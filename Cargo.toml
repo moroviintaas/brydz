@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "brydz_dd",
+    "brydz_model",
+    "brydz_core"
+]
+
+[patch.crates-io]
+brydz_core = {path = "brydz_core"}
+brydz_model = {path = "brydz_model"}
+brydz_dd = {path = "brydz_dd"}
