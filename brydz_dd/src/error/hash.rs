@@ -1,0 +1,3 @@
+pub enum HashError{
+    HashTableFull
+}

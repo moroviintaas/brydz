@@ -1,0 +1,34 @@
+[package]
+name = "brydz_dd"
+version = "0.2.0"
+edition = "2021"
+repository = "https://github.com/moroviintaas/brydz_dd"
+license-file = "LICENSE"
+keywords = ["game", "theory", "cards", "bridge", "contract"]
+categories = ["games"]
+description =  "Work in progress - implementation of double dummy solver for contract bridge"
+
+
+[dependencies]
+
+#brydz_framework = {path = "../brydz_framework"}
+fern = "0.6.2"
+log = "0.4.20"
+chrono = "0.4.31"
+smallvec = "1.11.2"
+criterion = "0.5.1"
+
+brydz_core = {version = "0.2.0", features = ["amfiteatr"]}
+
+[[bench]]
+name = "alphabeta_explorer"
+harness = false
+
+[[bench]]
+name = "binary_explorer"
+harness = false
+
+[[bench]]
+name = "init_hash_array"
+harness = false
+
