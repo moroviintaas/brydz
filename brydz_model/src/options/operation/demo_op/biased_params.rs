@@ -1,11 +1,11 @@
 use rand::{Rng, thread_rng};
 use brydz_core::deal::BiasedHandDistribution;
 use brydz_core::player::side::Side::North;
-use brydz_core::amfi::spec::ContractDP;
+use brydz_core::amfiteatr::spec::ContractDP;
 use karty::cards::ACE_SPADES;
-use amfiteatr_core::error::AmfiError;
+use amfiteatr_core::error::AmfiteatrError;
 
-pub fn test_sample_biased_distribution_parameters() -> Result<(), AmfiError<ContractDP>>{
+pub fn test_sample_biased_distribution_parameters() -> Result<(), AmfiteatrError<ContractDP>>{
     //setup_logger(LevelFilter::Debug, &None).unwrap();
 
     let mut trng = thread_rng();

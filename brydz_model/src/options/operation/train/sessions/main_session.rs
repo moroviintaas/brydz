@@ -10,14 +10,14 @@ use brydz_core::contract::{ContractMechanics, ContractParametersGen, ContractRan
 use brydz_core::deal::{DealDistribution, DescriptionDeckDeal};
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::Side;
-use brydz_core::amfi::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
-use brydz_core::amfi::env::ContractEnv;
-use brydz_core::amfi::spec::ContractDP;
-use brydz_core::amfi::state::{ContractDummyState, ContractEnvStateComplete, ContractState};
+use brydz_core::amfiteatr::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
+use brydz_core::amfiteatr::env::ContractEnv;
+use brydz_core::amfiteatr::spec::ContractDP;
+use brydz_core::amfiteatr::state::{ContractDummyState, ContractEnvStateComplete, ContractState};
 use karty::suits::Suit;
 use amfiteatr_core::agent::*;
 use amfiteatr_core::env::{RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
-use amfiteatr_core::error::AmfiError;
+use amfiteatr_core::error::AmfiteatrError;
 use amfiteatr_core::domain::DomainParameters;
 
 use amfiteatr_rl::error::AmfiRLError;
@@ -565,7 +565,7 @@ where
     pub fn test_agents_team(&mut self, rng: &mut ThreadRng, team: &Team, number_of_tests: usize,
         distribution_pool: Option<&[DealDistribution]>,
         contract_randomizer: &ContractRandomizer, )
-        -> Result<f64, AmfiError<ContractDP>> {
+        -> Result<f64, AmfiteatrError<ContractDP>> {
 
 
         self.clear_rewards();
@@ -624,7 +624,7 @@ where
 
     pub fn test_agents_team_on_ready_test_set(&mut self, team: &Team,
         test_set: &[SimContractParams])
-        -> Result<f64, AmfiError<ContractDP>> {
+        -> Result<f64, AmfiteatrError<ContractDP>> {
 
         self.set_exploring(false);
         self.clear_rewards();
@@ -677,7 +677,7 @@ where
     pub fn test_agents(&mut self, number_of_tests: usize,
         distribution_pool: Option<&[DealDistribution]>,
         contract_randomizer: &ContractRandomizer)
-        -> Result<(f64, f64), AmfiError<ContractDP>> {
+        -> Result<(f64, f64), AmfiteatrError<ContractDP>> {
 
         self.set_exploring(false);
         let mut rng = thread_rng();
@@ -717,7 +717,7 @@ where
 
     pub fn test_agents_on_ready_contracts(&mut self,
         test_set: &[SimContractParams])
-        -> Result<(f64, f64), AmfiError<ContractDP>> {
+        -> Result<(f64, f64), AmfiteatrError<ContractDP>> {
         self.set_exploring(false);
 
 

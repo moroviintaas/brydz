@@ -15,7 +15,7 @@ use crate::error::FuzzyCardSetErrorGen;
 use crate::meta::HAND_SIZE;
 use crate::player::side::{Side, SideMap, SIDES};
 use crate::player::side::Side::{East, North, South, West};
-use crate::amfi::state::{FProbability, FuzzyCardSet};
+use crate::amfiteatr::state::{FProbability, FuzzyCardSet};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]

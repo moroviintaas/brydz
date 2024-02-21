@@ -18,7 +18,7 @@ pub mod error;
 pub mod deal;
 
 #[cfg(feature = "amfiteatr")]
-pub mod amfi;
+pub mod amfiteatr;
 
 
 #[cfg(feature = "serde")]

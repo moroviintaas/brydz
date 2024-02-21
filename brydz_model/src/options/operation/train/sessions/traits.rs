@@ -2,9 +2,9 @@ use std::fmt::Debug;
 use brydz_core::contract::ContractParameters;
 use brydz_core::deal::DescriptionDeckDeal;
 use brydz_core::player::side::Side;
-use brydz_core::amfi::comm::{ContractAgentSyncComm};
+use brydz_core::amfiteatr::comm::{ContractAgentSyncComm};
 
-use brydz_core::amfi::spec::ContractDP;
+use brydz_core::amfiteatr::spec::ContractDP;
 
 use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions, EvaluatedInformationSet, StatefulAgent};
 

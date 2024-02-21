@@ -1,8 +1,8 @@
 use log::debug;
 use amfiteatr_rl::tch::{Device, nn, Tensor};
 use amfiteatr_rl::tch::nn::{Adam, Optimizer, OptimizerConfig, VarStore};
-use brydz_core::amfi::spec::ContractDP;
-use brydz_core::amfi::state::{ContractAction, ContractAgentInfoSetSimple};
+use brydz_core::amfiteatr::spec::ContractDP;
+use brydz_core::amfiteatr::state::{ContractAction, ContractAgentInfoSetSimple};
 use amfiteatr_core::agent::{Policy, PresentPossibleActions};
 use crate::policy::nn::Model;
 

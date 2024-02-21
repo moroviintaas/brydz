@@ -1,12 +1,12 @@
 use rand::{Rng, thread_rng};
 use brydz_core::deal::BiasedHandDistribution;
 use brydz_core::player::side::Side::North;
-use brydz_core::amfi::spec::ContractDP;
+use brydz_core::amfiteatr::spec::ContractDP;
 use karty::cards::ACE_SPADES;
 use karty::hand::HandTrait;
-use amfiteatr_core::error::AmfiError;
+use amfiteatr_core::error::AmfiteatrError;
 
-pub fn test_sample_biased_deal_crossing() -> Result<(), AmfiError<ContractDP>>{
+pub fn test_sample_biased_deal_crossing() -> Result<(), AmfiteatrError<ContractDP>>{
     let mut trng = thread_rng();
     let distribution: BiasedHandDistribution = trng.gen();
     let tries = 10000;
@@ -44,7 +44,7 @@ pub fn test_sample_biased_deal_crossing() -> Result<(), AmfiError<ContractDP>>{
 
 }
 
-pub fn test_sample_biased_deal_single() -> Result<(), AmfiError<ContractDP>>{
+pub fn test_sample_biased_deal_single() -> Result<(), AmfiteatrError<ContractDP>>{
     let mut trng = thread_rng();
     let distribution: BiasedHandDistribution = trng.gen();
     let tries = 10000;

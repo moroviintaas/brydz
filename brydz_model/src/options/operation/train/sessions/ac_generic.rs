@@ -7,10 +7,10 @@ use brydz_core::contract::{ContractRandomizer};
 use brydz_core::deal::{DealDistribution, DescriptionDeckDeal};
 
 use brydz_core::player::side::{Side, SideMap};
-use brydz_core::amfi::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
-use brydz_core::amfi::env::ContractEnv;
-use brydz_core::amfi::spec::ContractDP;
-use brydz_core::amfi::state::*;
+use brydz_core::amfiteatr::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
+use brydz_core::amfiteatr::env::ContractEnv;
+use brydz_core::amfiteatr::spec::ContractDP;
+use brydz_core::amfiteatr::state::*;
 use amfiteatr_core::agent::*;
 use amfiteatr_rl::policy::ActorCriticPolicy;
 use amfiteatr_rl::error::AmfiRLError;

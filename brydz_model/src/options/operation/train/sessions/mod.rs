@@ -14,8 +14,8 @@ pub use traits::*;
 
 
 use clap::Subcommand;
-use brydz_core::amfi::spec::ContractDP;
-use brydz_core::amfi::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvert420, ContractInfoSetConvertSparse};
+use brydz_core::amfiteatr::spec::ContractDP;
+use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvert420, ContractInfoSetConvertSparse};
 use amfiteatr_core::agent::EvaluatedInformationSet;
 
 
