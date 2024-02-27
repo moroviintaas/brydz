@@ -1,6 +1,6 @@
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
-use amfiteatr_rl::tensor_data::{ConvertToTensor, SimpleConvertToTensor};
+use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, SimpleConvertToTensor};
 use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert420, ContractInfoSetConvert420Normalised, ContractInfoSetConvertSparse};
 
 
@@ -59,7 +59,7 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
     }
 }
 
-impl ConvertToTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
+impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvert420) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
@@ -77,7 +77,7 @@ impl ConvertToTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
 /// use karty::card_set;
 /// use karty::cards::*;
 /// use amfiteatr_core::agent::InformationSet;
-/// use amfiteatr_rl::tensor_data::ConvertToTensor;
+/// use amfiteatr_rl::tensor_data::CtxTryIntoTensor;
 /// let card_set = card_set!(
 ///     THREE_CLUBS, FOUR_CLUBS, FIVE_CLUBS, NINE_CLUBS,
 ///     QUEEN_CLUBS, KING_CLUBS, ACE_CLUBS, TWO_DIAMONDS,
@@ -183,13 +183,13 @@ impl ConvertToTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
 ///  let v: Vec<f32> = info_set.to_tensor(&ContractInfoSetConvertSparse{}).try_into().unwrap();
 ///  assert_eq!(v, expected);
 /// ```
-impl ConvertToTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
+impl CtxTryIntoTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }
 
-impl ConvertToTensor<ContractInfoSetConvert420Normalised> for ContractAgentInfoSetSimple{
+impl CtxTryIntoTensor<ContractInfoSetConvert420Normalised> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvert420Normalised) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }

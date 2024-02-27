@@ -32,11 +32,42 @@ mod neuro_impls{
     use karty::cards::{Card};
     use karty::symbol::CardSymbol;
     use amfiteatr_core::error::ConvertError;
-    use amfiteatr_rl::tensor_data::ActionTensor;
+    use amfiteatr_rl::error::TensorRepresentationError;
+    use amfiteatr_rl::tensor_data::{ActionTensor, TryFromTensor, TryIntoTensor};
     use crate::amfiteatr::state::ContractAction;
 
 
 
+
+    impl TryIntoTensor for ContractAction{
+        fn try_to_tensor(&self) -> Result<Tensor, TensorRepresentationError> {
+            match self{
+                ContractAction::ShowHand(_) => Err(TensorRepresentationError::ConversionToTensor {
+                    comment: String::from("Show hand is not expected to be converted to tensor - this is exclusive move of dummy")
+                }),
+                ContractAction::PlaceCard(c) => Ok(Tensor::from_slice(&[c.usize_index() as f32;1])),
+            }
+        }
+    }
+
+    impl TryFrom<&Tensor> for ContractAction{
+        type Error = ConvertError;
+
+        fn try_from(value: &Tensor) -> Result<Self, Self::Error> {
+
+            let v: Vec<i64> = match Vec::try_from(value){
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(ConvertError::ActionDeserialize(format!("{}: {e:}", value)))
+                }
+            };
+            let action_index = v[0];
+            Card::from_usize_index(action_index as usize)
+                .map_err(|e| ConvertError::ActionDeserialize(format!("Bad index of card: {e:}")))
+                .map(|ok| Self::PlaceCard(ok))
+
+        }
+    }
 
     impl ActionTensor for ContractAction{
         fn to_tensor(&self) -> Tensor {
@@ -47,19 +78,12 @@ mod neuro_impls{
         }
 
         fn try_from_tensor(t: &Tensor) -> Result<Self, ConvertError> {
-            let v: Vec<i64> = match Vec::try_from(t){
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(ConvertError::ActionDeserialize(format!("{}: {e:}", t)))
-                }
-            };
-            let action_index = v[0];
-            Card::from_usize_index(action_index as usize)
-                .map_err(|e| ConvertError::ActionDeserialize(format!("Bad index of card: {e:}")))
-                .map(|ok| Self::PlaceCard(ok))
+            ContractAction::try_from(t)
 
         }
     }
+
+    //impl From<ContractAction> for Tensor
 }
 
 //#[cfg(feature = "neuro")]

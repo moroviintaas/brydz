@@ -9,16 +9,16 @@ use brydz_core::amfiteatr::spec::ContractDP;
 use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions, EvaluatedInformationSet, StatefulAgent};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
-use amfiteatr_rl::tensor_data::{ConvertToTensor, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};
 
 pub trait ContractInfoSetForLearning<ISW: ConversionToTensor>:
-ConvertToTensor<ISW>
+CtxTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + EvaluatedInformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug {}
 
-impl<ISW: ConversionToTensor, T: ConvertToTensor<ISW>
+impl<ISW: ConversionToTensor, T: CtxTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + EvaluatedInformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
@@ -50,7 +50,7 @@ impl<
     P: Policy<ContractDP>
 > SessionAgentTrait<ISW, P> for TracingAgentGen<ContractDP, P, ContractAgentSyncComm>
 where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ EvaluatedInformationSet<ContractDP> + ConvertToTensor<ISW> + PresentPossibleActions<ContractDP>
++ EvaluatedInformationSet<ContractDP> + CtxTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
@@ -67,7 +67,7 @@ impl<
 where for<'a> <P as Policy<ContractDP>>::InfoSetType:
     From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
     + PresentPossibleActions<ContractDP>
-    + EvaluatedInformationSet<ContractDP> + ConvertToTensor<ISW>
+    + EvaluatedInformationSet<ContractDP> + CtxTryIntoTensor<ISW>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;

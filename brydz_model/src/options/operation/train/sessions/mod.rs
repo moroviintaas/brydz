@@ -32,7 +32,7 @@ pub enum TrainType{
 
 fn create_and_run_learning_a2c_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
-    W2T: ConversionToTensor
+    W2T: ConversionToTensor + Default
 >(options: &TrainOptions) -> Result<(), BrydzSimError>
 where <InfoSet as EvaluatedInformationSet<ContractDP>>::RewardType: FloatTensorReward{
     let mut session = t_session_a2c_symmetric::<InfoSet, W2T>(options)?;
@@ -76,7 +76,7 @@ fn session_a2c(options: &TrainOptions) -> Result<(), BrydzSimError>{
 
 fn create_and_run_learning_q_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
-    W2T: ConversionToTensor
+    W2T: ConversionToTensor + Default
 >(options: &TrainOptions) -> Result<(), BrydzSimError>{
     let mut session = t_session_q_symmetric::<InfoSet, W2T>(options)?;
     session.load_network_params(options)?;

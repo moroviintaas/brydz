@@ -39,7 +39,7 @@ where P: Policy<ContractDP, InfoSetType= ContractAgentInfoSetAllKnowing>{
 #[allow(clippy::type_complexity)]
 pub fn t_session_a2c_symmetric<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
-    W2T: ConversionToTensor
+    W2T: ConversionToTensor + Default
 >(
     //declarer_policy: QLearningPolicy<ContractDP, DIS, DISW2T, ContractActionWayToTensor>,
     //whist_policy: QLearningPolicy<ContractDP, WIS, WISW2T, ContractActionWayToTensor>,
