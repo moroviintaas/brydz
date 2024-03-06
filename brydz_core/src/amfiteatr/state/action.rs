@@ -33,7 +33,7 @@ mod neuro_impls{
     use karty::symbol::CardSymbol;
     use amfiteatr_core::error::ConvertError;
     use amfiteatr_rl::error::TensorRepresentationError;
-    use amfiteatr_rl::tensor_data::{ActionTensor, TryFromTensor, TryIntoTensor};
+    use amfiteatr_rl::tensor_data::{TryIntoTensor};
     use crate::amfiteatr::state::ContractAction;
 
 
@@ -68,7 +68,7 @@ mod neuro_impls{
 
         }
     }
-
+/*
     impl ActionTensor for ContractAction{
         fn to_tensor(&self) -> Tensor {
             match self{
@@ -84,7 +84,11 @@ mod neuro_impls{
     }
 
     //impl From<ContractAction> for Tensor
+
+ */
 }
+
+
 
 //#[cfg(feature = "neuro")]
 //pub use neuro_impls::*;
