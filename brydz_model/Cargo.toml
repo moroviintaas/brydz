@@ -1,6 +1,6 @@
 [package]
 name = "brydz_model"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 repository = "https://github.com/moroviintaas/brydz_model"
 license-file = "LICENSE"
@@ -11,22 +11,22 @@ description =  "Minimal (unstable yet) implementation od simulation model for co
 
 [dependencies]
 
-log = "0.4.20"
+log = "0.4.21"
 fern = "0.6.2"
-chrono = "0.4.31"
+chrono = "0.4.35"
 
-config = "0.13.4"
-serde = {version = "1.0.195", featueres = ["derive"]}
-toml = "0.8.8"
-clap = {version = "4.4.14", features = ["derive"]}
-thiserror = "1.0.56"
+config = "0.14.0"
+serde = {version = "1.0.197", featueres = ["derive"]}
+toml = "0.8.11"
+clap = {version = "4.5.2", features = ["derive"]}
+thiserror = "1.0.57"
 rand = "0.8.5"
 ron = "0.8.1"
-smallvec = "1.11.2"
+smallvec = "1.13.1"
 rand_distr = "0.4.3"
 
-amfiteatr_rl = { version = "0.2.0" }
+amfiteatr_rl = { version = "0.3.0" }
 karty = { version = "0.1.1", features = ["fuzzy"]}
-brydz_core = {version = "0.2.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
-amfiteatr_core = {version = "0.2.0", features= ["speedy"]}
-amfiteatr_net_ext = {version = "0.2.0" }
+brydz_core = {version = "0.3.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
+amfiteatr_core = {version = "0.3.0", features= ["speedy"]}
+amfiteatr_net_ext = {version = "0.3.0" }
