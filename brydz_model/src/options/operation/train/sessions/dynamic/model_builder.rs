@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::fs;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use rand::rngs::ThreadRng;
 use rand::thread_rng;
 use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
@@ -20,8 +23,17 @@ use brydz_core::deal::DescriptionDeckDeal;
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::Side;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, PolicyTypeSelect};
+use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, DynamicBridgeModel, PolicyTypeSelect};
 use crate::SimContractParams;
+
+pub enum AgentRole{
+    Declarer,
+    Whist,
+    Offside,
+    TestDeclarer,
+    TestWhist,
+    TestOffside
+}
 
 pub struct DynamicBridgeModelBuilder{
 
@@ -35,6 +47,10 @@ pub struct DynamicBridgeModelBuilder{
     test_declarer: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
     test_whist: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
     test_offside: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
+
+    inactive_declarer_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
+    inactive_whist_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
+    inactive_offside_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
 
     test_vectors: Option<Vec<SimContractParams>>,
 
@@ -75,6 +91,9 @@ impl DynamicBridgeModelBuilder{
             test_declarer: None,
             test_whist: None,
             test_offside: None,
+            inactive_declarer_comm: None,
+            inactive_whist_comm: None,
+            inactive_offside_comm: None,
             test_vectors: None,
             initial_deal: contract,
         }
@@ -149,9 +168,9 @@ impl DynamicBridgeModelBuilder{
 
 
 
-    /*
+
     fn create_dynamic_agent(&self, agent_configuration: &AgentConfiguration, var_store: VarStore, side: Side)
-    -> Result<(Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP>), AmfiRLError<ContractDP>>
+    -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP>), AmfiRLError<ContractDP>>
     {
         let (env_endpoint, agent_endpoint ) = StdEnvironmentEndpoint::new_pair();
 
@@ -162,9 +181,9 @@ impl DynamicBridgeModelBuilder{
 
 
 
-        let agent: Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>> = match  agent_configuration.info_set_conversion_type {
+        let agent: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>> = match  agent_configuration.info_set_conversion_type {
             InfoSetWayToTensorSelect::_420 => {
-                /*
+
                 match agent_configuration.info_set_type{
                     InfoSetTypeSelect::Simple => {
                         let info_set = ContractAgentInfoSetSimple::from((&side, self.initial_deal.parameters(), &description));
@@ -183,8 +202,6 @@ impl DynamicBridgeModelBuilder{
                     }
                 }
 
-                 */
-                todo!()
 
             },
 
@@ -199,14 +216,14 @@ impl DynamicBridgeModelBuilder{
                     InfoSetTypeSelect::Assume => {
                         let info_set = ContractAgentInfoSetAssuming::from((&side, self.initial_deal.parameters(), &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparse::default())?;
-                        //Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
-                        todo!()
+                        Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
+                        //todo!()
                     }
                     InfoSetTypeSelect::Complete => {
                         let info_set = ContractAgentInfoSetAllKnowing::from((&side, self.initial_deal.parameters(), &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparse::default())?;
-                        //Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
-                        todo!()
+                        Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
+                        //todo!()
                     }
                 }
             }
@@ -217,7 +234,86 @@ impl DynamicBridgeModelBuilder{
 
     }
 
-     */
+
+    pub fn with_agent(&mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<(), AmfiRLError<ContractDP>>{
+
+        let side = match place{
+            AgentRole::Declarer | AgentRole::TestDeclarer => self.initial_deal.parameters().declarer(),
+            AgentRole::Whist | AgentRole::TestWhist => self.initial_deal.parameters().whist(),
+            AgentRole::Offside | AgentRole::TestOffside => self.initial_deal.parameters().offside()
+        };
+        let var_store = match agent_configuration.var_store_path{
+            None => VarStore::new(agent_configuration.device),
+            Some(ref s) => {
+                let mut vs = VarStore::new(agent_configuration.device);
+                vs.load(s)?;
+                vs
+            }
+        };
+        let (agent, comm) = self.create_dynamic_agent(agent_configuration, var_store, side)?;
+
+        match place{
+            AgentRole::Declarer => {
+                self.declarer = Some(agent);
+                self.env.comms_mut().insert(side, comm);
+            }
+            AgentRole::Whist => {
+                self.whist = Some(agent);
+                self.env.comms_mut().insert(side, comm);
+            }
+            AgentRole::Offside => {
+                self.offside = Some(agent);
+                self.env.comms_mut().insert(side, comm);
+            }
+            AgentRole::TestDeclarer => {
+                self.test_declarer = Some(agent);
+                self.inactive_declarer_comm = Some(comm);
+            }
+            AgentRole::TestWhist => {
+                self.test_whist = Some(agent);
+                self.inactive_whist_comm = Some(comm);
+            }
+            AgentRole::TestOffside => {
+                self.test_offside = Some(agent);
+                self.inactive_offside_comm = Some(comm);
+            }
+        }
+        Ok(())
+    }
+
+    pub fn generate_random_test_vectors(&mut self, tng: &mut ThreadRng, number: usize) -> Result<(), AmfiRLError<ContractDP>>{
+        todo!()
+    }
+
+    pub fn with_test_vectors(&mut self, path: &PathBuf) -> Result<(), AmfiRLError<ContractDP>>{
+        let test_str = fs::read_to_string(path)
+            .map_err(|e| AmfiRLError::IO(format!("Error opening file: {path:?}")))?;
+        let set = ron::de::from_str(&test_str)
+            .map_err(|e| AmfiRLError::IO(format!("Error reading tensors from file: {path:?} (error: {e:})")))?;
+        self.test_vectors = Some(set);
+        Ok(())
+    }
+
+    pub fn build(self) -> Result<DynamicBridgeModel, AmfiRLError<ContractDP>>{
+
+
+        Ok(DynamicBridgeModel{
+            env: self.env,
+            declarer: self.declarer.unwrap(),
+            whist: self.whist.unwrap(),
+            offside: self.offside.unwrap(),
+            dummy: self.dummy,
+            test_declarer: self.test_declarer.unwrap(),
+            test_whist: self.test_whist.unwrap(),
+            test_offside: self.test_offside.unwrap(),
+            inactive_declarer_comm: self.inactive_declarer_comm.unwrap(),
+            inactive_whist_comm: self.inactive_whist_comm.unwrap(),
+            inactive_offside_comm: self.inactive_offside_comm.unwrap(),
+            test_vectors: self.test_vectors.unwrap(),
+            initial_deal: self.initial_deal,
+        })
+    }
+
 
 
 

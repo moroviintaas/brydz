@@ -36,25 +36,28 @@ pub struct DynamicBridgeModel{
     pub whist: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
     pub offside: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
     pub dummy: AgentGen<ContractDP, RandomPolicy<ContractDP, ContractDummyState>, ContractAgentSyncComm>,
-    pub test_declarer: Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
-    pub test_whist: Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
-    pub test_offside: Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub test_declarer: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub test_whist: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub test_offside: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
     
 
 
 
-    inactive_declarer_comm: StdEnvironmentEndpoint<ContractDP>,
-    inactive_whist_comm: StdEnvironmentEndpoint<ContractDP>,
-    inactive_offside_comm: StdEnvironmentEndpoint<ContractDP>,
+    pub(crate) inactive_declarer_comm: StdEnvironmentEndpoint<ContractDP>,
+    pub(crate) inactive_whist_comm: StdEnvironmentEndpoint<ContractDP>,
+    pub(crate) inactive_offside_comm: StdEnvironmentEndpoint<ContractDP>,
 
-    test_vectors: Vec<SimContractParams>,
-    initial_deal: SimContractParams,
+    pub(crate) test_vectors: Vec<SimContractParams>,
+    pub(crate) initial_deal: SimContractParams,
 }
 
 
 
 
 impl DynamicBridgeModel{
+
+
+
 
     fn swap_defense(&mut self){
         let ws = self.env.state().whist_side();
