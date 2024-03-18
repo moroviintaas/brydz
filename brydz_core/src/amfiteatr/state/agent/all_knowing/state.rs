@@ -4,16 +4,17 @@ use karty::cards::{Card, Card2SymTrait};
 use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
 use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters};
+use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::error::AmfiteatrError;
 
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
-use crate::deal::{DescriptionDeckDeal};
+use crate::deal::{DealDistribution, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, BridgeCoreErrorGen};
 use crate::error::ContractErrorGen::CardNotInHand;
 use crate::meta::HAND_SIZE;
 use crate::player::side::{Side, SideMap};
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpdate, StateWithSide};
+use crate::amfiteatr::state::{ContractAction, ContractAgentInfoSetAssuming, ContractInfoSet, ContractStateUpdate, StateWithSide};
 
 #[derive(Debug, Clone)]
 
@@ -210,5 +211,16 @@ impl From<(&Side, &ContractParameters, &DescriptionDeckDeal,)> for ContractAgent
 
         let contract = Contract::new(params.clone());
         Self::new(*side, descript.cards, contract)
+    }
+}
+impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for ContractAgentInfoSetAllKnowing{
+    fn renew_from(&mut self, base: (&Side, &ContractParameters, &DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, params, descript) = base;
+
+        let contract = Contract::new(params.clone());
+        self.contract = contract;
+        self.side = *side;
+        self.initial_deal = descript.cards;
+        Ok(())
     }
 }

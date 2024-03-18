@@ -3,8 +3,9 @@ use log::{debug, error};
 use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
 use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
-use amfiteatr_core::env::{EnvironmentStateSequential, EnvironmentStateUniScore};
-use amfiteatr_core::domain::{DomainParameters};
+use amfiteatr_core::env::{DirtyReseedEnvironment, EnvironmentStateSequential, EnvironmentStateUniScore};
+use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::DescriptionDeckDeal;
 use crate::error::{BridgeCoreError, ContractErrorGen};
@@ -246,5 +247,19 @@ impl From<(&ContractParameters, &DescriptionDeckDeal,)> for ContractEnvStateComp
                   descript.cards[&declarer.next_i(1)],
                   descript.cards[&declarer.next_i(2)],
                   descript.cards[&declarer.next_i(3)])
+    }
+}
+
+impl Renew<ContractDP, (&ContractParameters, &DescriptionDeckDeal)> for ContractEnvStateComplete{
+    fn renew_from(&mut self, base: (&ContractParameters, &DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (params, descript) = base;
+        self.contract = Contract::new(params.clone());
+        let declarer = params.declarer();
+        self.declarer_hand = descript.cards[&declarer];
+        self.whist_hand = descript.cards[&declarer.next_i(1)];
+        self.dummy_hand = descript.cards[&declarer.next_i(2)];
+        self.offside_hand = descript.cards[&declarer.next_i(3)];
+        self.dummy_shown = false;
+        Ok(())
     }
 }

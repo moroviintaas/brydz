@@ -5,6 +5,7 @@ use brydz_core::player::side::Side;
 use crate::error::BrydzSimError;
 use crate::error::GenError::ConvForceDeclarerNoToSide;
 use clap::Args;
+use crate::options::operation::generate::DealMethod::Fair;
 
 #[derive(ValueEnum, Clone, Debug)]
 pub enum ChoiceDoubling{
@@ -99,4 +100,21 @@ pub struct GenContractOptions {
     pub choice_doubling: ChoiceDoubling,
 
 
+}
+
+impl Default for GenContractOptions{
+    fn default() -> Self {
+        Self{
+            game_count: 1,
+            deal_method: Fair,
+
+            min_contract: 1,
+            max_contract: 6,
+            output_file: None,
+            probability_file: None,
+            trump_limit: Subtrump::All,
+            force_declarer: ForceDeclarer::DontForce,
+            choice_doubling: ChoiceDoubling::Any,
+        }
+    }
 }

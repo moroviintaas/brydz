@@ -18,7 +18,8 @@ mod state_tensor;
 //#[cfg(feature = "neuro")]
 //pub use state_tensor::*;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters};
+use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::error::AmfiteatrError;
 
 #[derive(Debug, Clone)]
 pub struct ContractAgentInfoSetSimple {
@@ -487,6 +488,34 @@ impl From<(&Side, &ContractParameters, &DescriptionDeckDeal)> for ContractAgentI
     }
 }
 
+impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for ContractAgentInfoSetSimple{
+    fn renew_from(&mut self, base: (&Side, &ContractParameters, &DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, params, descript) = base;
+
+        let contract = Contract::new(params.clone());
+        self.dummy_hand = None;
+        self.contract = contract;
+        self.side = *side;
+        self.hand = descript.cards[side];
+        Ok(())
+    }
+}
+/*
+impl Renew<ContractDP, (Side, ContractParameters, DescriptionDeckDeal)> for ContractAgentInfoSetSimple{
+    fn renew_from(&mut self, base: (Side, ContractParameters, DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, params, descript) = base;
+
+        let contract = Contract::new(params);
+        self.dummy_hand = None;
+        self.contract = contract;
+        self.side = side;
+        self.hand = descript.cards[&side];
+        Ok(())
+    }
+}
+
+
+ */
 
 
 impl ContractInfoSet for ContractAgentInfoSetSimple{

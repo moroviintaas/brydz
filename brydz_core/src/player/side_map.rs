@@ -31,6 +31,14 @@ impl<T> SideMap<T>{
             west: f(West),
         }
     }
+    pub fn new_with_fn_mut<F>(mut f: F) -> Self where F: FnMut(Side) -> T{
+        Self{
+            north: f(North),
+            east: f(East),
+            south: f(South),
+            west: f(West),
+        }
+    }
     pub fn new_symmetric(sym: T)  -> Self where T: Clone{
         Self{north: sym.clone(), east: sym.clone(), south: sym.clone(), west: sym }
     }

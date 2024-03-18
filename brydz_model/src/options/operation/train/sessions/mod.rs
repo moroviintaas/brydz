@@ -4,6 +4,7 @@ mod q_generic;
 mod options;
 mod main_session;
 mod traits;
+mod dynamic;
 
 pub use ac_generic::*;
 pub use team::*;
@@ -11,6 +12,7 @@ pub use q_generic::*;
 pub use options::*;
 pub use main_session::*;
 pub use traits::*;
+pub use dynamic::*;
 
 
 use clap::Subcommand;
@@ -136,6 +138,7 @@ pub fn build_and_run_train_session(agent_type: &AgentType) -> Result<(), BrydzSi
          */
         AgentType::A2C(options) => session_a2c(options)?,
         AgentType::Q(options) => session_q(options)?,
+        AgentType::Dynamic(options) => run_dynamic_model(options)?
 
     }
     Ok(())

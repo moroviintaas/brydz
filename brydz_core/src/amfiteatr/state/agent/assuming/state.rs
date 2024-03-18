@@ -5,14 +5,15 @@ use karty::cards::{Card, Card2SymTrait};
 use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
 use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters};
+use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::{BiasedHandDistribution, DealDistribution, DescriptionDeckDeal};
 use crate::error::BridgeCoreError;
 use crate::meta::HAND_SIZE;
 use crate::player::side::Side;
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpdate, CreatedContractInfoSet, RenewableContractInfoSet, StateWithSide};
+use crate::amfiteatr::state::{ContractAction, ContractAgentInfoSetSimple, ContractInfoSet, ContractStateUpdate, CreatedContractInfoSet, RenewableContractInfoSet, StateWithSide};
 
 #[derive(Debug, Clone)]
 pub struct ContractAgentInfoSetAssuming {
@@ -332,5 +333,23 @@ impl From<(&Side, &ContractParameters, &DescriptionDeckDeal,)> for ContractAgent
 
         let contract = Contract::new(params.clone());
         Self::new(*side, descript.cards[&side], contract, None, distr)
+    }
+}
+
+impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for ContractAgentInfoSetAssuming{
+    fn renew_from(&mut self, base: (&Side, &ContractParameters, &DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, params, descript) = base;
+
+        let contract = Contract::new(params.clone());
+        let distr = match &descript.probabilities{
+            DealDistribution::Fair => Default::default(),
+            DealDistribution::Biased(biased) => biased.deref().clone()
+        };
+        self.dummy_hand = None;
+        self.contract = contract;
+        self.side = *side;
+        self.hand = descript.cards[side];
+        self.card_distribution = distr;
+        Ok(())
     }
 }

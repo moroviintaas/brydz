@@ -15,6 +15,18 @@ pub trait ContractState{
     }
     fn dummy_hand(&self) -> Option<&CardSet>;
     fn contract_data(&self) -> &Contract;
+
+    fn declarer_side(&self) -> Side{
+        self.contract_data().declarer()
+    }
+
+    fn whist_side(&self) -> Side{
+        self.contract_data().declarer().next()
+    }
+
+    fn offside_side(&self) -> Side{
+        self.contract_data().declarer().next_i(3)
+    }
 }
 
 impl<T: ContractState> ContractState for Box<T>{
