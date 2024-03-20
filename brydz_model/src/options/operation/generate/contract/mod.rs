@@ -5,14 +5,13 @@ use ron::ser::{PrettyConfig, to_string_pretty};
 use brydz_core::bidding::{Bid, Doubling};
 use brydz_core::cards::trump::{Trump, TrumpGen};
 use brydz_core::contract::ContractParameters;
-use brydz_core::deal::{BiasedHandDistribution, DealDistribution, fair_bridge_deal};
+use brydz_core::deal::{BiasedHandDistribution, ContractGameDescription, DealDistribution, fair_bridge_deal};
 use brydz_core::player::side::Side;
 use karty::hand::CardSet;
 use karty::random::RandomSymbol;
 use karty::suits::Suit;
 use crate::error::BrydzSimError;
 use crate::error::GenError::LowerBoundOverUpper;
-use crate::{SimContractParams};
 use rand_distr::Distribution;
 use std::io::Write;
 
@@ -23,7 +22,7 @@ pub use options::*;
 
 //pub fn random_contract_with_declarer(rng: &mut ThreadRng) -> Result<SimContractParams>
 
-fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) -> Result<SimContractParams, BrydzSimError>{
+fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) -> Result<ContractGameDescription, BrydzSimError>{
 
     if params.min_contract > params.max_contract {
         return Err(BrydzSimError::Gen(LowerBoundOverUpper {lower: params.min_contract, upper: params.max_contract }))
@@ -66,15 +65,15 @@ fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) ->
         }
     };
 
-    Ok(SimContractParams::new(contract_parameters, template, cards))
+    Ok(ContractGameDescription::new(contract_parameters, template, cards))
 
 
 }
 
-pub fn generate_contracts(params: &GenContractOptions) -> Result<Vec<SimContractParams>, BrydzSimError>{
+pub fn generate_contracts(params: &GenContractOptions) -> Result<Vec<ContractGameDescription>, BrydzSimError>{
     let repeat = params.game_count as usize;
     let mut rng = thread_rng();
-    let mut game_params: Vec<SimContractParams> = Vec::with_capacity(repeat);
+    let mut game_params: Vec<ContractGameDescription> = Vec::with_capacity(repeat);
     for _ in 0..repeat{
         game_params.push(generate_single_contract(params, &mut rng)?);
     }

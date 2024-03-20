@@ -5,6 +5,8 @@ pub mod error;
 mod model;
 mod policy;
 mod a2c;
+mod domain;
 
 pub use data_formats::*;
 pub use policy::*;
+pub use domain::*;

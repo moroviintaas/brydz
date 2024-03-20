@@ -1,5 +1,12 @@
 use std::collections::HashMap;
+use std::fs;
+use std::iter::Sum;
+use std::ops::{Add, Div};
+use std::path::Path;
 use std::sync::{Arc, Mutex};
+use enum_map::{enum_map, EnumMap};
+use log::{debug, trace};
+use rand::prelude::ThreadRng;
 use rand::thread_rng;
 use rand_distr::num_traits::Signed;
 use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReinitAgent, ReseedAgent};
@@ -11,15 +18,64 @@ use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::env::ContractEnv;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractDummyState, ContractEnvStateComplete, ContractState};
-use brydz_core::contract::{Contract, ContractParameters};
-use brydz_core::deal::DescriptionDeckDeal;
+use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
+use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
+use brydz_core::player::axis::RoleAxis;
+use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::{Side, SideMap};
 use brydz_core::player::side::Side::{East, North, South, West};
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{ContractInfoSetSeed, PolicyTypeSelect};
-use crate::SimContractParams;
+use crate::options::operation::train::sessions::{ContractInfoSetSeed, ContractInfoSetSeedLegacy, PolicyTypeSelect};
+use crate::{ModelError};
 
 
+#[derive(Default, Debug)]
+pub struct RolePayoffSummary {
+    pub scores: EnumMap<PlayRole, f64>,
+}
+
+impl Add<&RolePayoffSummary> for &RolePayoffSummary{
+    type Output = RolePayoffSummary;
+
+    fn add(self, rhs: &RolePayoffSummary) -> Self::Output {
+        RolePayoffSummary{
+            scores: enum_map! {
+                PlayRole::Declarer => self.scores[PlayRole::Declarer] + rhs.scores[PlayRole::Declarer],
+                PlayRole::Whist => self.scores[PlayRole::Whist] + rhs.scores[PlayRole::Whist],
+                PlayRole::Offside => self.scores[PlayRole::Offside] + rhs.scores[PlayRole::Offside],
+                PlayRole::Dummy => self.scores[PlayRole::Dummy] + rhs.scores[PlayRole::Dummy],
+
+            }
+        }
+    }
+}
+
+impl<'a> Sum<&'a RolePayoffSummary> for RolePayoffSummary{
+    fn sum<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
+        iter.fold(Default::default(), |acc, x|{
+            &acc + x
+        } )
+    }
+}
+
+impl Div<usize> for &RolePayoffSummary{
+    type Output = RolePayoffSummary;
+
+    fn div(self, rhs: usize) -> Self::Output {
+        let df = rhs as f64;
+        RolePayoffSummary{
+            scores: enum_map! {
+                PlayRole::Declarer => self.scores[PlayRole::Declarer] / df,
+                PlayRole::Whist => self.scores[PlayRole::Whist] / df,
+                PlayRole::Offside => self.scores[PlayRole::Offside] /df,
+                PlayRole::Dummy => self.scores[PlayRole::Dummy] / df
+
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
 pub enum Testing{
     Declarer,
     Defenders,
@@ -47,8 +103,8 @@ pub struct DynamicBridgeModel{
     pub(crate) inactive_whist_comm: StdEnvironmentEndpoint<ContractDP>,
     pub(crate) inactive_offside_comm: StdEnvironmentEndpoint<ContractDP>,
 
-    pub(crate) test_vectors: Vec<SimContractParams>,
-    pub(crate) initial_deal: SimContractParams,
+    pub(crate) test_vectors: Vec<ContractGameDescription>,
+    pub(crate) initial_deal: ContractGameDescription,
 }
 
 
@@ -65,7 +121,34 @@ impl DynamicBridgeModel{
         std::mem::swap(self.env.comms_mut().get_mut(&ws).unwrap(), &mut self.inactive_whist_comm);
         std::mem::swap(self.env.comms_mut().get_mut(&os).unwrap(), &mut self.inactive_offside_comm);
     }
+    fn swap_declarer(&mut self){
+        let ds = self.env.state().declarer_side();
+        std::mem::swap(self.env.comms_mut().get_mut(&ds).unwrap(), &mut self.inactive_declarer_comm);
+    }
 
+    fn swap_for_test(&mut self,  tested_role_axis: RoleAxis){
+        match tested_role_axis{
+            RoleAxis::Declarers => {
+                self.swap_defense();
+            }
+            RoleAxis::Defenders => {
+                self.swap_declarer();
+            }
+        }
+    }
+
+    pub fn load_test_games_from_file(&mut self, file: impl AsRef<Path>) -> Result<(), ModelError>{
+        let test_str = fs::read_to_string(&file)
+            .map_err(|e| ModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", &file.as_ref())))?;
+        let set:  Vec<ContractGameDescription> = ron::de::from_str(&test_str)
+            .map_err(|e| ModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", &file.as_ref())))?;
+
+        self.test_vectors = set;
+        Ok(())
+    }
+    pub fn generate_test_games(&mut self, rng: &mut ThreadRng, number: usize) -> Result<(), AmfiRLError<ContractDP>>{
+        todo!()
+    }
 
     fn rotate_environment_comms(&mut self, side_before: Side, side_after: Side){
         //let rhs = side_after - side_before
@@ -81,50 +164,63 @@ impl DynamicBridgeModel{
         self.env.comms_mut().insert(South, s);
     }
 
-    pub fn prepare_episode(&mut self, seed: (ContractParameters, DescriptionDeckDeal), testing: Testing) -> Result<(), AmfiRLError<ContractDP>>{
+    fn episode_result(&self) -> RolePayoffSummary{
+
+        RolePayoffSummary{
+            scores: enum_map! {
+                PlayRole::Declarer => self.env.state().contract_data().total_tricks_taken_role_axis(PlayRole::Declarer) as f64,
+                PlayRole::Whist => self.env.state().contract_data().total_tricks_taken_role_axis(PlayRole::Whist) as f64,
+                PlayRole::Offside => self.env.state().contract_data().total_tricks_taken_role_axis(PlayRole::Offside) as f64,
+                PlayRole::Dummy => self.env.state().contract_data().total_tricks_taken_role_axis(PlayRole::Dummy) as f64,
+
+            }
+        }
+    }
+
+    pub fn prepare_episode(&mut self, seed: &ContractGameDescription, testing: Testing) -> Result<(), AmfiRLError<ContractDP>>{
 
         let old_declarer_side = self.env.state().declarer_side();
-        let new_declarer_side = seed.0.declarer();
-        self.rotate_environment_comms(old_declarer_side, new_declarer_side);
+        let new_declarer_side = seed.parameters().declarer();
 
-        let seed_refs = (&seed.0, &seed.1);
-        self.env.reseed(seed_refs)?;
 
-        let dummy_side = seed_refs.0.dummy();
-        self.dummy.reseed((&dummy_side, seed_refs.0, seed_refs.1))?;
+        //let seed_refs = (seed.0, seed.1);
+        self.env.reseed(seed)?;
 
-        let declarer_side = seed_refs.0.declarer();
-        let whist_side = seed_refs.0.whist();
-        let offside_side = seed_refs.0.offside();
+        let dummy_side = seed.parameters().dummy();
+        self.dummy.reseed((&dummy_side, seed))?;
+
+        let declarer_side = seed.parameters().declarer();
+        let whist_side = seed.parameters().whist();
+        let offside_side = seed.parameters().offside();
 
 
 
         match testing{
             Testing::Declarer => {
                 // testing declarer
-                self.declarer.lock().unwrap().reseed((&declarer_side, seed_refs.0, seed_refs.1))?;
-                self.test_whist.lock().unwrap().reseed((&whist_side, seed_refs.0, seed_refs.1))?;
-                self.test_offside.lock().unwrap().reseed((&offside_side, seed_refs.0, seed_refs.1))?;
+                self.declarer.lock().unwrap().reseed((&declarer_side, seed))?;
+                self.test_whist.lock().unwrap().reseed((&whist_side, seed))?;
+                self.test_offside.lock().unwrap().reseed((&offside_side, seed))?;
                 //let
             }
             Testing::Defenders => {
-                self.test_declarer.lock().unwrap().reseed((&declarer_side, seed_refs.0, seed_refs.1))?;
-                self.whist.lock().unwrap().reseed((&whist_side, seed_refs.0, seed_refs.1))?;
-                self.offside.lock().unwrap().reseed((&offside_side, seed_refs.0, seed_refs.1))?;
+                self.test_declarer.lock().unwrap().reseed((&declarer_side, seed))?;
+                self.whist.lock().unwrap().reseed((&whist_side, seed))?;
+                self.offside.lock().unwrap().reseed((&offside_side, seed))?;
             }
             Testing::None => {
-                self.declarer.lock().unwrap().reseed((&declarer_side, seed_refs.0, seed_refs.1))?;
-                self.whist.lock().unwrap().reseed((&whist_side, seed_refs.0, seed_refs.1))?;
-                self.offside.lock().unwrap().reseed((&offside_side, seed_refs.0, seed_refs.1))?;
+                self.declarer.lock().unwrap().reseed((&declarer_side, seed))?;
+                self.whist.lock().unwrap().reseed((&whist_side, seed))?;
+                self.offside.lock().unwrap().reseed((&offside_side, seed))?;
             }
         }
-
+        self.rotate_environment_comms(old_declarer_side, new_declarer_side);
 
 
         Ok(())
     }
 
-    pub fn run_episode(&mut self, testing: Testing){
+    pub fn run_episode(&mut self, testing: Testing) -> Result<(), ModelError>{
 
         std::thread::scope(|s|{
             s.spawn(|| self.env.run_round_robin_with_rewards_penalise(-100));
@@ -149,11 +245,46 @@ impl DynamicBridgeModel{
             }
 
         });
+        Ok(())
     }
-    pub fn run_learning_episode(&mut self, seed: ()) -> Result<(), AmfiRLError<ContractDP>>{
 
+    pub fn run_test_series(&mut self, tested_role_axis: RoleAxis) -> Result<RolePayoffSummary, ModelError>{
+
+        let mut result = RolePayoffSummary::default();
+        let testing_sides = match tested_role_axis{
+            RoleAxis::Declarers => Testing::Declarer,
+            RoleAxis::Defenders => Testing::Defenders,
+        };
+        let mut test_vectors = Vec::with_capacity(0);
+        std::mem::swap(&mut test_vectors, &mut self.test_vectors);
+
+        self.swap_for_test(tested_role_axis);
+        for t in &test_vectors{
+
+            self.prepare_episode(t, testing_sides)?;
+            self.run_episode(testing_sides)?;
+
+            let r =  self.episode_result();
+            trace!("Result for test episode: {:?} ", r);
+            result = &result + &r;
+
+        }
+        result = &result / test_vectors.len();
+        debug!("Average results after test: {:?}", result);
+        self.swap_for_test(tested_role_axis);
+        std::mem::swap(&mut test_vectors, &mut self.test_vectors);
+
+
+
+        Ok(result)
+    }
+
+
+
+    pub fn run_learning_episode(&mut self, seed: ()) -> Result<(), AmfiRLError<ContractDP>>{
+        todo!()
         //self.env.re
 
-        Ok(())
+        //Ok(())
     }
 }

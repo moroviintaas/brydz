@@ -18,6 +18,18 @@ pub struct PolicyParams{
 
 }
 
+impl Default for PolicyParams{
+    fn default() -> Self {
+        Self{
+            hidden_layers: vec![1024,512],
+
+            optimizer_params: Default::default(),
+            select_policy: PolicyTypeSelect::Q,
+            learning_rate: 0.0001,
+        }
+    }
+}
+
 #[derive(Args, Clone)]
 pub struct DynamicModelOptions{
     #[arg(short = 'd', long = "declarer_save", help = "Declarer VarStore save file")]

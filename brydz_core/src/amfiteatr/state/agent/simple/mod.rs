@@ -8,7 +8,7 @@ use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpda
 use log::debug;
 use karty::cards::{Card, Card2SymTrait};
 use karty::register::Register;
-use crate::deal::{BiasedHandDistribution, DescriptionDeckDeal};
+use crate::deal::{BiasedHandDistribution, ContractGameDescription, DescriptionDeckDeal};
 use crate::amfiteatr::spec::ContractDP;
 
 #[cfg(feature = "torch")]
@@ -500,22 +500,28 @@ impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for C
         Ok(())
     }
 }
-/*
-impl Renew<ContractDP, (Side, ContractParameters, DescriptionDeckDeal)> for ContractAgentInfoSetSimple{
-    fn renew_from(&mut self, base: (Side, ContractParameters, DescriptionDeckDeal)) -> Result<(), AmfiteatrError<ContractDP>> {
-        let (side, params, descript) = base;
 
-        let contract = Contract::new(params);
-        self.dummy_hand = None;
-        self.contract = contract;
-        self.side = side;
-        self.hand = descript.cards[&side];
-        Ok(())
+impl From<(&Side, &ContractGameDescription)> for ContractAgentInfoSetSimple{
+    fn from(base: (&Side, &ContractGameDescription)) -> Self {
+        let (side, description) = base;
+
+        let contract = Contract::new(description.parameters().clone());
+        Self::new(*side, description.cards()[side] , contract, None)
     }
 }
 
+impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoSetSimple{
+    fn renew_from(&mut self, base: (&Side, &ContractGameDescription)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, description) = base;
 
- */
+        let contract = Contract::new(description.parameters().clone());
+        self.dummy_hand = None;
+        self.contract = contract;
+        self.side = *side;
+        self.hand = description.cards()[side];
+        Ok(())
+    }
+}
 
 
 impl ContractInfoSet for ContractAgentInfoSetSimple{

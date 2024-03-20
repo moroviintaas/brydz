@@ -7,7 +7,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use brydz_core::contract::{ContractMechanics, ContractParametersGen, ContractRandomizer};
-use brydz_core::deal::{DealDistribution, DescriptionDeckDeal};
+use brydz_core::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::Side;
 use brydz_core::amfiteatr::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
@@ -26,10 +26,10 @@ use amfiteatr_rl::tensor_data::ConversionToTensor;
 use crate::error::{BrydzSimError, SimulationError};
 use crate::options::operation::train::sessions::Team;
 use crate::options::operation::train::TrainOptions;
-use crate::SimContractParams;
 
 
-pub type ContractInfoSetSeed<'a> = (&'a Side, &'a ContractParametersGen<Suit>, &'a DescriptionDeckDeal);
+pub type ContractInfoSetSeedLegacy<'a> = (&'a Side, &'a ContractParametersGen<Suit>, &'a DescriptionDeckDeal);
+pub type ContractInfoSetSeed<'a> = (&'a Side, &'a ContractGameDescription);
 
 
 pub struct TSession<
@@ -80,7 +80,7 @@ where
     _wis_test2t: PhantomData<WISTest2T>,
     _ois_test2t: PhantomData<OISTest2T>,
 
-    test_set: Option<Vec<SimContractParams>>
+    test_set: Option<Vec<ContractGameDescription>>
 
 
 
@@ -114,27 +114,27 @@ impl <
 >
 where
     <PolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
     <PolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
          + PresentPossibleActions<ContractDP>
         + Clone,
     <PolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
     <TestPolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
     <TestPolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
         + PresentPossibleActions<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + Clone,
     <TestPolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
-        + for<'a> From<ContractInfoSetSeed<'a>>
+        + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
 {
@@ -149,7 +149,7 @@ where
         test_declarer: TracingAgentGen<ContractDP, TestPolicyD, ContractAgentSyncComm>,
         test_whist: TracingAgentGen<ContractDP, TestPolicyW, ContractAgentSyncComm>,
         test_offside: TracingAgentGen<ContractDP, TestPolicyO, ContractAgentSyncComm>,
-        test_set: Option<Vec<SimContractParams>>,
+        test_set: Option<Vec<ContractGameDescription>>,
     ) -> Self{
         Self{
             environment,
@@ -291,7 +291,7 @@ where
     fn prepare_test_game_on_ready_deal
     (
         &mut self,
-        deal: &SimContractParams,
+        deal: &ContractGameDescription,
         tested_team: Team) {
 
         debug!("Preparing test game for team: {tested_team:?}");
@@ -623,7 +623,7 @@ where
     }
 
     pub fn test_agents_team_on_ready_test_set(&mut self, team: &Team,
-        test_set: &[SimContractParams])
+        test_set: &[ContractGameDescription])
         -> Result<f64, AmfiteatrError<ContractDP>> {
 
         self.set_exploring(false);
@@ -716,7 +716,7 @@ where
     }
 
     pub fn test_agents_on_ready_contracts(&mut self,
-        test_set: &[SimContractParams])
+        test_set: &[ContractGameDescription])
         -> Result<(f64, f64), AmfiteatrError<ContractDP>> {
         self.set_exploring(false);
 

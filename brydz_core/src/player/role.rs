@@ -1,8 +1,9 @@
 use std::fmt::{Display, Formatter};
 use std::ops::Sub;
+use enum_map::Enum;
 //pub use super::role_map::*;
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Enum)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PlayRole {
     Whist,

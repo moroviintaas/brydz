@@ -4,7 +4,7 @@ use rand::thread_rng;
 use amfiteatr_rl::tch::{nn, Tensor};
 use amfiteatr_rl::tch::nn::{Adam, VarStore};
 use brydz_core::contract::{ContractRandomizer};
-use brydz_core::deal::{DealDistribution, DescriptionDeckDeal};
+use brydz_core::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
 
 use brydz_core::player::side::{Side, SideMap};
 use brydz_core::amfiteatr::comm::{ContractAgentSyncComm, ContractEnvSyncComm};
@@ -18,7 +18,6 @@ use amfiteatr_rl::tensor_data::{FloatTensorReward, ConversionToTensor};
 use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, TensorA2C};
 use crate::options::operation::train::sessions::{ContractInfoSetForLearning, TSession};
 use crate::options::operation::train::TrainOptions;
-use crate::SimContractParams;
 
 
 pub type ContractA2CLocalAgent<ISW, S> = TracingAgentGen<
@@ -66,7 +65,7 @@ where <InfoSet as EvaluatedInformationSet<ContractDP>>::RewardType: FloatTensorR
 
     let test_set = options.test_set.as_ref().map(|path|{
         let test_str = fs::read_to_string(path).unwrap();
-        let set: Vec<SimContractParams> = ron::de::from_str(&test_str).unwrap();
+        let set: Vec<ContractGameDescription> = ron::de::from_str(&test_str).unwrap();
         set
     });
 

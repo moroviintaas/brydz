@@ -7,7 +7,7 @@ use amfiteatr_core::env::{DirtyReseedEnvironment, EnvironmentStateSequential, En
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
-use crate::deal::DescriptionDeckDeal;
+use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, ContractErrorGen};
 use crate::player::side::Side;
 use crate::player::side::Side::*;
@@ -259,6 +259,32 @@ impl Renew<ContractDP, (&ContractParameters, &DescriptionDeckDeal)> for Contract
         self.whist_hand = descript.cards[&declarer.next_i(1)];
         self.dummy_hand = descript.cards[&declarer.next_i(2)];
         self.offside_hand = descript.cards[&declarer.next_i(3)];
+        self.dummy_shown = false;
+        Ok(())
+    }
+}
+
+impl From<&ContractGameDescription> for ContractEnvStateComplete {
+    fn from(base: &ContractGameDescription) -> Self {
+        let contract = Contract::new(base.parameters().clone());
+        let declarer = contract.declarer();
+        Self::new(contract,
+                  base.cards()[&declarer],
+                  base.cards()[&declarer.next_i(1)],
+                  base.cards()[&declarer.next_i(2)],
+                  base.cards()[&declarer.next_i(3)])
+    }
+}
+
+impl Renew<ContractDP, &ContractGameDescription> for ContractEnvStateComplete{
+    fn renew_from(&mut self, base: &ContractGameDescription) -> Result<(), AmfiteatrError<ContractDP>> {
+        //let (params, descript) = base;
+        self.contract = Contract::new(base.parameters().clone());
+        let declarer = self.contract.declarer();
+        self.declarer_hand = base.cards()[&declarer];
+        self.whist_hand = base.cards()[&declarer.next_i(1)];
+        self.dummy_hand = base.cards()[&declarer.next_i(2)];
+        self.offside_hand = base.cards()[&declarer.next_i(3)];
         self.dummy_shown = false;
         Ok(())
     }

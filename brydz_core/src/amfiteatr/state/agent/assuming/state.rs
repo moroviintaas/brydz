@@ -8,7 +8,7 @@ use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInf
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
-use crate::deal::{BiasedHandDistribution, DealDistribution, DescriptionDeckDeal};
+use crate::deal::{BiasedHandDistribution, ContractGameDescription, DealDistribution, DescriptionDeckDeal};
 use crate::error::BridgeCoreError;
 use crate::meta::HAND_SIZE;
 use crate::player::side::Side;
@@ -349,6 +349,38 @@ impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for C
         self.contract = contract;
         self.side = *side;
         self.hand = descript.cards[side];
+        self.card_distribution = distr;
+        Ok(())
+    }
+}
+
+impl From<(&Side, &ContractGameDescription)> for ContractAgentInfoSetAssuming{
+    fn from(base: (&Side, &ContractGameDescription)) -> Self {
+        let (side, description) = base;
+
+        let distr = match &description.distribution(){
+            DealDistribution::Fair => Default::default(),
+            DealDistribution::Biased(biased) => biased.deref().clone()
+        };
+
+        let contract = Contract::new(description.parameters().clone());
+        Self::new(*side, description.cards()[&side], contract, None, distr)
+    }
+}
+
+impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoSetAssuming{
+    fn renew_from(&mut self, base: (&Side, &ContractGameDescription)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, description) = base;
+
+        let contract = Contract::new(description.parameters().clone());
+        let distr = match &description.distribution(){
+            DealDistribution::Fair => Default::default(),
+            DealDistribution::Biased(biased) => biased.deref().clone()
+        };
+        self.dummy_hand = None;
+        self.contract = contract;
+        self.side = *side;
+        self.hand = description.cards()[side];
         self.card_distribution = distr;
         Ok(())
     }

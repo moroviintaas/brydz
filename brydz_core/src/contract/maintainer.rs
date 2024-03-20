@@ -4,6 +4,7 @@ use crate::player::side::Side;
 use crate::player::axis::Axis;
 use crate::contract::spec::ContractParametersGen;
 use crate::error::ContractErrorGen;
+use crate::player::role::PlayRole;
 
 
 pub trait ContractMechanics {
@@ -16,6 +17,7 @@ pub trait ContractMechanics {
     fn is_completed(&self) -> bool;
     fn completed_tricks(&self) -> Vec<TrickGen<Self::Card>>;
     fn total_tricks_taken_side(&self, side: Side) -> u32;
+
     fn tricks_taken_side_in_n_first_tricks(&self, side: Side, n: usize) -> u32;
     fn tricks_taken_axis_in_n_first_tricks(&self, axis: Axis, n: usize) -> u32;
     fn total_tricks_taken_axis(&self, axis: Axis) -> u32;
@@ -29,6 +31,24 @@ pub trait ContractMechanics {
         self.contract_spec().declarer().partner()
     }
     fn undo(&mut self) -> Result<Self::Card, ContractErrorGen<Self::Card>>;
+
+    fn side_by_role(&self, role: PlayRole) -> Side{
+        match role{
+            PlayRole::Whist => self.contract_spec().whist(),
+            PlayRole::Declarer => self.contract_spec().declarer(),
+            PlayRole::Offside => self.contract_spec().offside(),
+            PlayRole::Dummy => self.contract_spec().dummy(),
+        }
+    }
+
+    fn total_tricks_taken_role(&self, role: PlayRole) -> u32{
+        let side = self.side_by_role(role);
+        self.total_tricks_taken_side(side)
+    }
+    fn total_tricks_taken_role_axis(&self, role: PlayRole) -> u32{
+        let side = self.side_by_role(role);
+        self.total_tricks_taken_axis(side.axis())
+    }
 
 
 }

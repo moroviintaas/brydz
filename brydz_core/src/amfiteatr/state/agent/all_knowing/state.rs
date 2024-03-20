@@ -8,7 +8,7 @@ use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
-use crate::deal::{DealDistribution, DescriptionDeckDeal};
+use crate::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, BridgeCoreErrorGen};
 use crate::error::ContractErrorGen::CardNotInHand;
 use crate::meta::HAND_SIZE;
@@ -221,6 +221,26 @@ impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for C
         self.contract = contract;
         self.side = *side;
         self.initial_deal = descript.cards;
+        Ok(())
+    }
+}
+
+impl From<(&Side, &ContractGameDescription)> for ContractAgentInfoSetAllKnowing{
+    fn from(base: (&Side, &ContractGameDescription)) -> Self {
+        let (side, description) = base;
+
+        let contract = Contract::new(description.parameters().clone());
+        Self::new(*side, description.cards().clone(), contract)
+    }
+}
+impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoSetAllKnowing{
+    fn renew_from(&mut self, base: (&Side, &ContractGameDescription)) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (side, description) = base;
+
+        let contract = Contract::new(description.parameters().clone());
+        self.contract = contract;
+        self.side = *side;
+        self.initial_deal = description.cards().clone();
         Ok(())
     }
 }

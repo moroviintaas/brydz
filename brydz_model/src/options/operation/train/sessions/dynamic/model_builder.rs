@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use rand::rngs::ThreadRng;
 use rand::thread_rng;
 use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
-use amfiteatr_core::env::HashMapEnvironment;
+use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
 use amfiteatr_rl::error::AmfiRLError;
 use amfiteatr_rl::policy::{QLearningPolicy, QSelector, TrainConfig};
@@ -17,15 +17,16 @@ use amfiteatr_rl::tensor_data::{ConversionToTensor, CtxTryIntoTensor};
 use amfiteatr_rl::torch_net::{NeuralNetTemplate, QValueNet};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse};
-use brydz_core::contract::{Contract, ContractParameters};
-use brydz_core::deal::DescriptionDeckDeal;
+use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractState};
+use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
+use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::Side;
+use crate::ModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, DynamicBridgeModel, PolicyTypeSelect};
-use crate::SimContractParams;
+use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, ContractInfoSetSeedLegacy, DynamicBridgeModel, PolicyTypeSelect};
 
+#[derive(Copy, Clone, Debug)]
 pub enum AgentRole{
     Declarer,
     Whist,
@@ -34,6 +35,8 @@ pub enum AgentRole{
     TestWhist,
     TestOffside
 }
+
+
 
 pub struct DynamicBridgeModelBuilder{
 
@@ -52,9 +55,9 @@ pub struct DynamicBridgeModelBuilder{
     inactive_whist_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
     inactive_offside_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
 
-    test_vectors: Option<Vec<SimContractParams>>,
+    test_vectors: Vec<ContractGameDescription>,
 
-    initial_deal: SimContractParams,
+    initial_deal: ContractGameDescription,
 
 
 }
@@ -63,7 +66,7 @@ impl DynamicBridgeModelBuilder{
     pub fn new() -> Self{
         let mut rng = thread_rng();
 
-        let contract = SimContractParams::new_fair_random(&mut rng);
+        let contract = ContractGameDescription::new_fair_random(&mut rng);
 
         let contract_params = contract.parameters();
         let deal_description = DescriptionDeckDeal{
@@ -94,7 +97,7 @@ impl DynamicBridgeModelBuilder{
             inactive_declarer_comm: None,
             inactive_whist_comm: None,
             inactive_offside_comm: None,
-            test_vectors: None,
+            test_vectors: Vec::new(),
             initial_deal: contract,
         }
     }
@@ -174,10 +177,21 @@ impl DynamicBridgeModelBuilder{
     {
         let (env_endpoint, agent_endpoint ) = StdEnvironmentEndpoint::new_pair();
 
+        /*
         let description = DescriptionDeckDeal{
             probabilities: self.initial_deal.distribution().clone(),
             cards: self.initial_deal.cards().clone(),
         };
+
+         */
+
+        let description = ContractGameDescription::new(
+            self.env.state().contract_data().contract_spec().clone(),
+            self.initial_deal.distribution().clone(),
+            self.initial_deal.cards().clone());
+
+
+
 
 
 
@@ -186,17 +200,17 @@ impl DynamicBridgeModelBuilder{
 
                 match agent_configuration.info_set_type{
                     InfoSetTypeSelect::Simple => {
-                        let info_set = ContractAgentInfoSetSimple::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetSimple::from((&side, &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvert420::default())?;
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
                     }
                     InfoSetTypeSelect::Assume => {
-                        let info_set = ContractAgentInfoSetAssuming::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetAssuming::from((&side, &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvert420::default())?;
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
                     }
                     InfoSetTypeSelect::Complete => {
-                        let info_set = ContractAgentInfoSetAllKnowing::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetAllKnowing::from((&side, &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvert420::default())?;
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
                     }
@@ -208,22 +222,19 @@ impl DynamicBridgeModelBuilder{
             InfoSetWayToTensorSelect::Sparse => {
                 match agent_configuration.info_set_type{
                     InfoSetTypeSelect::Simple => {
-                        let info_set = ContractAgentInfoSetSimple::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetSimple::from((&side,  &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparse::default())?;
-                        //todo!()
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
                     }
                     InfoSetTypeSelect::Assume => {
-                        let info_set = ContractAgentInfoSetAssuming::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetAssuming::from((&side,  &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparse::default())?;
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
-                        //todo!()
                     }
                     InfoSetTypeSelect::Complete => {
-                        let info_set = ContractAgentInfoSetAllKnowing::from((&side, self.initial_deal.parameters(), &description));
+                        let info_set = ContractAgentInfoSetAllKnowing::from((&side,  &description));
                         let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparse::default())?;
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
-                        //todo!()
                     }
                 }
             }
@@ -235,14 +246,14 @@ impl DynamicBridgeModelBuilder{
     }
 
 
-    pub fn with_agent(&mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<(), AmfiRLError<ContractDP>>{
+    pub fn with_agent(mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<Self, AmfiRLError<ContractDP>>{
 
         let side = match place{
             AgentRole::Declarer | AgentRole::TestDeclarer => self.initial_deal.parameters().declarer(),
             AgentRole::Whist | AgentRole::TestWhist => self.initial_deal.parameters().whist(),
             AgentRole::Offside | AgentRole::TestOffside => self.initial_deal.parameters().offside()
         };
-        let var_store = match agent_configuration.var_store_path{
+        let var_store = match agent_configuration.var_load_path {
             None => VarStore::new(agent_configuration.device),
             Some(ref s) => {
                 let mut vs = VarStore::new(agent_configuration.device);
@@ -278,21 +289,33 @@ impl DynamicBridgeModelBuilder{
                 self.inactive_offside_comm = Some(comm);
             }
         }
-        Ok(())
+        Ok(self)
     }
 
-    pub fn generate_random_test_vectors(&mut self, tng: &mut ThreadRng, number: usize) -> Result<(), AmfiRLError<ContractDP>>{
-        todo!()
-    }
 
-    pub fn with_test_vectors(&mut self, path: &PathBuf) -> Result<(), AmfiRLError<ContractDP>>{
+
+    /*
+    pub fn with_test_vectors(mut self, path: &PathBuf) -> Result<Self, AmfiRLError<ContractDP>>{
         let test_str = fs::read_to_string(path)
             .map_err(|e| AmfiRLError::IO(format!("Error opening file: {path:?}")))?;
         let set = ron::de::from_str(&test_str)
             .map_err(|e| AmfiRLError::IO(format!("Error reading tensors from file: {path:?} (error: {e:})")))?;
-        self.test_vectors = Some(set);
-        Ok(())
+        self.test_vectors = set;
+        Ok(self)
     }
+
+     */
+
+    pub fn with_test_games_from_file(mut self, file: impl AsRef<Path>) -> Result<Self, ModelError>{
+        let test_str = fs::read_to_string(&file)
+            .map_err(|e| ModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", file.as_ref())))?;
+        let set:  Vec<ContractGameDescription> = ron::de::from_str(&test_str)
+            .map_err(|e| ModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", file.as_ref())))?;
+
+        self.test_vectors = set;
+        Ok(self)
+    }
+
 
     pub fn build(self) -> Result<DynamicBridgeModel, AmfiRLError<ContractDP>>{
 
@@ -309,7 +332,7 @@ impl DynamicBridgeModelBuilder{
             inactive_declarer_comm: self.inactive_declarer_comm.unwrap(),
             inactive_whist_comm: self.inactive_whist_comm.unwrap(),
             inactive_offside_comm: self.inactive_offside_comm.unwrap(),
-            test_vectors: self.test_vectors.unwrap(),
+            test_vectors: self.test_vectors,
             initial_deal: self.initial_deal,
         })
     }

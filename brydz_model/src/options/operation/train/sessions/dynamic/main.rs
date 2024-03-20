@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use log::info;
 use rand::thread_rng;
 use amfiteatr_core::agent::TracingAgentGen;
 use amfiteatr_core::comm::StdEnvironmentEndpoint;
@@ -10,24 +11,55 @@ use amfiteatr_rl::tch::nn::VarStore;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractInfoSetConvertSparse};
 use brydz_core::contract::ContractParameters;
-use brydz_core::deal::DescriptionDeckDeal;
+use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
+use brydz_core::player::axis::RoleAxis;
 use brydz_core::player::side::Side;
 use brydz_core::player::side::Side::North;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, DynamicBridgeModelBuilder, DynamicModelOptions, PolicyParams, PolicyTypeSelect};
-use crate::SimContractParams;
+use crate::options::operation::train::sessions::{AgentConfiguration, AgentRole, ContractInfoSetSeedLegacy, DynamicBridgeModelBuilder, DynamicModelOptions, PolicyParams, PolicyTypeSelect};
 
 pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), AmfiRLError<ContractDP>>{
 
 
-    let mut model = DynamicBridgeModelBuilder::new();
+    let conf_declarer = AgentConfiguration::default();
+    let conf_whist = AgentConfiguration::default();
+    let conf_offside = AgentConfiguration::default();
+    let conf_test_declarer = AgentConfiguration::default();
+    let conf_test_whist = AgentConfiguration::default();
+    let conf_test_offside = AgentConfiguration::default();
 
+
+
+    let mut model = DynamicBridgeModelBuilder::new()
+        .with_agent(&conf_declarer, AgentRole::Declarer)?
+        .with_agent(&conf_whist, AgentRole::Whist)?
+        .with_agent(&conf_offside, AgentRole::Offside)?
+        .with_agent(&conf_test_declarer, AgentRole::TestDeclarer)?
+        .with_agent(&conf_test_whist, AgentRole::TestWhist)?
+        .with_agent(&conf_test_offside, AgentRole::TestOffside)?
+        .build()?;
+
+    if let Some(test_vec_file) = &options.test_set{
+        model.load_test_games_from_file(test_vec_file)?;
+    } else {
+        let mut rng = thread_rng();
+        model.generate_test_games(&mut rng, options.tests_set_size as usize)?;
+    }
+
+    let r = model.run_test_series(RoleAxis::Declarers)?;
+    info!("Testing declarers before learning: {r:?}");
+    let r = model.run_test_series(RoleAxis::Defenders)?;
+    info!("Testing defenders before learning: {r:?}");
+
+
+    /*
     let mut rng = thread_rng();
-    let si = SimContractParams::new_fair_random(&mut rng);
+    let si = ContractGameDescription::new_fair_random(&mut rng);
     let description = DescriptionDeckDeal{
         probabilities: si.distribution().clone(),
         cards: si.cards().clone(),
     };
+
 
     let agent_conf = AgentConfiguration{
         info_set_type: InfoSetTypeSelect::Simple,
@@ -39,6 +71,7 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), AmfiRLErro
             learning_rate: 0.001,
 
         },
+        var_load_path: None,
         var_store_path: None,
         device: Cpu
     };
@@ -49,6 +82,9 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), AmfiRLErro
     //let mut agent = TracingAgentGen::new(info_set, e, policy);
 
     agent.lock().unwrap().simple_apply_experience()?;
+    */
+
+
 
 
     Ok(())

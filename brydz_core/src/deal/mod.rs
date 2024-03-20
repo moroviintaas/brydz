@@ -2,7 +2,7 @@ mod hand_distribution;
 #[cfg(feature = "amfiteatr")]
 mod biased_hand_distribution;
 #[cfg(feature = "amfiteatr")]
-mod deck_distr_description;
+mod contract_game_description;
 #[cfg(feature = "amfiteatr")]
 mod deal_distribution;
 //mod stack_hand;
@@ -14,7 +14,7 @@ pub use hand_distribution::*;
 #[cfg(feature = "amfiteatr")]
 pub use biased_hand_distribution::*;
 #[cfg(feature = "amfiteatr")]
-pub use deck_distr_description::*;
+pub use contract_game_description::*;
 #[cfg(feature = "amfiteatr")]
 pub use deal_distribution::*;
 
