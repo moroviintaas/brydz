@@ -10,10 +10,10 @@ pub use gen::*;
 pub use simulation::*;
 use amfiteatr_core::error::{AmfiteatrError, WorldError};
 use amfiteatr_rl::error::AmfiRLError;
-use crate::error::BrydzSimError::Amfi;
+use crate::error::BrydzModelError::Amfiteatr;
 
 #[derive(Debug,  thiserror::Error)]
-pub enum BrydzSimError{
+pub enum BrydzModelError {
     #[error("Custom error {0}")]
     Custom(String),
     #[error("Error in game generation: {0}")]
@@ -23,9 +23,9 @@ pub enum BrydzSimError{
     //#[error("Error during playing game: {0}")]
     //Game(BridgeCoreError),
     #[error("Error in sztorm framework: {0}")]
-    Amfi(AmfiteatrError<ContractDP>),
+    Amfiteatr(AmfiteatrError<ContractDP>),
     #[error("Error in sztorm Reinforcement Learning framework: {0}")]
-    SztormRL(AmfiRLError<ContractDP>),
+    AmfiteatrRL(AmfiRLError<ContractDP>),
     //#[error("Tensorflow Error {0}")]
     //TensorflowStatus(Status),
     //#[error("SaveModel Error {0}")]
@@ -35,43 +35,45 @@ pub enum BrydzSimError{
     #[error("Ron Error {0}")]
     Ron(ron::error::Error),
     #[error("IO Error {0}")]
-    IO(std::io::Error),
+    IO(String),
+    #[error("Locking mutex: {0}")]
+    Mutex(String),
 
 }
 
-impl From<BridgeCoreError> for BrydzSimError{
+impl From<BridgeCoreError> for BrydzModelError {
     fn from(value: BridgeCoreError) -> Self {
-        Self::Amfi(AmfiteatrError::Game(value))
+        Self::Amfiteatr(AmfiteatrError::Game(value))
     }
 }
 
 
-impl From<AmfiteatrError<ContractDP>> for BrydzSimError{
+impl From<AmfiteatrError<ContractDP>> for BrydzModelError {
     fn from(value: AmfiteatrError<ContractDP>) -> Self {
-        Self::Amfi(value)
+        Self::Amfiteatr(value)
     }
 }
-impl From<AmfiRLError<ContractDP>> for BrydzSimError{
+impl From<AmfiRLError<ContractDP>> for BrydzModelError {
     fn from(value: AmfiRLError<ContractDP>) -> Self {
-        Self::SztormRL(value)
+        Self::AmfiteatrRL(value)
     }
 }
 
-impl From<WorldError<ContractDP>> for BrydzSimError{
+impl From<WorldError<ContractDP>> for BrydzModelError {
     fn from(value: WorldError<ContractDP>) -> Self {
-        Amfi(AmfiteatrError::World(value))
+        Amfiteatr(AmfiteatrError::World(value))
     }
 }
 
 
-impl From<ron::error::Error> for BrydzSimError{
+impl From<ron::error::Error> for BrydzModelError {
     fn from(value: Error) -> Self {
-        BrydzSimError::Ron(value)
+        BrydzModelError::Ron(value)
     }
 }
-impl From<std::io::Error> for BrydzSimError{
+impl From<std::io::Error> for BrydzModelError {
     fn from(value: std::io::Error) -> Self {
-        BrydzSimError::IO(value)
+        BrydzModelError::IO(format!("{}", value))
     }
 }
 /*
@@ -82,7 +84,7 @@ impl From<tensorflow::Status> for BrydzSimError{
 }
 
  */
-impl From<TchError> for BrydzSimError{
+impl From<TchError> for BrydzModelError {
     fn from(value: TchError) -> Self {
         Self::Tch(value)
     }

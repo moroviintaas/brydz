@@ -22,7 +22,7 @@ use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
 use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::Side;
-use crate::ModelError;
+use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
 use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, ContractInfoSetSeedLegacy, DynamicBridgeModel, PolicyTypeSelect};
 
@@ -246,7 +246,7 @@ impl DynamicBridgeModelBuilder{
     }
 
 
-    pub fn with_agent(mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<Self, AmfiRLError<ContractDP>>{
+    pub fn with_agent(mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<Self, BrydzModelError>{
 
         let side = match place{
             AgentRole::Declarer | AgentRole::TestDeclarer => self.initial_deal.parameters().declarer(),
@@ -262,6 +262,25 @@ impl DynamicBridgeModelBuilder{
             }
         };
         let (agent, comm) = self.create_dynamic_agent(agent_configuration, var_store, side)?;
+
+        match place{
+            AgentRole::TestDeclarer | AgentRole::TestOffside | AgentRole::TestWhist => {
+                agent.lock().map_err(|e|{
+                    BrydzModelError::Mutex(format!("Locking agent in builder {e:}"))
+                })?.set_exploration(false)
+            },
+            _ => {}
+        }
+
+        match place{
+            AgentRole::Declarer => {}
+            AgentRole::Whist => {}
+            AgentRole::Offside => {}
+            AgentRole::TestDeclarer => {}
+            AgentRole::TestWhist => {}
+            AgentRole::TestOffside => {}
+        }
+
 
         match place{
             AgentRole::Declarer => {
@@ -306,11 +325,11 @@ impl DynamicBridgeModelBuilder{
 
      */
 
-    pub fn with_test_games_from_file(mut self, file: impl AsRef<Path>) -> Result<Self, ModelError>{
+    pub fn with_test_games_from_file(mut self, file: impl AsRef<Path>) -> Result<Self, BrydzModelError>{
         let test_str = fs::read_to_string(&file)
-            .map_err(|e| ModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", file.as_ref())))?;
+            .map_err(|e| BrydzModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", file.as_ref())))?;
         let set:  Vec<ContractGameDescription> = ron::de::from_str(&test_str)
-            .map_err(|e| ModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", file.as_ref())))?;
+            .map_err(|e| BrydzModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", file.as_ref())))?;
 
         self.test_vectors = set;
         Ok(self)

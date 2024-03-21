@@ -13,12 +13,16 @@ use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgent
 use brydz_core::contract::ContractParameters;
 use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
 use brydz_core::player::axis::RoleAxis;
+use brydz_core::player::role::PlayRole;
+use brydz_core::player::role::PlayRole::Declarer;
 use brydz_core::player::side::Side;
 use brydz_core::player::side::Side::North;
+use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
 use crate::options::operation::train::sessions::{AgentConfiguration, AgentRole, ContractInfoSetSeedLegacy, DynamicBridgeModelBuilder, DynamicModelOptions, PolicyParams, PolicyTypeSelect};
+use crate::options::operation::train::sessions::AgentRole::{Offside, Whist};
 
-pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), AmfiRLError<ContractDP>>{
+pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModelError>{
 
 
     let conf_declarer = AgentConfiguration::default();
@@ -46,10 +50,25 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), AmfiRLErro
         model.generate_test_games(&mut rng, options.tests_set_size as usize)?;
     }
 
-    let r = model.run_test_series(RoleAxis::Declarers)?;
-    info!("Testing declarers before learning: {r:?}");
-    let r = model.run_test_series(RoleAxis::Defenders)?;
-    info!("Testing defenders before learning: {r:?}");
+    let r1 = model.run_test_series(RoleAxis::Declarers)?;
+    //info!("Testing declarers before learning: {r:?}");
+    let r2 = model.run_test_series(RoleAxis::Defenders)?;
+    info!("Test before learn. Trained declarer against reference: {}. Trained whist,offide against reference: {},{}",
+        r1.scores[PlayRole::Declarer], r2.scores[PlayRole::Whist], r2.scores[PlayRole::Offside]);
+    //info!("Testing defenders before learning: {r:?}");
+
+    let epochs = 50;
+    let games_in_epoch = 100;
+    for i in 0..epochs{
+        info!("Learning epoch: {}", i+1);
+        model.learning_epoch(games_in_epoch)?;
+        let r1 = model.run_test_series(RoleAxis::Declarers)?;
+
+        let r2 = model.run_test_series(RoleAxis::Defenders)?;
+
+        info!("Test after epoch: {}. Trained declarer against reference: {}. Trained whist,offide against reference: {},{}",
+        i+1, r1.scores[PlayRole::Declarer], r2.scores[PlayRole::Whist], r2.scores[PlayRole::Offside]);
+    }
 
 
     /*

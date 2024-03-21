@@ -5,7 +5,7 @@ use rand::{Rng, thread_rng};
 use ron::ser::{PrettyConfig, to_string_pretty};
 use brydz_core::deal::{BiasedHandDistribution, DealDistribution};
 pub use options::*;
-use crate::error::BrydzSimError;
+use crate::error::BrydzModelError;
 use std::io::Write;
 
 
@@ -22,7 +22,7 @@ pub fn generate_biased_deal_distributions(number_of_distributions: u64) -> Vec<D
 
 }
 
-pub fn op_generate_biased_distributions(options: &BiasDistributionOptions) -> Result<(), BrydzSimError>{
+pub fn op_generate_biased_distributions(options: &BiasDistributionOptions) -> Result<(), BrydzModelError>{
     let generated = generate_biased_deal_distributions(options.distribution_count);
     let my_config = PrettyConfig::new()
         .depth_limit(4)

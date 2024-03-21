@@ -10,7 +10,7 @@ use brydz_core::player::side::Side;
 use karty::hand::CardSet;
 use karty::random::RandomSymbol;
 use karty::suits::Suit;
-use crate::error::BrydzSimError;
+use crate::error::BrydzModelError;
 use crate::error::GenError::LowerBoundOverUpper;
 use rand_distr::Distribution;
 use std::io::Write;
@@ -22,10 +22,10 @@ pub use options::*;
 
 //pub fn random_contract_with_declarer(rng: &mut ThreadRng) -> Result<SimContractParams>
 
-fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) -> Result<ContractGameDescription, BrydzSimError>{
+fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) -> Result<ContractGameDescription, BrydzModelError>{
 
     if params.min_contract > params.max_contract {
-        return Err(BrydzSimError::Gen(LowerBoundOverUpper {lower: params.min_contract, upper: params.max_contract }))
+        return Err(BrydzModelError::Gen(LowerBoundOverUpper {lower: params.min_contract, upper: params.max_contract }))
     }
 
     let contract_value = rng.gen_range(params.min_contract..=params.max_contract);
@@ -70,7 +70,7 @@ fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) ->
 
 }
 
-pub fn generate_contracts(params: &GenContractOptions) -> Result<Vec<ContractGameDescription>, BrydzSimError>{
+pub fn generate_contracts(params: &GenContractOptions) -> Result<Vec<ContractGameDescription>, BrydzModelError>{
     let repeat = params.game_count as usize;
     let mut rng = thread_rng();
     let mut game_params: Vec<ContractGameDescription> = Vec::with_capacity(repeat);
@@ -81,7 +81,7 @@ pub fn generate_contracts(params: &GenContractOptions) -> Result<Vec<ContractGam
 
 }
 
-pub fn gen2(gen_options: &GenContractOptions) -> Result<(), BrydzSimError>{
+pub fn gen2(gen_options: &GenContractOptions) -> Result<(), BrydzModelError>{
     let my_config = PrettyConfig::new()
         .depth_limit(4)
         // definitely superior (okay, just joking)

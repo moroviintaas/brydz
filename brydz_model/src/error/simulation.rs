@@ -1,5 +1,5 @@
 use brydz_core::player::role::PlayRole;
-use crate::error::BrydzSimError;
+use crate::error::BrydzModelError;
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum SimulationError {
@@ -13,7 +13,7 @@ pub enum SimulationError {
 
 }
 
-impl From<SimulationError> for BrydzSimError{
+impl From<SimulationError> for BrydzModelError {
     fn from(value: SimulationError) -> Self {
         Self::Simulation(value)
     }

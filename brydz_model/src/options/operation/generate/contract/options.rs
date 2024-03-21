@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use clap::ValueEnum;
 use brydz_core::player::side::Side;
-use crate::error::BrydzSimError;
+use crate::error::BrydzModelError;
 use crate::error::GenError::ConvForceDeclarerNoToSide;
 use clap::Args;
 use crate::options::operation::generate::DealMethod::Fair;
@@ -34,11 +34,11 @@ pub enum ForceDeclarer{
 }
 
 impl TryFrom<&ForceDeclarer> for Side{
-    type Error = BrydzSimError;
+    type Error = BrydzModelError;
 
     fn try_from(value: &ForceDeclarer) -> Result<Self, Self::Error> {
         match value{
-            ForceDeclarer::DontForce => Err(BrydzSimError::Gen(ConvForceDeclarerNoToSide)),
+            ForceDeclarer::DontForce => Err(BrydzModelError::Gen(ConvForceDeclarerNoToSide)),
             ForceDeclarer::ForceNorth => Ok(Side::North),
             ForceDeclarer::ForceEast => Ok(Side::East),
             ForceDeclarer::ForceSouth => Ok(Side::South),

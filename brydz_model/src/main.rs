@@ -10,7 +10,7 @@ use clap::Parser;
 
 
 
-use brydz_model::error::BrydzSimError;
+use brydz_model::error::BrydzModelError;
 use brydz_model::{
     options};
 use brydz_model::options::operation::{Operation,
@@ -43,7 +43,7 @@ fn serialize_settings_toml(){
     println!("{}", toml);
 }
 
-fn main() -> Result<(), BrydzSimError> {
+fn main() -> Result<(), BrydzModelError> {
 
     let cli = options::CliOptions::parse();
     options::setup_logger(&cli).unwrap();
@@ -83,7 +83,7 @@ fn main() -> Result<(), BrydzSimError> {
                 DemoCommands::Generic => {
                     match options::operation::demo_op::test_generic_model(){
                         Ok(_) => Ok(()),
-                        Err(e) => Err(BrydzSimError::Custom(format!("{e:}")))
+                        Err(e) => Err(BrydzModelError::Custom(format!("{e:}")))
                     }
                 },
                 /*

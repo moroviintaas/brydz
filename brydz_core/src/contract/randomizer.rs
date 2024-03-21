@@ -1,4 +1,4 @@
-use rand::distributions::{Distribution, Uniform as RandUni};
+use rand::distributions::{Distribution, Standard, Uniform as RandUni};
 
 use rand::{Rng};
 use rand::seq::SliceRandom;
@@ -20,6 +20,13 @@ pub struct ContractRandomizer{
 
 
 
+}
+
+impl Distribution<ContractParameters> for Standard{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> ContractParameters {
+        let randomizer = ContractRandomizer::default();
+        randomizer.sample(rng)
+    }
 }
 
 impl Default for ContractRandomizer{

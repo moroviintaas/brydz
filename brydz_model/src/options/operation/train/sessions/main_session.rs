@@ -23,7 +23,7 @@ use amfiteatr_core::domain::DomainParameters;
 use amfiteatr_rl::error::AmfiRLError;
 use amfiteatr_rl::policy::{LearningNetworkPolicy, TrainConfig};
 use amfiteatr_rl::tensor_data::ConversionToTensor;
-use crate::error::{BrydzSimError, SimulationError};
+use crate::error::{BrydzModelError, SimulationError};
 use crate::options::operation::train::sessions::Team;
 use crate::options::operation::train::TrainOptions;
 
@@ -742,7 +742,7 @@ where
 
 
 
-    pub fn load_network_params_for_role<S: AsRef<std::path::Path>>(&mut self, role: PlayRole, path: S) -> Result<(), BrydzSimError>{
+    pub fn load_network_params_for_role<S: AsRef<std::path::Path>>(&mut self, role: PlayRole, path: S) -> Result<(), BrydzModelError>{
         match role{
             PlayRole::Whist => {
                 self.whist.policy_mut().var_store_mut().load(path)?;
@@ -761,7 +761,7 @@ where
     }
 
 
-    pub fn load_network_params(&mut self, options: &TrainOptions) -> Result<(), BrydzSimError>{
+    pub fn load_network_params(&mut self, options: &TrainOptions) -> Result<(), BrydzModelError>{
         if let Some(ref dpath) = options.declarer_load{
             self.load_network_params_for_role(PlayRole::Declarer, dpath)?;
         }
@@ -787,7 +787,7 @@ where
         Ok(())
     }
 
-    pub fn save_network_params_for_role<S: AsRef<std::path::Path>>(&self, role: PlayRole, path: S) -> Result<(), BrydzSimError>{
+    pub fn save_network_params_for_role<S: AsRef<std::path::Path>>(&self, role: PlayRole, path: S) -> Result<(), BrydzModelError>{
         match role{
             PlayRole::Whist => {
                 self.whist.policy().var_store().save(path)?;
@@ -805,7 +805,7 @@ where
         Ok(())
     }
 
-    pub fn save_network_params(&self, options: &TrainOptions) -> Result<(), BrydzSimError>{
+    pub fn save_network_params(&self, options: &TrainOptions) -> Result<(), BrydzModelError>{
         if let Some(ref path) = options.declarer_save{
             self.save_network_params_for_role(PlayRole::Declarer, path)?;
         }

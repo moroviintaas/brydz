@@ -22,7 +22,7 @@ use amfiteatr_core::agent::EvaluatedInformationSet;
 
 
 use amfiteatr_rl::tensor_data::{FloatTensorReward, ConversionToTensor};
-use crate::error::BrydzSimError;
+use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect, TrainOptions};
 
 
@@ -35,7 +35,7 @@ pub enum TrainType{
 fn create_and_run_learning_a2c_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
     W2T: ConversionToTensor + Default
->(options: &TrainOptions) -> Result<(), BrydzSimError>
+>(options: &TrainOptions) -> Result<(), BrydzModelError>
 where <InfoSet as EvaluatedInformationSet<ContractDP>>::RewardType: FloatTensorReward{
     let mut session = t_session_a2c_symmetric::<InfoSet, W2T>(options)?;
     session.load_network_params(options)?;
@@ -51,7 +51,7 @@ where <InfoSet as EvaluatedInformationSet<ContractDP>>::RewardType: FloatTensorR
 
 
 
-fn session_a2c_420_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_a2c_420_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.info_set_select{
         InfoSetTypeSelect::Simple => create_and_run_learning_a2c_session::<ContractAgentInfoSetSimple, ContractInfoSetConvert420>(options),
         InfoSetTypeSelect::Assume => create_and_run_learning_a2c_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvert420>(options),
@@ -60,7 +60,7 @@ fn session_a2c_420_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
 
 }
 
-fn session_a2c_sparse_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_a2c_sparse_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.info_set_select{
         InfoSetTypeSelect::Simple => create_and_run_learning_a2c_session::<ContractAgentInfoSetSimple, ContractInfoSetConvertSparse>(options),
         InfoSetTypeSelect::Assume => create_and_run_learning_a2c_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvertSparse>(options),
@@ -69,7 +69,7 @@ fn session_a2c_sparse_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
 
 }
 
-fn session_a2c(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_a2c(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.w2t{
         InfoSetWayToTensorSelect::_420 => session_a2c_420_repr(options),
         InfoSetWayToTensorSelect::Sparse => session_a2c_sparse_repr(options)
@@ -79,7 +79,7 @@ fn session_a2c(options: &TrainOptions) -> Result<(), BrydzSimError>{
 fn create_and_run_learning_q_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
     W2T: ConversionToTensor + Default
->(options: &TrainOptions) -> Result<(), BrydzSimError>{
+>(options: &TrainOptions) -> Result<(), BrydzModelError>{
     let mut session = t_session_q_symmetric::<InfoSet, W2T>(options)?;
     session.load_network_params(options)?;
     session.train_all_at_once(
@@ -92,7 +92,7 @@ fn create_and_run_learning_q_session<
     Ok(())
 }
 
-fn session_q_420_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_q_420_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.info_set_select{
         InfoSetTypeSelect::Simple => create_and_run_learning_q_session::<ContractAgentInfoSetSimple, ContractInfoSetConvert420>(options),
         InfoSetTypeSelect::Assume => create_and_run_learning_q_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvert420>(options),
@@ -101,7 +101,7 @@ fn session_q_420_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
 
 }
 
-fn session_q_sparse_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_q_sparse_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.info_set_select{
         InfoSetTypeSelect::Simple => create_and_run_learning_q_session::<ContractAgentInfoSetSimple, ContractInfoSetConvertSparse>(options),
         InfoSetTypeSelect::Assume => create_and_run_learning_q_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvertSparse>(options),
@@ -110,14 +110,14 @@ fn session_q_sparse_repr(options: &TrainOptions) -> Result<(), BrydzSimError>{
 
 }
 
-fn session_q(options: &TrainOptions) -> Result<(), BrydzSimError>{
+fn session_q(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.w2t{
         InfoSetWayToTensorSelect::_420 => session_q_420_repr(options),
         InfoSetWayToTensorSelect::Sparse => session_q_sparse_repr(options)
     }
 }
 
-pub fn build_and_run_train_session(agent_type: &AgentType) -> Result<(), BrydzSimError>{
+pub fn build_and_run_train_session(agent_type: &AgentType) -> Result<(), BrydzModelError>{
     match agent_type{
         /*
         AgentType::A2C(options) => {

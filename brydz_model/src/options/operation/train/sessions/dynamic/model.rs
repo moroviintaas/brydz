@@ -6,6 +6,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
 use log::{debug, trace};
+use rand::distributions::{Distribution, Standard};
 use rand::prelude::ThreadRng;
 use rand::thread_rng;
 use rand_distr::num_traits::Signed;
@@ -19,14 +20,15 @@ use brydz_core::amfiteatr::env::ContractEnv;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractDummyState, ContractEnvStateComplete, ContractState};
 use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
-use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
+use brydz_core::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
 use brydz_core::player::axis::RoleAxis;
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::{Side, SideMap};
 use brydz_core::player::side::Side::{East, North, South, West};
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
 use crate::options::operation::train::sessions::{ContractInfoSetSeed, ContractInfoSetSeedLegacy, PolicyTypeSelect};
-use crate::{ModelError};
+use crate::error::BrydzModelError;
+use crate::options::operation::generate::{GenContractOptions, generate_biased_deal_distributions};
 
 
 #[derive(Default, Debug)]
@@ -137,11 +139,11 @@ impl DynamicBridgeModel{
         }
     }
 
-    pub fn load_test_games_from_file(&mut self, file: impl AsRef<Path>) -> Result<(), ModelError>{
+    pub fn load_test_games_from_file(&mut self, file: impl AsRef<Path>) -> Result<(), BrydzModelError>{
         let test_str = fs::read_to_string(&file)
-            .map_err(|e| ModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", &file.as_ref())))?;
+            .map_err(|e| BrydzModelError::IO(format!("Failed reading file input {:?} as test vectors ({e:})", &file.as_ref())))?;
         let set:  Vec<ContractGameDescription> = ron::de::from_str(&test_str)
-            .map_err(|e| ModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", &file.as_ref())))?;
+            .map_err(|e| BrydzModelError::IO(format!("Failed converting input of file {:?} as test vectors ({e:})", &file.as_ref())))?;
 
         self.test_vectors = set;
         Ok(())
@@ -220,7 +222,7 @@ impl DynamicBridgeModel{
         Ok(())
     }
 
-    pub fn run_episode(&mut self, testing: Testing) -> Result<(), ModelError>{
+    pub fn run_episode(&mut self, testing: Testing) -> Result<(), BrydzModelError>{
 
         std::thread::scope(|s|{
             s.spawn(|| self.env.run_round_robin_with_rewards_penalise(-100));
@@ -248,13 +250,29 @@ impl DynamicBridgeModel{
         Ok(())
     }
 
-    pub fn run_test_series(&mut self, tested_role_axis: RoleAxis) -> Result<RolePayoffSummary, ModelError>{
+    fn set_explore_agent(&self, agent: &Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, explore: bool)
+    -> Result<(), BrydzModelError>{
+        agent.lock()
+            .map_err(|e|BrydzModelError::Mutex("Failed locking mutex preparing agent in tests".into()))?
+            .set_exploration(explore);
+
+        Ok(())
+    }
+    fn set_explore_all(&self, explore: bool) -> Result<(), BrydzModelError>{
+        self.set_explore_agent(&self.declarer, explore)?;
+        self.set_explore_agent(&self.whist, explore)?;
+        self.set_explore_agent(&self.offside, explore)?;
+        Ok(())
+    }
+
+    pub fn run_test_series(&mut self, tested_role_axis: RoleAxis) -> Result<RolePayoffSummary, BrydzModelError>{
 
         let mut result = RolePayoffSummary::default();
         let testing_sides = match tested_role_axis{
             RoleAxis::Declarers => Testing::Declarer,
             RoleAxis::Defenders => Testing::Defenders,
         };
+        self.set_explore_all(false)?;
         let mut test_vectors = Vec::with_capacity(0);
         std::mem::swap(&mut test_vectors, &mut self.test_vectors);
 
@@ -273,6 +291,7 @@ impl DynamicBridgeModel{
         debug!("Average results after test: {:?}", result);
         self.swap_for_test(tested_role_axis);
         std::mem::swap(&mut test_vectors, &mut self.test_vectors);
+        self.set_explore_all(true)?;
 
 
 
@@ -280,11 +299,53 @@ impl DynamicBridgeModel{
     }
 
 
+    fn clear_trajectories(&mut self) -> Result<(), BrydzModelError>{
+        self.declarer.lock().unwrap().clear_episodes();
+        self.whist.lock().unwrap().clear_episodes();
+        self.offside.lock().unwrap().clear_episodes();
+        self.test_declarer.lock().unwrap().clear_episodes();
+        self.test_whist.lock().unwrap().clear_episodes();
+        self.test_offside.lock().unwrap().clear_episodes();
 
-    pub fn run_learning_episode(&mut self, seed: ()) -> Result<(), AmfiRLError<ContractDP>>{
-        todo!()
-        //self.env.re
 
-        //Ok(())
+        Ok(())
+    }
+
+
+    pub fn play_learning_episode(&mut self, seed: &ContractGameDescription) -> Result<(), BrydzModelError>{
+
+        self.prepare_episode(seed, Testing::None)?;
+        self.run_episode(Testing::None)?;
+        self.declarer.lock().unwrap().store_episode();
+        self.whist.lock().unwrap().store_episode();
+        self.offside.lock().unwrap().store_episode();
+
+        Ok(())
+    }
+
+    pub fn learning_epoch(&mut self, number_of_games: usize) -> Result<(), BrydzModelError>{
+
+        self.clear_trajectories()?;
+        let distributions = generate_biased_deal_distributions(number_of_games as u64);
+        let mut rng = thread_rng();
+
+
+
+
+        for d in distributions.into_iter(){
+            let contract_params = Standard{}.sample(&mut rng);
+            let cards = d.sample(&mut rng);
+            let description = ContractGameDescription::new(
+                contract_params, d, cards);
+
+            self.play_learning_episode(&description)?;
+
+        }
+        debug!("Played {} games in epoch", number_of_games);
+        self.declarer.lock().unwrap().simple_apply_experience()?;
+        self.whist.lock().unwrap().simple_apply_experience()?;
+        self.offside.lock().unwrap().simple_apply_experience()?;
+
+        Ok(())
     }
 }
