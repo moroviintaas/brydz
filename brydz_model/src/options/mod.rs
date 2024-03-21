@@ -16,11 +16,11 @@ pub struct CliOptions {
     pub command: Operation,
     #[arg(short = 'l', long = "log", default_value_t= LevelFilter::Info)]
     pub log_level: LevelFilter,
-    #[arg(short = 'c', long = "log_core", default_value_t= LevelFilter::Off)]
+    #[arg(short = 'c', long = "log_core", default_value_t= LevelFilter::Error)]
     pub brydz_core_log_level: LevelFilter,
-    #[arg(short = 'a', long = "log_amfi", default_value_t= LevelFilter::Off)]
+    #[arg(short = 'a', long = "log_amfi", default_value_t= LevelFilter::Error)]
     pub amfi_log_level: LevelFilter,
-    #[arg(short = 'r', long = "log_amfi-rl", default_value_t= LevelFilter::Off)]
+    #[arg(short = 'r', long = "log_amfi-rl", default_value_t= LevelFilter::Error)]
     pub amfiteatr_rl_log_level: LevelFilter,
 
     #[arg(long = "log_file")]

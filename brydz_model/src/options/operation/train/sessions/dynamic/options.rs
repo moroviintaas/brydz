@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use clap::{Args, ValueEnum};
 use amfiteatr_rl::tch::nn::Adam;
-use crate::options::operation::train::{DeviceSelect, InfoSetWayToTensorSelect};
+use crate::options::operation::train::{DeviceSelect, InfoSetTypeSelect, InfoSetWayToTensorSelect};
 
 #[derive(ValueEnum, Copy, Clone)]
 pub enum PolicyTypeSelect{
@@ -30,6 +30,7 @@ impl Default for PolicyParams{
     }
 }
 
+
 #[derive(Args, Clone)]
 pub struct DynamicModelOptions{
     #[arg(short = 'd', long = "declarer_save", help = "Declarer VarStore save file")]
@@ -38,6 +39,13 @@ pub struct DynamicModelOptions{
     pub whist_save: Option<PathBuf>,
     #[arg(short = 'o', long = "offside_save", help = "Offside VarStore save file")]
     pub offside_save: Option<PathBuf>,
+
+    #[arg(long = "declarer_iset", default_value = "simple", help = "Declarer's information set type")]
+    pub declarer_is_type: InfoSetTypeSelect,
+    #[arg(long = "whist_iset", default_value = "simple", help = "Whists's information set type")]
+    pub whist_is_type: InfoSetTypeSelect,
+    #[arg(long = "offside_iset", default_value = "simple", help = "Offside's information set type")]
+    pub offside_is_type: InfoSetTypeSelect,
 
     #[arg(short = 'D', long = "declarer_load", help = "Declarer VarStore load file")]
     pub declarer_load: Option<PathBuf>,

@@ -10,11 +10,11 @@ use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
 use amfiteatr_rl::error::AmfiRLError;
-use amfiteatr_rl::policy::{QLearningPolicy, QSelector, TrainConfig};
+use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};
 use amfiteatr_rl::tch::{nn, Tensor};
 use amfiteatr_rl::tch::nn::{OptimizerConfig, VarStore};
 use amfiteatr_rl::tensor_data::{ConversionToTensor, CtxTryIntoTensor};
-use amfiteatr_rl::torch_net::{NeuralNetTemplate, QValueNet};
+use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorA2C};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractState};
@@ -168,6 +168,79 @@ impl DynamicBridgeModelBuilder{
 
          */
     }
+
+    pub fn create_agent_a2c_policy<
+        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
+        IS2T: ConversionToTensor>
+    (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, is2t: IS2T)
+     -> Result<ActorCriticPolicy<ContractDP, InfoSet, IS2T>, AmfiRLError<ContractDP>>{
+
+        // Result<(Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvEndpoint<ContractDP>), AmfiRLError<ContractDP>>{
+
+        //let (env_endpoint, agent_endpoint ) = StdEnvironmentEndpoint::new_pair();
+
+        //let description = self.initial_deal.distribution();
+
+        let input_shape: i64 = match agent_configuration.info_set_conversion_type{
+            InfoSetWayToTensorSelect::_420 => {
+                ContractInfoSetConvert420::default().desired_shape().iter().sum()
+            },
+            InfoSetWayToTensorSelect::Sparse => {
+                ContractInfoSetConvertSparse::default().desired_shape().iter().sum()
+            }
+        };
+        let hidden_layers = &agent_configuration.policy_params.hidden_layers;
+        let network_pattern = NeuralNetTemplate::new(|path| {
+            let mut seq = nn::seq();
+            let mut last_dim = None;
+            if !hidden_layers.is_empty(){
+                let mut ld = hidden_layers[0];
+
+                last_dim = Some(ld);
+                seq = seq.add(nn::linear(path / "INPUT", input_shape, ld, Default::default()));
+
+                for i in 1..hidden_layers.len(){
+                    let ld_new = hidden_layers[i];
+                    seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
+                        .add_fn(|xs| xs.relu());
+
+                    ld = ld_new;
+                    last_dim = Some(ld);
+                }
+            }
+            let (actor, critic) = match last_dim{
+                None => {
+                    (nn::linear(path / "al", input_shape, 52, Default::default()),
+                     nn::linear(path / "cl", input_shape, 1, Default::default()))
+                }
+                Some(ld) => {
+                    (nn::linear(path / "al", ld, 52, Default::default()),
+                     nn::linear(path / "cl", ld, 1, Default::default()))
+                }
+            };
+            let device = path.device();
+            {move |xs: &Tensor|{
+                if seq.is_empty(){
+                    TensorA2C{critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                } else {
+                    let xs = xs.to_device(device).apply(&seq);
+                    TensorA2C{critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                }
+            }}
+        });
+
+        let net = network_pattern.get_net_closure();
+        let optimiser = agent_configuration.policy_params.optimizer_params.build(&var_store, agent_configuration.policy_params.learning_rate)?;
+        let net = A2CNet::new(var_store, net, );
+        //Ok(ActorCriticPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), TrainConfig{ gamma: 0.99 }))
+        Ok(ActorCriticPolicy::new(net, optimiser, is2t, TrainConfig {gamma: 0.9}))
+        /*
+
+
+         */
+    }
+
+
 
 
 

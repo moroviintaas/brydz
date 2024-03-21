@@ -1,4 +1,4 @@
-use log::debug;
+use log::{debug, error};
 use smallvec::SmallVec;
 use karty::cards::{Card, Card2SymTrait};
 use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
@@ -6,6 +6,7 @@ use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
+use karty::error::CardSetErrorGen;
 
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
@@ -81,7 +82,9 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
             ContractAction::ShowHand(dhand) => {
                 let local_dhand = self.dummy_hand().unwrap();
                 if local_dhand != &dhand{
-                    todo!()
+                    error!("Dummy shown hand ({dhand:#}) which is different than known before ({local_dhand:#})");
+                    return Err(BridgeCoreError::Hand(CardSetErrorGen::ExpectedEqualCardSets {expected: local_dhand.into_iter().collect(), found: dhand.into_iter().collect()}))
+                    //todo!()
                     //panic!("Currenly not implemented what to do when dummys showed hand is different than known in infoset")
                 }
                 Ok(())
@@ -99,6 +102,13 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
                 debug!("Agent {:?}: actual_side: {:?}", &self.side, &actual_side);
                 if !self.deal[&actual_side].contains(&card){
                     //used card known to not be in players hand
+                    error!("Player {} reports error due to his complete knowledge. Current player: {actual_side: } does not have card {card:#} in hand (to my knowledge: {:#}).\
+                    Cards are: North: {:#}, East: {:#}, West: {:#}, South: {:#}. Declarer is on {:?}.",
+                        self.side(),
+                        self.deal[&actual_side],
+                        self.deal[&Side::North], self.deal[&Side::East], &self.deal[&Side::South], &self.deal[&Side::West],
+                        self.contract.contract_spec().declarer());
+
                     return Err(BridgeCoreErrorGen::Contract(CardNotInHand(actual_side, card)))
                 }
                 self.contract.insert_card(actual_side, card)?;
@@ -221,6 +231,7 @@ impl Renew<ContractDP, (&Side, &ContractParameters, &DescriptionDeckDeal)> for C
         self.contract = contract;
         self.side = *side;
         self.initial_deal = descript.cards;
+        self.deal = descript.cards;
         Ok(())
     }
 }
@@ -241,6 +252,7 @@ impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoS
         self.contract = contract;
         self.side = *side;
         self.initial_deal = description.cards().clone();
+        self.deal = description.cards().clone();
         Ok(())
     }
 }

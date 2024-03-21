@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::iter::Sum;
-use std::ops::{Add, Div};
+use std::ops::{Add, Deref, Div};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
@@ -30,7 +30,7 @@ use crate::options::operation::train::sessions::{ContractInfoSetSeed, ContractIn
 use crate::error::BrydzModelError;
 use crate::options::operation::generate::{GenContractOptions, generate_biased_deal_distributions};
 
-
+type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
 #[derive(Default, Debug)]
 pub struct RolePayoffSummary {
     pub scores: EnumMap<PlayRole, f64>,
@@ -188,6 +188,7 @@ impl DynamicBridgeModel{
         //let seed_refs = (seed.0, seed.1);
         self.env.reseed(seed)?;
 
+
         let dummy_side = seed.parameters().dummy();
         self.dummy.reseed((&dummy_side, seed))?;
 
@@ -195,7 +196,10 @@ impl DynamicBridgeModel{
         let whist_side = seed.parameters().whist();
         let offside_side = seed.parameters().offside();
 
-
+        debug!("After game reseed: North: {:#}, East: {:#}, South: {:#}, West: {:#}. Declarer is on: {}.",
+            self.env.state()[North], self.env.state()[East], self.env.state()[South], self.env.state()[West],
+            self.env.state().contract_data().declarer()
+        );
 
         match testing{
             Testing::Declarer => {
@@ -323,6 +327,16 @@ impl DynamicBridgeModel{
         Ok(())
     }
 
+    pub(crate) fn store_agents_var(&self, agent: &BrydzDynamicAgent, file: & impl AsRef<Path>) -> Result<(), BrydzModelError>{
+        let g = agent.lock().map_err(|e|{
+            BrydzModelError::Mutex("Failed locking agent for borrowing varstore to save to file".into())
+        })?;
+
+        let var = g.get_var_store();
+        var.save(file).map_err(|e|{
+            BrydzModelError::Tch(e)
+        })
+    }
     pub fn learning_epoch(&mut self, number_of_games: usize) -> Result<(), BrydzModelError>{
 
         self.clear_trajectories()?;
