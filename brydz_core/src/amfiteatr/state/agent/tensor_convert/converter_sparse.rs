@@ -46,9 +46,10 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     //  current trick data
     //  0219-0222:      called suit [Clubs, Diamonds, Hearts, Spades]
     //  0223-0226:      trick starting side [own, next, partner, right]
-    //  0227-0278:      card placed left [52 - 1.0 to flag card]
-    //  0279-0330:      card placed partner [52 - 1.0 to flag card]
+    //  0227-0278:      card placed  own [52 - 1.0 to flag card]
+    //  0279-0330:      card placed left [52 - 1.0 to flag card]
     //  0331-0382:      card placed partner [52 - 1.0 to flag card]
+    //  0383-0334:      card placed right [52 - 1.0 to flag card]
 
     use karty::cards::{STANDARD_DECK};
     use karty::symbol::CardSymbol;
@@ -57,10 +58,13 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     use crate::contract::ContractMechanics;
     use crate::player::side::Side;
     use crate::amfiteatr::state::ContractInfoSet;
+    use crate::player::role::PlayRole;
 
-    pub const STATE_REPR_SIZE: usize = 383;
+    pub const STATE_REPR_SIZE: usize = RIGHT_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
     pub const SPARSE_DECK_SIZE: usize = 52;
-    pub const CONTRACT_TRUMP_OFFSET: usize = 4;
+
+    pub const CONTRACT_ROLE_OFFSET: usize = 0;
+    pub const CONTRACT_TRUMP_OFFSET: usize = CONTRACT_ROLE_OFFSET + 4;
     pub const CONTRACT_VALUE_OFFSET: usize = CONTRACT_TRUMP_OFFSET + 5;
     pub const DOUBLING_OFFSET: usize = CONTRACT_VALUE_OFFSET + 1;
     pub const CARD_SET_OFFSET: usize = DOUBLING_OFFSET + 1;
@@ -69,7 +73,9 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     pub const RIGHT_CARD_SET_OFFSET: usize = PARTNER_CARD_SET_OFFSET + SPARSE_DECK_SIZE;
     pub const CALLED_SUIT_OFFSET: usize = RIGHT_CARD_SET_OFFSET + SPARSE_DECK_SIZE;
     pub const TRICK_STARTING_SIDE_OFFSET: usize = CALLED_SUIT_OFFSET + 4;
-    pub const LEFT_CARD_PLACED_OFFSET: usize = TRICK_STARTING_SIDE_OFFSET + 4;
+    pub const OWN_CARD_PLACED_OFFSET: usize = TRICK_STARTING_SIDE_OFFSET + 4;
+    #[allow(dead_code)]
+    pub const LEFT_CARD_PLACED_OFFSET: usize = OWN_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
     #[allow(dead_code)]
     pub const PARTNER_CARD_PLACED_OFFSET: usize = LEFT_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
     #[allow(dead_code)]
@@ -80,8 +86,12 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
         use crate::amfiteatr::state::contract_state_sparse_convert_with_init_assumption::{*};
 
         #[test]
+        fn own_trick_offset(){
+            assert_eq!(OWN_CARD_PLACED_OFFSET, 227)
+        }
+        #[test]
         fn left_card_offset(){
-            assert_eq!(LEFT_CARD_PLACED_OFFSET, 227);
+            assert_eq!(LEFT_CARD_PLACED_OFFSET, 279);
         }
         #[test]
         fn cardset_offset(){
@@ -93,9 +103,10 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
         }
     }
     #[inline]
-    pub fn write_contract_params<T: ContractInfoSet>(state_repr: &mut [f32; STATE_REPR_SIZE], state: &T){
+    pub fn write_contract_params<T: ContractInfoSet>(state_repr: &mut [f32], state: &T){
         let u = state.side() -  state.contract_data().declarer();
         state_repr[u as usize] = 1.0;
+
         let t = match state.contract_data().contract_spec().bid().trump(){
             TrumpGen::Colored(c) => c.usize_index(),
             TrumpGen::NoTrump => 4,
@@ -111,7 +122,7 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     }
 
     #[inline]
-    pub fn write_card_hold_probability_hints<T: ContractInfoSet>(state_repr: &mut [f32; STATE_REPR_SIZE], state: &T, side: Side){
+    pub fn write_card_hold_probability_hints<T: ContractInfoSet>(state_repr: &mut [f32], state: &T, side: Side){
         let side_diff = (side - state.side()) as usize;
         let offset = CARD_SET_OFFSET + (side_diff * SPARSE_DECK_SIZE);
         for card in STANDARD_DECK{
@@ -120,7 +131,7 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
 
     }
     #[inline]
-    pub fn write_called_suit<T: ContractInfoSet>(state_repr: &mut [f32; STATE_REPR_SIZE], state: &T){
+    pub fn write_called_suit<T: ContractInfoSet>(state_repr: &mut [f32], state: &T){
         let u = CALLED_SUIT_OFFSET + match state.contract_data().current_trick().called_suit(){
             None => {
                 return;
@@ -131,7 +142,7 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
 
     }
     #[inline]
-    pub fn write_trick_starter<T: ContractInfoSet>(state_repr: &mut [f32; STATE_REPR_SIZE], state: &T){
+    pub fn write_trick_starter<T: ContractInfoSet>(state_repr: &mut [f32], state: &T){
 
         let u = TRICK_STARTING_SIDE_OFFSET
             + (state.contract_data().current_trick().first_player_side() - state.side()) as usize;
@@ -140,15 +151,15 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     }
 
     #[inline]
-    pub fn write_placed_card_in_tricks<T: ContractInfoSet>(state_repr: &mut [f32; STATE_REPR_SIZE], state: &T){
+    pub fn write_placed_card_in_tricks<T: ContractInfoSet>(state_repr: &mut [f32], state: &T){
 
         //let offset = LEFT_CARD_PLACED_OFFSET + ((side_diff-1) * SPARSE_DECK_SIZE);
 
-        for i in 1..4{
+        for i in 0..4{
             match state.contract_data().current_trick()[state.side().next_i(i)]{
                 None => {}
                 Some(c) => {
-                    let offset = LEFT_CARD_PLACED_OFFSET + ((i as usize -1) * SPARSE_DECK_SIZE) + c.usize_index();
+                    let offset = OWN_CARD_PLACED_OFFSET + ((i as usize) * SPARSE_DECK_SIZE) + c.usize_index();
                     state_repr[offset] = 1.0;
                 }
             }

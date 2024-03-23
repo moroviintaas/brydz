@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 use std::fs;
 use std::iter::Sum;
-use std::ops::{Add, Deref, Div};
+use std::ops::{Add, Deref, Div, Index};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
 use log::{debug, trace};
 use rand::distributions::{Distribution, Standard};
 use rand::prelude::ThreadRng;
+use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand_distr::num_traits::Signed;
 use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReinitAgent, ReseedAgent};
@@ -31,6 +32,8 @@ use crate::error::BrydzModelError;
 use crate::options::operation::generate::{GenContractOptions, generate_biased_deal_distributions};
 
 type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
+
+
 #[derive(Default, Debug)]
 pub struct RolePayoffSummary {
     pub scores: EnumMap<PlayRole, f64>,
@@ -76,6 +79,7 @@ impl Div<usize> for &RolePayoffSummary{
         }
     }
 }
+
 
 #[derive(Clone, Copy)]
 pub enum Testing{
@@ -318,12 +322,37 @@ impl DynamicBridgeModel{
 
     pub fn play_learning_episode(&mut self, seed: &ContractGameDescription) -> Result<(), BrydzModelError>{
 
+        let mut rng = thread_rng();
+        //let role:
+
         self.prepare_episode(seed, Testing::None)?;
         self.run_episode(Testing::None)?;
         self.declarer.lock().unwrap().store_episode();
         self.whist.lock().unwrap().store_episode();
         self.offside.lock().unwrap().store_episode();
 
+        Ok(())
+    }
+    pub fn play_learning_episode_one_learner(&mut self, seed: &ContractGameDescription, role: PlayRole) -> Result<(), BrydzModelError>{
+
+        let roles_to_disable_exploring = match role{
+            PlayRole::Whist => [PlayRole::Declarer, PlayRole::Offside],
+            PlayRole::Declarer | PlayRole::Dummy => [PlayRole::Whist, PlayRole::Offside],
+            PlayRole::Offside => [PlayRole::Whist, PlayRole::Declarer]
+        };
+        for r in roles_to_disable_exploring{
+            self.set_exploration_for_agent(r, false)?;
+        }
+
+        self.prepare_episode(seed, Testing::None)?;
+        self.run_episode(Testing::None)?;
+        self.declarer.lock().unwrap().store_episode();
+        self.whist.lock().unwrap().store_episode();
+        self.offside.lock().unwrap().store_episode();
+
+        for r in roles_to_disable_exploring{
+            self.set_exploration_for_agent(r, true)?;
+        }
         Ok(())
     }
 
@@ -339,9 +368,16 @@ impl DynamicBridgeModel{
     }
     pub fn learning_epoch(&mut self, number_of_games: usize) -> Result<(), BrydzModelError>{
 
+
+
+
         self.clear_trajectories()?;
         let distributions = generate_biased_deal_distributions(number_of_games as u64);
         let mut rng = thread_rng();
+
+        let learning_choices = [PlayRole::Declarer, PlayRole::Offside, PlayRole::Whist];
+        let explorer = learning_choices.choose(&mut rng).unwrap();
+
 
 
 
@@ -352,7 +388,7 @@ impl DynamicBridgeModel{
             let description = ContractGameDescription::new(
                 contract_params, d, cards);
 
-            self.play_learning_episode(&description)?;
+            self.play_learning_episode_one_learner(&description, explorer.clone())?;
 
         }
         debug!("Played {} games in epoch", number_of_games);
@@ -362,4 +398,29 @@ impl DynamicBridgeModel{
 
         Ok(())
     }
+
+    fn get_learning_agent(&self, role: PlayRole) -> Option<&BrydzDynamicAgent>{
+        match role{
+            PlayRole::Whist => Some(&self.whist),
+            PlayRole::Declarer => Some(&self.declarer),
+            PlayRole::Offside => Some(&self.offside),
+            PlayRole::Dummy => None,
+        }
+    }
+
+    fn set_exploration_for_agent(&mut self, role: PlayRole, exploring: bool) -> Result<(), BrydzModelError>{
+        match self.get_learning_agent(role){
+            Some(a) => {
+                let mut g = a.lock().map_err(|e|{
+                    BrydzModelError::Mutex(format!("Locking agent to switch on/off learning: {e:}"))
+                })?;
+                g.set_exploration(exploring);
+                Ok(())
+            },
+            None => {
+                Ok(())
+            }
+        }
+    }
 }
+

@@ -5,6 +5,7 @@ use crate::player::axis::Axis;
 use crate::contract::spec::ContractParametersGen;
 use crate::error::ContractErrorGen;
 use crate::player::role::PlayRole;
+use crate::player::role::PlayRole::{Declarer, Dummy, Offside, Whist};
 
 
 pub trait ContractMechanics {
@@ -38,6 +39,17 @@ pub trait ContractMechanics {
             PlayRole::Declarer => self.contract_spec().declarer(),
             PlayRole::Offside => self.contract_spec().offside(),
             PlayRole::Dummy => self.contract_spec().dummy(),
+        }
+    }
+
+    fn role_by_side(&self, side: Side) -> PlayRole{
+        let x = side - self.contract_spec().declarer();
+        match x{
+            0 => Declarer,
+            1 => Whist,
+            2 => Dummy,
+            3 => Offside,
+            _ => panic!("Unfailable")
         }
     }
 

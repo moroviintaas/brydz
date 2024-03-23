@@ -1,3 +1,4 @@
+use std::fs;
 use std::sync::{Arc, Mutex};
 use log::info;
 use rand::thread_rng;
@@ -18,26 +19,26 @@ use brydz_core::player::role::PlayRole::Declarer;
 use brydz_core::player::side::Side;
 use brydz_core::player::side::Side::North;
 use crate::error::BrydzModelError;
-use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, AgentRole, ContractInfoSetSeedLegacy, DynamicBridgeModelBuilder, DynamicModelOptions, PolicyParams, PolicyTypeSelect};
+use crate::options::operation::train::{DeviceSelect, InfoSetTypeSelect, InfoSetWayToTensorSelect};
+use crate::options::operation::train::sessions::{AgentConfiguration, AgentRole, ContractInfoSetSeedLegacy, DynamicBridgeModelBuilder, DynamicModelOptions, DynamicSessionConfig, PolicyParams, PolicyTypeSelect};
 use crate::options::operation::train::sessions::AgentRole::{Offside, Whist};
 
 
-
+/*
 fn parse_declarer_config(options: &DynamicModelOptions) -> AgentConfiguration{
 
     AgentConfiguration{
         info_set_type: options.declarer_is_type,
-        info_set_conversion_type: InfoSetWayToTensorSelect::Sparse,
+        info_set_conversion_type: options.declarer_tensor,
         policy_params: PolicyParams{
-            hidden_layers: vec![1024, 512],
+            hidden_layers: vec![2048, 1024],
             optimizer_params: Default::default(),
             select_policy: PolicyTypeSelect::Q,
             learning_rate: 0.0001,
         },
         var_load_path: options.declarer_load.clone(),
         var_store_path: options.declarer_save.clone(),
-        device: Device::Cpu,
+        device: DeviceSelect::Cpu,
     }
 }
 
@@ -45,16 +46,16 @@ fn parse_whist_config(options: &DynamicModelOptions) -> AgentConfiguration{
 
     AgentConfiguration{
         info_set_type: options.whist_is_type,
-        info_set_conversion_type: InfoSetWayToTensorSelect::Sparse,
+        info_set_conversion_type: options.whist_tensor,
         policy_params: PolicyParams{
-            hidden_layers: vec![1024, 512],
+            hidden_layers: vec![2048, 1024],
             optimizer_params: Default::default(),
             select_policy: PolicyTypeSelect::Q,
             learning_rate: 0.0001,
         },
         var_load_path: options.whist_load.clone(),
         var_store_path: options.whist_save.clone(),
-        device: Device::Cpu,
+        device: DeviceSelect::Cpu,
     }
 }
 
@@ -62,28 +63,89 @@ fn parse_offside_config(options: &DynamicModelOptions) -> AgentConfiguration{
 
     AgentConfiguration{
         info_set_type: options.offside_is_type,
-        info_set_conversion_type: InfoSetWayToTensorSelect::Sparse,
+        info_set_conversion_type: options.offside_tensor,
         policy_params: PolicyParams{
-            hidden_layers: vec![1024, 512],
+            hidden_layers: vec![2048, 1024],
             optimizer_params: Default::default(),
             select_policy: PolicyTypeSelect::Q,
             learning_rate: 0.0001,
         },
         var_load_path: options.offside_load.clone(),
         var_store_path: options.offside_save.clone(),
-        device: Device::Cpu,
+        device: DeviceSelect::Cpu,
     }
 }
 
+fn parse_test_declarer_config(options: &DynamicModelOptions) -> AgentConfiguration{
+
+    AgentConfiguration{
+        info_set_type: options.test_declarer_is_type,
+        info_set_conversion_type: options.test_declarer_tensor,
+        policy_params: PolicyParams{
+            hidden_layers: vec![2048, 1024],
+            optimizer_params: Default::default(),
+            select_policy: PolicyTypeSelect::Q,
+            learning_rate: 0.0001,
+        },
+        var_load_path: options.declarer_load.clone(),
+        var_store_path: options.declarer_save.clone(),
+        device: DeviceSelect::Cpu,
+    }
+}
+
+fn parse_test_whist_config(options: &DynamicModelOptions) -> AgentConfiguration{
+
+    AgentConfiguration{
+        info_set_type: options.test_whist_is_type,
+        info_set_conversion_type: options.test_whist_tensor,
+        policy_params: PolicyParams{
+            hidden_layers: vec![2048, 1024],
+            optimizer_params: Default::default(),
+            select_policy: PolicyTypeSelect::Q,
+            learning_rate: 0.0001,
+        },
+        var_load_path: options.whist_load.clone(),
+        var_store_path: options.whist_save.clone(),
+        device: DeviceSelect::Cpu,
+    }
+}
+
+fn parse_test_offside_config(options: &DynamicModelOptions) -> AgentConfiguration{
+
+    AgentConfiguration{
+        info_set_type: options.test_offside_is_type,
+        info_set_conversion_type: options.test_offside_tensor,
+        policy_params: PolicyParams{
+            hidden_layers: vec![2048, 1024],
+            optimizer_params: Default::default(),
+            select_policy: PolicyTypeSelect::Q,
+            learning_rate: 0.0001,
+        },
+        var_load_path: options.test_offside_load.clone(),
+        var_store_path: None,
+        device: DeviceSelect::Cpu,
+    }
+}
+
+ */
+
 pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModelError>{
 
+    let config_str = fs::read_to_string(&options.config_file).map_err(|e|{
+        BrydzModelError::IO(format!("Error opening file {:?} with error {e:}", &options.config_file))
+    })?;
+    let config: DynamicSessionConfig = ron::from_str(&config_str).map_err(|e|{
+        BrydzModelError::Ron(e.code)
+    })?;
 
-    let conf_declarer = parse_declarer_config(options);
-    let conf_whist = parse_whist_config(options);
-    let conf_offside = parse_offside_config(options);
-    let conf_test_declarer = AgentConfiguration::default();
-    let conf_test_whist = AgentConfiguration::default();
-    let conf_test_offside = AgentConfiguration::default();
+    let conf_declarer = &config.declarer;
+    let conf_whist = &config.whist;
+    let conf_offside =&config.offside;
+    let conf_test_declarer = &config.test_declarer;
+    let conf_test_whist = &config.test_whist;
+    let conf_test_offside = &config.test_offside;
+
+    //println!("{}", ron::ser::to_string_pretty(&DynamicSessionConfig::default(), ron::ser::PrettyConfig::default()).unwrap());
 
 
 
@@ -96,11 +158,13 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModel
         .with_agent(&conf_test_offside, AgentRole::TestOffside)?
         .build()?;
 
-    if let Some(test_vec_file) = &options.test_set{
+    if let Some(test_vec_file) = &config.test_set{
         model.load_test_games_from_file(test_vec_file)?;
-    } else {
+    } else if let Some(test_set_size) = &config.tests_set_size{
         let mut rng = thread_rng();
-        model.generate_test_games(&mut rng, options.tests_set_size as usize)?;
+        model.generate_test_games(&mut rng, *test_set_size as usize)?;
+    } else {
+        panic!("Expected test set (.ron file) or test number to be specified")
     }
 
     let r1 = model.run_test_series(RoleAxis::Declarers)?;
@@ -110,26 +174,26 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModel
         r1.scores[PlayRole::Declarer], r2.scores[PlayRole::Whist], r2.scores[PlayRole::Offside]);
     //info!("Testing defenders before learning: {r:?}");
 
-    let epochs = 50;
-    let games_in_epoch = 100;
+    let epochs = config.epochs;
+    let games_in_epoch = config.games as usize;
     for i in 0..epochs{
-        info!("Learning epoch: {}", i+1);
+
         model.learning_epoch(games_in_epoch)?;
         let r1 = model.run_test_series(RoleAxis::Declarers)?;
 
         let r2 = model.run_test_series(RoleAxis::Defenders)?;
-
+        info!("Learning epoch: {}", i+1);
         info!("Test after epoch: {}. Trained declarer against reference: {}. Trained whist,offide against reference: {},{}",
         i+1, r1.scores[PlayRole::Declarer], r2.scores[PlayRole::Whist], r2.scores[PlayRole::Offside]);
     }
 
-    if let Some(declarer_store) = &options.declarer_save{
+    if let Some(declarer_store) = &config.declarer.var_store_path{
         model.store_agents_var(&model.declarer, declarer_store).unwrap();
     }
-    if let Some(offside_store) = &options.offside_save{
+    if let Some(offside_store) = &config.offside.var_store_path{
         model.store_agents_var(&model.offside, offside_store).unwrap();
     }
-    if let Some(whist_store) = &options.whist_save{
+    if let Some(whist_store) = &config.whist.var_store_path{
         model.store_agents_var(&model.whist, whist_store).unwrap();
     }
 

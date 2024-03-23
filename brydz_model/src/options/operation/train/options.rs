@@ -1,32 +1,44 @@
 use clap::{Args, ValueEnum};
 use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
 use amfiteatr_rl::tch::Device;
 use amfiteatr_rl::policy::TrainConfig;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TestPolicyChoice{
     RandomPolicy,
     InitLikeLearning,
 }
 
-#[derive(ValueEnum, Copy, Clone)]
+#[derive(ValueEnum, Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum DeviceSelect{
     Cpu,
     Cuda,
     Vulkan
 }
 
-#[derive(ValueEnum, Copy, Clone)]
+impl From<DeviceSelect> for Device{
+    fn from(value: DeviceSelect) -> Self {
+        match value{
+            DeviceSelect::Cpu => Device::Cpu,
+            DeviceSelect::Cuda => Self::cuda_if_available(),
+            DeviceSelect::Vulkan => Device::Vulkan
+        }
+    }
+}
+
+#[derive(ValueEnum, Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum InfoSetTypeSelect{
     Simple,
     Assume,
     Complete
 }
 
-#[derive(ValueEnum, Copy, Clone)]
+#[derive(ValueEnum, Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum InfoSetWayToTensorSelect{
     _420,
     Sparse,
+    SparseHistoric
 }
 
 impl DeviceSelect{

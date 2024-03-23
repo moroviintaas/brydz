@@ -38,13 +38,20 @@ use amfiteatr_rl::tensor_data::{ConversionToTensor};
 /// assert_eq!(v[226], 1.0); //dummy has 3 diamonds
 /// assert_eq!(v[264], 1.0); //2 clubs in hand
 /// assert_eq!(v[315], 0.0); //A clubs not in hand
-/// assert_eq!(v[316], -1.0);
-/// assert_eq!(v[317], -1.0);
-/// assert_eq!(v[318], 3.0);
-/// assert_eq!(v[319], 9.0);
-/// assert_eq!(v[320], 3.0);
-/// assert_eq!(v[321], 0.0);
-/// for i in 322..420{
+/// assert_eq!(v[316], 3.0); // called spades
+/// assert_eq!(v[317], -1.0); // no declarers suit
+/// assert_eq!(v[318], -1.0); // no declarers figure
+/// assert_eq!(v[319], 3.0); // whist spades
+/// assert_eq!(v[320], 9.0); // whist jack
+/// assert_eq!(v[321], 3.0); // dummy spades
+/// assert_eq!(v[322], 0.0); // dummy two
+/// assert_eq!(v[325], -1.0);
+/// //assert_eq!(v[326], -1.0);
+/// //assert_eq!(v[327], 3.0);
+/// //assert_eq!(v[328], 9.0);
+/// //assert_eq!(v[329], 3.0);
+/// //assert_eq!(v[330], 0.0);
+/// for i in 326..429{
 ///     assert_eq!(v[i], -1.0);
 /// }
 /// ```
@@ -95,7 +102,11 @@ pub(crate) mod contract_state_converter_common {
     pub const OFFSIDE_DIST_OFFSET: usize = DUMMY_DIST_OFFSET + SPARSE_DECK_SIZE;
     pub const CURRENT_DUMMY_CARDS: usize = OFFSIDE_DIST_OFFSET + SPARSE_DECK_SIZE;
     pub const CURRENT_OWN_CARDS: usize = CURRENT_DUMMY_CARDS + SPARSE_DECK_SIZE;
-    pub const TRICKS_OFFSET: usize = CURRENT_OWN_CARDS + SPARSE_DECK_SIZE;
+
+    pub const CURRENT_CALLED_TRUMP_OFFSET: usize =  CURRENT_OWN_CARDS + SPARSE_DECK_SIZE;
+    pub const CURRENT_TRICK_OFFSET: usize = CURRENT_CALLED_TRUMP_OFFSET + 1;
+    pub const TRICKS_OFFSET: usize = CURRENT_TRICK_OFFSET + TRICK_REPRESENTATION_SIZE;
+    //pub const TRICKS_OFFSET: usize = CURRENT_OWN_CARDS + SPARSE_DECK_SIZE;
     pub const STATE_REPR_SIZE: usize = TRICKS_OFFSET + 13 * TRICK_REPRESENTATION_SIZE;
 
     #[inline]
@@ -147,6 +158,25 @@ pub(crate) mod contract_state_converter_common {
         let declarer_side = state.contract_data().declarer();
         let tricks_done = state.contract_data().completed_tricks().len();
         //setting up completed tricks
+
+        state_repr[CURRENT_CALLED_TRUMP_OFFSET] = match state.contract_data().current_trick().called_suit(){
+            None => -1.0,
+            Some(s) => s.usize_index() as f32
+        };
+
+        for offset in 0..4{
+            state_repr[CURRENT_TRICK_OFFSET + (offset as usize * 2)]
+                = match state.contract_data().current_trick()[declarer_side.next_i(offset)]{
+                None => -1.0,
+                Some(c) => c.suit().usize_index() as f32
+            };
+            state_repr[CURRENT_TRICK_OFFSET + (offset as usize * 2) + 1]
+                = match state.contract_data().current_trick()[declarer_side.next_i(offset)]{
+                None => -1.0,
+                Some(c) => c.figure().usize_index() as f32
+            };
+        }
+
         for trick_num in 0..tricks_done{
             let trick = &state.contract_data().completed_tricks()[trick_num];
             for offset in 0..4{
@@ -165,24 +195,13 @@ pub(crate) mod contract_state_converter_common {
 
         }
         //setting not completed tricks with -1
-        for next_trick_num in tricks_done+1..TRICK_NUMBER{
+        for next_trick_num in tricks_done..TRICK_NUMBER{
             for pos in 0..TRICK_REPRESENTATION_SIZE{
                 state_repr[TRICKS_OFFSET + (next_trick_num * TRICK_REPRESENTATION_SIZE) + pos] = -1.0;
             }
         }
         //setting current trick
-        for offset in 0..4{
-            state_repr[TRICKS_OFFSET + (tricks_done * TRICK_REPRESENTATION_SIZE) + (offset as usize * 2)]
-                = match state.contract_data().current_trick()[declarer_side.next_i(offset)]{
-                None => -1.0,
-                Some(c) => c.suit().usize_index() as f32
-            };
-            state_repr[TRICKS_OFFSET + (tricks_done * TRICK_REPRESENTATION_SIZE) + (offset as usize * 2) + 1]
-                = match state.contract_data().current_trick()[declarer_side.next_i(offset)]{
-                None => -1.0,
-                Some(c) => c.figure().usize_index() as f32
-            };
-        }
+
     }
 
     #[inline]
@@ -225,6 +244,16 @@ pub(crate) mod contract_state_converter_common {
                 None => -1.0,
                 Some(c) =>  (c.figure().usize_index() as f32 + 1.0)  / Figure::SYMBOL_SPACE as f32
             };
+        }
+    }
+
+    #[cfg(test)]
+    mod tests{
+        use crate::amfiteatr::state::contract_state_converter_common::CURRENT_TRICK_OFFSET;
+
+        #[test]
+        fn current_trick_offset(){
+            assert_eq!(CURRENT_TRICK_OFFSET, 317);
         }
     }
 }

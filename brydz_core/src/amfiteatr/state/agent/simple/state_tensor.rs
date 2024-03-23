@@ -1,7 +1,7 @@
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, SimpleConvertToTensor};
-use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert420, ContractInfoSetConvert420Normalised, ContractInfoSetConvertSparse};
+use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert420, ContractInfoSetConvert420Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 
 
 
@@ -59,11 +59,15 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
     }
 }
 
+
+
 impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvert420) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }
+
+
 
 /// ```
 /// use amfiteatr_rl::tch::Tensor;
@@ -118,6 +122,10 @@ impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
 ///
 ///     0.0, 0.0, 1.0, 0.0, // called heart
 ///     0.0, 1.0, 0.0, 0.0, // trick is started by player positioned one to the left
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card clubs
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card diam
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card hearts (A)
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card spades
 ///
 ///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //left placed card clubs
 ///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //left placed card diam
@@ -164,6 +172,10 @@ impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
 ///
 ///     0.0, 0.0, 1.0, 0.0, // called heart
 ///     0.0, 1.0, 0.0, 0.0, // trick is started by player positioned one to the left
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card clubs
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card diam
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card hearts (A)
+///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //own placed card spades
 ///
 ///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //left placed card clubs
 ///     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //left placed card diam
@@ -185,6 +197,12 @@ impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
 /// ```
 impl CtxTryIntoTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, TensorRepresentationError> {
+        Ok(way.make_tensor(self))
+    }
+}
+
+impl CtxTryIntoTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInfoSetSimple{
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }

@@ -17,7 +17,7 @@ pub use dynamic::*;
 
 use clap::Subcommand;
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvert420, ContractInfoSetConvertSparse};
+use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 use amfiteatr_core::agent::EvaluatedInformationSet;
 
 
@@ -68,11 +68,20 @@ fn session_a2c_sparse_repr(options: &TrainOptions) -> Result<(), BrydzModelError
     }
 
 }
+fn session_a2c_sparse_historic_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
+    match options.info_set_select{
+        InfoSetTypeSelect::Simple => create_and_run_learning_a2c_session::<ContractAgentInfoSetSimple, ContractInfoSetConvertSparseHistoric>(options),
+        InfoSetTypeSelect::Assume => create_and_run_learning_a2c_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvertSparseHistoric>(options),
+        InfoSetTypeSelect::Complete => create_and_run_learning_a2c_session::<ContractAgentInfoSetAllKnowing, ContractInfoSetConvertSparseHistoric>(options),
+    }
+
+}
 
 fn session_a2c(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.w2t{
         InfoSetWayToTensorSelect::_420 => session_a2c_420_repr(options),
-        InfoSetWayToTensorSelect::Sparse => session_a2c_sparse_repr(options)
+        InfoSetWayToTensorSelect::Sparse => session_a2c_sparse_repr(options),
+        InfoSetWayToTensorSelect::SparseHistoric => session_a2c_sparse_historic_repr(options),
     }
 }
 
@@ -109,11 +118,20 @@ fn session_q_sparse_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
     }
 
 }
+fn session_q_sparse_historic_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
+    match options.info_set_select{
+        InfoSetTypeSelect::Simple => create_and_run_learning_q_session::<ContractAgentInfoSetSimple, ContractInfoSetConvertSparse>(options),
+        InfoSetTypeSelect::Assume => create_and_run_learning_q_session::<ContractAgentInfoSetAssuming, ContractInfoSetConvertSparse>(options),
+        InfoSetTypeSelect::Complete => create_and_run_learning_q_session::<ContractAgentInfoSetAllKnowing, ContractInfoSetConvertSparse>(options),
+    }
+
+}
 
 fn session_q(options: &TrainOptions) -> Result<(), BrydzModelError>{
     match options.w2t{
         InfoSetWayToTensorSelect::_420 => session_q_420_repr(options),
-        InfoSetWayToTensorSelect::Sparse => session_q_sparse_repr(options)
+        InfoSetWayToTensorSelect::Sparse => session_q_sparse_repr(options),
+        InfoSetWayToTensorSelect::SparseHistoric => session_q_sparse_historic_repr(options)
     }
 }
 

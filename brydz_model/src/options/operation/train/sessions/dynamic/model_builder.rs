@@ -12,12 +12,12 @@ use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
 use amfiteatr_rl::error::AmfiRLError;
 use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};
 use amfiteatr_rl::tch::{nn, Tensor};
-use amfiteatr_rl::tch::nn::{OptimizerConfig, VarStore};
+use amfiteatr_rl::tch::nn::{Adam, OptimizerConfig, VarStore};
 use amfiteatr_rl::tensor_data::{ConversionToTensor, CtxTryIntoTensor};
 use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorA2C};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractState};
+use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractState};
 use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
 use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
 use brydz_core::player::role::PlayRole;
@@ -127,7 +127,10 @@ impl DynamicBridgeModelBuilder{
             },
             InfoSetWayToTensorSelect::Sparse => {
                 ContractInfoSetConvertSparse::default().desired_shape().iter().sum()
-            }
+            },
+            InfoSetWayToTensorSelect::SparseHistoric => {
+                ContractInfoSetConvertSparseHistoric::default().desired_shape().iter().sum()
+            },
         };
         let hidden_layers = &agent_configuration.policy_params.hidden_layers;
         let network_pattern = NeuralNetTemplate::new(|path| {
@@ -159,7 +162,7 @@ impl DynamicBridgeModelBuilder{
         });
 
         let net = network_pattern.get_net_closure();
-        let optimiser = agent_configuration.policy_params.optimizer_params.build(&var_store, agent_configuration.policy_params.learning_rate)?;
+        let optimiser = Adam::from(agent_configuration.policy_params.optimizer_params).build(&var_store, agent_configuration.policy_params.learning_rate)?;
         let net = QValueNet::new(var_store, net, );
         Ok(QLearningPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), QSelector::EpsilonGreedy(0.1), TrainConfig{ gamma: 0.99 }))
 
@@ -187,6 +190,9 @@ impl DynamicBridgeModelBuilder{
             },
             InfoSetWayToTensorSelect::Sparse => {
                 ContractInfoSetConvertSparse::default().desired_shape().iter().sum()
+            },
+            InfoSetWayToTensorSelect::SparseHistoric => {
+                ContractInfoSetConvertSparseHistoric::default().desired_shape().iter().sum()
             }
         };
         let hidden_layers = &agent_configuration.policy_params.hidden_layers;
@@ -230,10 +236,10 @@ impl DynamicBridgeModelBuilder{
         });
 
         let net = network_pattern.get_net_closure();
-        let optimiser = agent_configuration.policy_params.optimizer_params.build(&var_store, agent_configuration.policy_params.learning_rate)?;
+        let optimiser = Adam::from(agent_configuration.policy_params.optimizer_params).build(&var_store, agent_configuration.policy_params.learning_rate)?;
         let net = A2CNet::new(var_store, net, );
-        //Ok(ActorCriticPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), TrainConfig{ gamma: 0.99 }))
-        Ok(ActorCriticPolicy::new(net, optimiser, is2t, TrainConfig {gamma: 0.9}))
+        //Ok(ActorCriticPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), TrainConfig{ gamma: 0.999 }))
+        Ok(ActorCriticPolicy::new(net, optimiser, is2t, TrainConfig {gamma: 0.99}))
         /*
 
 
@@ -310,7 +316,26 @@ impl DynamicBridgeModelBuilder{
                         Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
                     }
                 }
-            }
+            },
+            InfoSetWayToTensorSelect::SparseHistoric => {
+                match agent_configuration.info_set_type{
+                    InfoSetTypeSelect::Simple => {
+                        let info_set = ContractAgentInfoSetSimple::from((&side,  &description));
+                        let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparseHistoric::default())?;
+                        Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
+                    }
+                    InfoSetTypeSelect::Assume => {
+                        let info_set = ContractAgentInfoSetAssuming::from((&side,  &description));
+                        let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparseHistoric::default())?;
+                        Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
+                    }
+                    InfoSetTypeSelect::Complete => {
+                        let info_set = ContractAgentInfoSetAllKnowing::from((&side,  &description));
+                        let policy = self.create_agent_q_policy(agent_configuration, var_store, ContractInfoSetConvertSparseHistoric::default())?;
+                        Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy)))
+                    }
+                }
+            },
 
         };
         Ok((agent, env_endpoint))
@@ -327,14 +352,15 @@ impl DynamicBridgeModelBuilder{
             AgentRole::Offside | AgentRole::TestOffside => self.initial_deal.parameters().offside()
         };
         let var_store = match agent_configuration.var_load_path {
-            None => VarStore::new(agent_configuration.device),
+            None => VarStore::new(agent_configuration.device.into()),
             Some(ref s) => {
-                let mut vs = VarStore::new(agent_configuration.device);
+                let mut vs = VarStore::new(agent_configuration.device.into());
                 vs.load(s)?;
                 vs
             }
         };
         let (agent, comm) = self.create_dynamic_agent(agent_configuration, var_store, side)?;
+
 
         match place{
             AgentRole::TestDeclarer | AgentRole::TestOffside | AgentRole::TestWhist => {
@@ -344,6 +370,10 @@ impl DynamicBridgeModelBuilder{
             },
             _ => {}
         }
+
+
+
+
 
         match place{
             AgentRole::Declarer => {}
