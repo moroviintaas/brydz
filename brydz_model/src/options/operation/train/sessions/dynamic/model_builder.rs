@@ -10,7 +10,7 @@ use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
 use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};
 use amfiteatr_rl::tch::{nn, Tensor};
 use amfiteatr_rl::tch::nn::{Adam, OptimizerConfig, VarStore};
@@ -114,7 +114,7 @@ impl DynamicBridgeModelBuilder{
         InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
         IS2T: ConversionToTensor>
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, is2t: IS2T)
-        -> Result<QLearningPolicy<ContractDP, InfoSet, IS2T, ContractActionWayToTensor>, AmfiRLError<ContractDP>>{
+        -> Result<QLearningPolicy<ContractDP, InfoSet, IS2T, ContractActionWayToTensor>, AmfiteatrRlError<ContractDP>>{
 
     // Result<(Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvEndpoint<ContractDP>), AmfiRLError<ContractDP>>{
         
@@ -146,7 +146,7 @@ impl DynamicBridgeModelBuilder{
                 for i in 0..hidden_layers.len(){
                     let ld_new = hidden_layers[i];
                     seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
-                        .add_fn(|xs| xs.relu());
+                        .add_fn(|xs| xs.tanh());
                     ld = ld_new;
                     last_dim = Some(ld);
                 }
@@ -177,7 +177,7 @@ impl DynamicBridgeModelBuilder{
         InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
         IS2T: ConversionToTensor>
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, is2t: IS2T)
-     -> Result<ActorCriticPolicy<ContractDP, InfoSet, IS2T>, AmfiRLError<ContractDP>>{
+     -> Result<ActorCriticPolicy<ContractDP, InfoSet, IS2T>, AmfiteatrRlError<ContractDP>>{
 
         // Result<(Arc<Mutex<dyn for<'a> RlSimpleTestAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvEndpoint<ContractDP>), AmfiRLError<ContractDP>>{
 
@@ -209,7 +209,7 @@ impl DynamicBridgeModelBuilder{
                 for i in 1..hidden_layers.len(){
                     let ld_new = hidden_layers[i];
                     seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
-                        .add_fn(|xs| xs.relu());
+                        .add_fn(|xs| xs.tanh());
 
                     ld = ld_new;
                     last_dim = Some(ld);
@@ -500,7 +500,7 @@ impl DynamicBridgeModelBuilder{
     }
 
 
-    pub fn build(self) -> Result<DynamicBridgeModel, AmfiRLError<ContractDP>>{
+    pub fn build(self) -> Result<DynamicBridgeModel, AmfiteatrRlError<ContractDP>>{
 
 
         Ok(DynamicBridgeModel{

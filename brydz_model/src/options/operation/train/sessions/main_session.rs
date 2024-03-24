@@ -20,7 +20,7 @@ use amfiteatr_core::env::{RoundRobinPenalisingUniversalEnvironment, StatefulEnvi
 use amfiteatr_core::error::AmfiteatrError;
 use amfiteatr_core::domain::DomainParameters;
 
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{LearningNetworkPolicy, TrainConfig};
 use amfiteatr_rl::tensor_data::ConversionToTensor;
 use crate::error::{BrydzModelError, SimulationError};
@@ -340,7 +340,7 @@ where
 
     }
 
-    fn play_game(&mut self) -> Result<(), AmfiRLError<ContractDP>>{
+    fn play_game(&mut self) -> Result<(), AmfiteatrRlError<ContractDP>>{
         thread::scope(|s|{
             s.spawn(||{
                 match self.environment.run_round_robin_with_rewards_penalise(-100){
@@ -390,7 +390,7 @@ where
     }
 
     fn play_test_game
-    (&mut self, team: &Team) -> Result<(), AmfiRLError<ContractDP>> {
+    (&mut self, team: &Team) -> Result<(), AmfiteatrRlError<ContractDP>> {
         thread::scope(|s|{
             s.spawn(||{
                 match self.environment.run_round_robin_with_rewards_penalise(-100){
@@ -525,7 +525,7 @@ where
         games_in_epoch: usize,
         distribution_pool: Option<&[DealDistribution]>,
         contract_randomizer: &ContractRandomizer,
-    ) -> Result<(), AmfiRLError<ContractDP>>{
+    ) -> Result<(), AmfiteatrRlError<ContractDP>>{
         self.clear_trajectories();
         self.set_exploring(true);
         let mut rng = thread_rng();
@@ -825,7 +825,7 @@ where
         games_in_test: usize,
         distribution_pool: Option<&[DealDistribution]>,
         contract_randomizer: &ContractRandomizer,
-    ) -> Result<(), AmfiRLError<ContractDP>> {
+    ) -> Result<(), AmfiteatrRlError<ContractDP>> {
 
         self.set_exploring(true);
 

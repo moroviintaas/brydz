@@ -15,7 +15,7 @@ use brydz_core::amfiteatr::state::*;
 use amfiteatr_core::agent::{*};
 
 
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{QLearningPolicy, QSelector};
 use amfiteatr_rl::tensor_data::{ConversionToTensor};
 use amfiteatr_rl::torch_net::{NeuralNetTemplate, QValueNet};
@@ -52,7 +52,7 @@ pub fn t_session_q_symmetric<
     QLearningPolicy<ContractDP, InfoSet, W2T, ContractActionWayToTensor>,
     W2T, W2T, W2T, W2T, W2T, W2T,
 
->, AmfiRLError<ContractDP>>{
+>, AmfiteatrRlError<ContractDP>>{
 
     let mut rng = thread_rng();
     let contract_params = ContractRandomizer::default().sample(&mut rng);

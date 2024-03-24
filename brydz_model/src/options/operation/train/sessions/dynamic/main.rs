@@ -5,7 +5,7 @@ use rand::thread_rng;
 use amfiteatr_core::agent::TracingAgentGen;
 use amfiteatr_core::comm::StdEnvironmentEndpoint;
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::tch::Device;
 use amfiteatr_rl::tch::Device::Cpu;
 use amfiteatr_rl::tch::nn::VarStore;

@@ -9,7 +9,7 @@ use brydz_core::amfiteatr::spec::ContractDP;
 pub use gen::*;
 pub use simulation::*;
 use amfiteatr_core::error::{AmfiteatrError, WorldError};
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use crate::error::BrydzModelError::Amfiteatr;
 
 #[derive(Debug,  thiserror::Error)]
@@ -25,7 +25,7 @@ pub enum BrydzModelError {
     #[error("Error in sztorm framework: {0}")]
     Amfiteatr(AmfiteatrError<ContractDP>),
     #[error("Error in sztorm Reinforcement Learning framework: {0}")]
-    AmfiteatrRL(AmfiRLError<ContractDP>),
+    AmfiteatrRL(AmfiteatrRlError<ContractDP>),
     //#[error("Tensorflow Error {0}")]
     //TensorflowStatus(Status),
     //#[error("SaveModel Error {0}")]
@@ -53,8 +53,8 @@ impl From<AmfiteatrError<ContractDP>> for BrydzModelError {
         Self::Amfiteatr(value)
     }
 }
-impl From<AmfiRLError<ContractDP>> for BrydzModelError {
-    fn from(value: AmfiRLError<ContractDP>) -> Self {
+impl From<AmfiteatrRlError<ContractDP>> for BrydzModelError {
+    fn from(value: AmfiteatrRlError<ContractDP>) -> Self {
         Self::AmfiteatrRL(value)
     }
 }

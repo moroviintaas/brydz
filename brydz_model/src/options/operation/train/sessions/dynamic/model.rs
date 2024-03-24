@@ -5,7 +5,7 @@ use std::ops::{Add, Deref, Div, Index};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
-use log::{debug, trace};
+use log::{debug, trace, warn};
 use rand::distributions::{Distribution, Standard};
 use rand::prelude::ThreadRng;
 use rand::seq::SliceRandom;
@@ -15,7 +15,7 @@ use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReinitAgent,
 use amfiteatr_core::comm::{EnvironmentMpscPort, StdEnvironmentEndpoint};
 use amfiteatr_core::env::{BasicEnvironment, HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
-use amfiteatr_rl::error::AmfiRLError;
+use amfiteatr_rl::error::AmfiteatrRlError;
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::env::ContractEnv;
 use brydz_core::amfiteatr::spec::ContractDP;
@@ -152,7 +152,7 @@ impl DynamicBridgeModel{
         self.test_vectors = set;
         Ok(())
     }
-    pub fn generate_test_games(&mut self, rng: &mut ThreadRng, number: usize) -> Result<(), AmfiRLError<ContractDP>>{
+    pub fn generate_test_games(&mut self, rng: &mut ThreadRng, number: usize) -> Result<(), AmfiteatrRlError<ContractDP>>{
         todo!()
     }
 
@@ -183,7 +183,7 @@ impl DynamicBridgeModel{
         }
     }
 
-    pub fn prepare_episode(&mut self, seed: &ContractGameDescription, testing: Testing) -> Result<(), AmfiRLError<ContractDP>>{
+    pub fn prepare_episode(&mut self, seed: &ContractGameDescription, testing: Testing) -> Result<(), AmfiteatrRlError<ContractDP>>{
 
         let old_declarer_side = self.env.state().declarer_side();
         let new_declarer_side = seed.parameters().declarer();
@@ -333,7 +333,7 @@ impl DynamicBridgeModel{
 
         Ok(())
     }
-    pub fn play_learning_episode_one_learner(&mut self, seed: &ContractGameDescription, role: PlayRole) -> Result<(), BrydzModelError>{
+    pub fn play_learning_episode_one_explorer(&mut self, seed: &ContractGameDescription, role: PlayRole) -> Result<(), BrydzModelError>{
 
         let roles_to_disable_exploring = match role{
             PlayRole::Whist => [PlayRole::Declarer, PlayRole::Offside],
@@ -388,13 +388,40 @@ impl DynamicBridgeModel{
             let description = ContractGameDescription::new(
                 contract_params, d, cards);
 
-            self.play_learning_episode_one_learner(&description, explorer.clone())?;
+            self.play_learning_episode_one_explorer(&description, explorer.clone())?;
 
         }
         debug!("Played {} games in epoch", number_of_games);
-        self.declarer.lock().unwrap().simple_apply_experience()?;
-        self.whist.lock().unwrap().simple_apply_experience()?;
-        self.offside.lock().unwrap().simple_apply_experience()?;
+        self.declarer.lock().unwrap().simple_apply_experience().or_else(|e|{
+            match e{
+
+                AmfiteatrRlError::NoTrainingData => {
+                    warn!("No data training for declarer");
+                    Ok(())
+                },
+                e => Err(BrydzModelError::AmfiteatrRL(e))
+            }
+        })?;
+        self.whist.lock().unwrap().simple_apply_experience().or_else(|e|{
+            match e{
+
+                AmfiteatrRlError::NoTrainingData => {
+                    warn!("No data training for whist");
+                    Ok(())
+                },
+                e => Err(BrydzModelError::AmfiteatrRL(e))
+            }
+        })?;
+        self.offside.lock().unwrap().simple_apply_experience().or_else(|e|{
+            match e{
+
+                AmfiteatrRlError::NoTrainingData => {
+                    warn!("No data training for offside");
+                    Ok(())
+                },
+                e => Err(BrydzModelError::AmfiteatrRL(e))
+            }
+        })?;
 
         Ok(())
     }
