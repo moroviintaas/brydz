@@ -7,6 +7,7 @@ use rand::rngs::ThreadRng;
 use rand::thread_rng;
 use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
+use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
 use amfiteatr_rl::error::AmfiRLError;
@@ -164,7 +165,7 @@ impl DynamicBridgeModelBuilder{
         let net = network_pattern.get_net_closure();
         let optimiser = Adam::from(agent_configuration.policy_params.optimizer_params).build(&var_store, agent_configuration.policy_params.learning_rate)?;
         let net = QValueNet::new(var_store, net, );
-        Ok(QLearningPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), QSelector::EpsilonGreedy(0.1), TrainConfig{ gamma: 0.99 }))
+        Ok(QLearningPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), QSelector::EpsilonGreedy(0.1), TrainConfig{ gamma: agent_configuration.policy_params.gamma }))
 
         /*
 
@@ -239,18 +240,75 @@ impl DynamicBridgeModelBuilder{
         let optimiser = Adam::from(agent_configuration.policy_params.optimizer_params).build(&var_store, agent_configuration.policy_params.learning_rate)?;
         let net = A2CNet::new(var_store, net, );
         //Ok(ActorCriticPolicy::new(net, optimiser, is2t, ContractActionWayToTensor::default(), TrainConfig{ gamma: 0.999 }))
-        Ok(ActorCriticPolicy::new(net, optimiser, is2t, TrainConfig {gamma: 0.99}))
+        Ok(ActorCriticPolicy::new(net, optimiser, is2t, TrainConfig {gamma: agent_configuration.policy_params.gamma }))
         /*
 
 
          */
     }
 
+    fn create_dyn_agent_l3<
+        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>
+         + for<'a> Renew<ContractDP, (&'a Side, &'a ContractGameDescription)> + Clone + 'static,
+        IS2T: ConversionToTensor + 'static,
+        >
+    (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, info_set: InfoSet, is2t: IS2T)
+    -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
+        let (env_endpoint, agent_endpoint ) = StdEnvironmentEndpoint::new_pair();
+        match agent_configuration.policy_params.select_policy{
 
+            PolicyTypeSelect::Q => {
+                let policy = self.create_agent_q_policy(&agent_configuration, var_store, is2t)?;
+                Ok((Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy))), env_endpoint))
+            }
+            PolicyTypeSelect::A2C => {
+                let policy = self.create_agent_a2c_policy(&agent_configuration, var_store, is2t)?;
+                Ok((Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy))), env_endpoint))
+            }
+        }
+    }
 
+    fn create_dyn_agent_l2<
+        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + PresentPossibleActions<ContractDP>
+        + CtxTryIntoTensor<ContractInfoSetConvertSparse> + CtxTryIntoTensor<ContractInfoSetConvertSparseHistoric>
+        + CtxTryIntoTensor<ContractInfoSetConvert420>
+        + for<'a> Renew<ContractDP, (&'a Side, &'a ContractGameDescription)> + Clone + 'static,
+    >
+    (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, info_set: InfoSet)
+     -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
+        match agent_configuration.info_set_conversion_type{
+            InfoSetWayToTensorSelect::_420 => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvert420::default()),
+            InfoSetWayToTensorSelect::Sparse => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvertSparse::default()),
+            InfoSetWayToTensorSelect::SparseHistoric => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvertSparseHistoric::default()),
+        }
+    }
 
+    fn create_dyn_agent_l1
+    (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, side: Side)
+     -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
 
+        let description = ContractGameDescription::new(
+            self.env.state().contract_data().contract_spec().clone(),
+            self.initial_deal.distribution().clone(),
+            self.initial_deal.cards().clone());
 
+        match agent_configuration.info_set_type{
+            InfoSetTypeSelect::Simple => {
+                let info_set = ContractAgentInfoSetSimple::from((&side, &description));
+                self.create_dyn_agent_l2(agent_configuration, var_store, info_set)
+            }
+            InfoSetTypeSelect::Assume => {
+                let info_set = ContractAgentInfoSetAssuming::from((&side, &description));
+                self.create_dyn_agent_l2(agent_configuration, var_store, info_set)
+            }
+            InfoSetTypeSelect::Complete => {
+                let info_set = ContractAgentInfoSetAllKnowing::from((&side, &description));
+                self.create_dyn_agent_l2(agent_configuration, var_store, info_set)
+            }
+        }
+    }
+
+/*
     fn create_dynamic_agent(&self, agent_configuration: &AgentConfiguration, var_store: VarStore, side: Side)
     -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP>), AmfiRLError<ContractDP>>
     {
@@ -344,6 +402,8 @@ impl DynamicBridgeModelBuilder{
     }
 
 
+ */
+
     pub fn with_agent(mut self, agent_configuration: &AgentConfiguration, place: AgentRole) -> Result<Self, BrydzModelError>{
 
         let side = match place{
@@ -359,7 +419,8 @@ impl DynamicBridgeModelBuilder{
                 vs
             }
         };
-        let (agent, comm) = self.create_dynamic_agent(agent_configuration, var_store, side)?;
+        //let (agent, comm) = self.create_dynamic_agent(agent_configuration, var_store, side)?;
+        let (agent, comm) = self.create_dyn_agent_l1(agent_configuration, var_store, side)?;
 
 
         match place{

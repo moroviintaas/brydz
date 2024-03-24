@@ -183,7 +183,7 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModel
 
         let r2 = model.run_test_series(RoleAxis::Defenders)?;
         info!("Learning epoch: {}", i+1);
-        info!("Test after epoch: {}. Trained declarer against reference: {}. Trained whist,offide against reference: {},{}",
+        info!("Test after epoch: {}. Trained declarer against reference: {}. Trained whist,offside against reference: {},{}",
         i+1, r1.scores[PlayRole::Declarer], r2.scores[PlayRole::Whist], r2.scores[PlayRole::Offside]);
     }
 

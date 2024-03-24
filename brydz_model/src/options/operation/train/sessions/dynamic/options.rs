@@ -55,6 +55,7 @@ pub struct PolicyParams{
     pub optimizer_params: AdamParams,
     pub select_policy: PolicyTypeSelect,
     pub learning_rate: f64,
+    pub gamma: f64
 
 }
 
@@ -66,6 +67,7 @@ impl Default for PolicyParams{
             optimizer_params: Default::default(),
             select_policy: PolicyTypeSelect::Q,
             learning_rate: 0.0001,
+            gamma: 0.99,
         }
     }
 }

@@ -1,4 +1,5 @@
 use amfiteatr_rl::tensor_data::{ConversionToTensor};
+use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 
 /// ```
 /// use brydz_core::bidding::{Bid, Doubling};
@@ -60,14 +61,14 @@ pub struct ContractInfoSetConvert420 {}
 
 impl ConversionToTensor for ContractInfoSetConvert420 {
     fn desired_shape(&self) -> &'static [i64] {
-        &[420]
+        &[STATE_REPR_SIZE as i64]
     }
 }
 #[derive(Default)]
 pub struct ContractInfoSetConvert420Normalised {}
 impl ConversionToTensor for ContractInfoSetConvert420Normalised{
     fn desired_shape(&self) -> &'static [i64] {
-        &[420]
+        &[STATE_REPR_SIZE as i64]
     }
 }
 /*

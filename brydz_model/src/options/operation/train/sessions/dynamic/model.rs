@@ -233,7 +233,7 @@ impl DynamicBridgeModel{
     pub fn run_episode(&mut self, testing: Testing) -> Result<(), BrydzModelError>{
 
         std::thread::scope(|s|{
-            s.spawn(|| self.env.run_round_robin_with_rewards_penalise(-100));
+            s.spawn(|| self.env.run_round_robin_with_rewards_penalise(-1000));
 
             s.spawn(|| self.dummy.run());
             match testing{
