@@ -1,6 +1,6 @@
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::{ConversionToTensor, SimpleConvertToTensor};
-use crate::amfiteatr::state::{ContractInfoSet, ContractInfoSetConvertSparse};
+use crate::amfiteatr::state::{ContractInfoSet};
 use crate::player::side::SIDES;
 
 #[derive(Default)]
@@ -20,7 +20,7 @@ pub(crate) mod contract_state_sparse_with_history{
 
     pub const  STATE_REPR_SIZE_WITH_HISTORY: usize = STATE_REPR_SIZE + (SPARSE_DECK_SIZE * 4 * 13);
 
-    pub const CONTRACT_HISTORY_OFFSET: usize = RIGHT_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
+    const CONTRACT_HISTORY_OFFSET: usize = RIGHT_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
 
     pub fn write_tricks<T: ContractInfoSet>(state_repr: &mut [f32], state: &T){
         let own = state.side();
@@ -53,6 +53,7 @@ impl<T: ContractInfoSet> SimpleConvertToTensor<T> for ContractInfoSetConvertSpar
         write_called_suit(&mut buffer, t);
         write_trick_starter(&mut buffer, t);
         write_placed_card_in_tricks(&mut buffer, t);
+        write_tricks(&mut buffer, t);
         Tensor::from_slice(&buffer[..])
     }
 }

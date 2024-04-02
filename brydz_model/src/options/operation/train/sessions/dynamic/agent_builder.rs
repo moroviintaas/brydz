@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
-use amfiteatr_rl::tch::Device;
+
 use crate::options::operation::train::{DeviceSelect, InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{PolicyParams, PolicyTypeSelect};
+use crate::options::operation::train::sessions::{PolicyParams};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct AgentConfiguration{

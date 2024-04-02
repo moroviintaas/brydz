@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+
 use std::fs;
 use std::iter::Sum;
-use std::ops::{Add, Deref, Div, Index};
+use std::ops::{Add, Div};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
@@ -10,26 +10,26 @@ use rand::distributions::{Distribution, Standard};
 use rand::prelude::ThreadRng;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use rand_distr::num_traits::Signed;
-use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReinitAgent, ReseedAgent};
-use amfiteatr_core::comm::{EnvironmentMpscPort, StdEnvironmentEndpoint};
-use amfiteatr_core::env::{BasicEnvironment, HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
-use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
+
+use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReseedAgent};
+use amfiteatr_core::comm::{StdEnvironmentEndpoint};
+use amfiteatr_core::env::{HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
+use amfiteatr_rl::agent::{RlSimpleLearningAgent};
 use amfiteatr_rl::error::AmfiteatrRlError;
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
-use brydz_core::amfiteatr::env::ContractEnv;
+
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractDummyState, ContractEnvStateComplete, ContractState};
-use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
-use brydz_core::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
+use brydz_core::contract::{ContractMechanics};
+use brydz_core::deal::{ContractGameDescription};
 use brydz_core::player::axis::RoleAxis;
 use brydz_core::player::role::PlayRole;
 use brydz_core::player::side::{Side, SideMap};
 use brydz_core::player::side::Side::{East, North, South, West};
-use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{ContractInfoSetSeed, ContractInfoSetSeedLegacy, PolicyTypeSelect};
+
+use crate::options::operation::train::sessions::{ContractInfoSetSeed};
 use crate::error::BrydzModelError;
-use crate::options::operation::generate::{GenContractOptions, generate_biased_deal_distributions};
+use crate::options::operation::generate::{generate_biased_deal_distributions};
 
 type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
 
@@ -110,7 +110,7 @@ pub struct DynamicBridgeModel{
     pub(crate) inactive_offside_comm: StdEnvironmentEndpoint<ContractDP>,
 
     pub(crate) test_vectors: Vec<ContractGameDescription>,
-    pub(crate) initial_deal: ContractGameDescription,
+    pub initial_deal: ContractGameDescription,
 }
 
 
@@ -152,7 +152,7 @@ impl DynamicBridgeModel{
         self.test_vectors = set;
         Ok(())
     }
-    pub fn generate_test_games(&mut self, rng: &mut ThreadRng, number: usize) -> Result<(), AmfiteatrRlError<ContractDP>>{
+    pub fn generate_test_games(&mut self, _rng: &mut ThreadRng, _number: usize) -> Result<(), AmfiteatrRlError<ContractDP>>{
         todo!()
     }
 
@@ -261,7 +261,7 @@ impl DynamicBridgeModel{
     fn set_explore_agent(&self, agent: &Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, explore: bool)
     -> Result<(), BrydzModelError>{
         agent.lock()
-            .map_err(|e|BrydzModelError::Mutex("Failed locking mutex preparing agent in tests".into()))?
+            .map_err(|_e|BrydzModelError::Mutex("Failed locking mutex preparing agent in tests".into()))?
             .set_exploration(explore);
 
         Ok(())
@@ -322,7 +322,7 @@ impl DynamicBridgeModel{
 
     pub fn play_learning_episode(&mut self, seed: &ContractGameDescription) -> Result<(), BrydzModelError>{
 
-        let mut rng = thread_rng();
+        let _rng = thread_rng();
         //let role:
 
         self.prepare_episode(seed, Testing::None)?;
@@ -357,7 +357,7 @@ impl DynamicBridgeModel{
     }
 
     pub(crate) fn store_agents_var(&self, agent: &BrydzDynamicAgent, file: & impl AsRef<Path>) -> Result<(), BrydzModelError>{
-        let g = agent.lock().map_err(|e|{
+        let g = agent.lock().map_err(|_e|{
             BrydzModelError::Mutex("Failed locking agent for borrowing varstore to save to file".into())
         })?;
 

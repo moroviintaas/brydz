@@ -9,13 +9,13 @@ use amfiteatr_core::error::AmfiteatrError;
 use karty::error::CardSetErrorGen;
 
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
-use crate::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};
+use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, BridgeCoreErrorGen};
 use crate::error::ContractErrorGen::CardNotInHand;
 use crate::meta::HAND_SIZE;
 use crate::player::side::{Side, SideMap};
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ContractAction, ContractAgentInfoSetAssuming, ContractInfoSet, ContractStateUpdate, StateWithSide};
+use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpdate, StateWithSide};
 
 #[derive(Debug, Clone)]
 

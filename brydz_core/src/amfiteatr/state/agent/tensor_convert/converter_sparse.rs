@@ -58,7 +58,7 @@ pub(crate) mod contract_state_sparse_convert_with_init_assumption{
     use crate::contract::ContractMechanics;
     use crate::player::side::Side;
     use crate::amfiteatr::state::ContractInfoSet;
-    use crate::player::role::PlayRole;
+    
 
     pub const STATE_REPR_SIZE: usize = RIGHT_CARD_PLACED_OFFSET + SPARSE_DECK_SIZE;
     pub const SPARSE_DECK_SIZE: usize = 52;

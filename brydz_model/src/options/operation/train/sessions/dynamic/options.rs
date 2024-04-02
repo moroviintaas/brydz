@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 use clap::{Args, ValueEnum};
-use log::warn;
+
 use serde::{Deserialize, Serialize};
 use amfiteatr_rl::tch::nn::Adam;
-use crate::options::operation::train::{DeviceSelect, InfoSetTypeSelect, InfoSetWayToTensorSelect};
+
 use crate::options::operation::train::sessions::AgentConfiguration;
 
 #[derive(ValueEnum, Copy, Clone, Serialize, Deserialize, Debug)]

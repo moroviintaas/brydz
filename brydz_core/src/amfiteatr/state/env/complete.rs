@@ -3,7 +3,7 @@ use log::{debug, error};
 use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
 use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
-use amfiteatr_core::env::{DirtyReseedEnvironment, EnvironmentStateSequential, EnvironmentStateUniScore};
+use amfiteatr_core::env::{EnvironmentStateSequential, EnvironmentStateUniScore};
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};

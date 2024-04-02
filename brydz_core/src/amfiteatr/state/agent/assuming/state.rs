@@ -13,7 +13,7 @@ use crate::error::BridgeCoreError;
 use crate::meta::HAND_SIZE;
 use crate::player::side::Side;
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ContractAction, ContractAgentInfoSetSimple, ContractInfoSet, ContractStateUpdate, CreatedContractInfoSet, RenewableContractInfoSet, StateWithSide};
+use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpdate, CreatedContractInfoSet, RenewableContractInfoSet, StateWithSide};
 
 #[derive(Debug, Clone)]
 pub struct ContractAgentInfoSetAssuming {

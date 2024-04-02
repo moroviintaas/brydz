@@ -1,27 +1,27 @@
 use std::fs;
-use std::sync::{Arc, Mutex};
+
 use log::info;
 use rand::thread_rng;
-use amfiteatr_core::agent::TracingAgentGen;
-use amfiteatr_core::comm::StdEnvironmentEndpoint;
-use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
-use amfiteatr_rl::error::AmfiteatrRlError;
-use amfiteatr_rl::tch::Device;
-use amfiteatr_rl::tch::Device::Cpu;
-use amfiteatr_rl::tch::nn::VarStore;
-use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractInfoSetConvertSparse};
-use brydz_core::contract::ContractParameters;
-use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
+
+
+
+
+
+
+
+
+
+
+
 use brydz_core::player::axis::RoleAxis;
 use brydz_core::player::role::PlayRole;
-use brydz_core::player::role::PlayRole::Declarer;
-use brydz_core::player::side::Side;
-use brydz_core::player::side::Side::North;
+
+
+
 use crate::error::BrydzModelError;
-use crate::options::operation::train::{DeviceSelect, InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, AgentRole, ContractInfoSetSeedLegacy, DynamicBridgeModelBuilder, DynamicModelOptions, DynamicSessionConfig, PolicyParams, PolicyTypeSelect};
-use crate::options::operation::train::sessions::AgentRole::{Offside, Whist};
+
+use crate::options::operation::train::sessions::{AgentRole, DynamicBridgeModelBuilder, DynamicModelOptions, DynamicSessionConfig};
+
 
 
 /*

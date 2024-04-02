@@ -9,4 +9,3 @@ mod domain;
 
 pub use data_formats::*;
 pub use policy::*;
-pub use domain::*;

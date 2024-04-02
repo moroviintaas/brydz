@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 use std::sync::{Arc, Mutex};
-use rand::rngs::ThreadRng;
+
 use rand::thread_rng;
-use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
-use amfiteatr_core::comm::{StdAgentEndpoint, StdEnvironmentEndpoint};
+use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
+use amfiteatr_core::comm::{StdEnvironmentEndpoint};
 use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
-use amfiteatr_rl::agent::{RlSimpleLearningAgent, RlSimpleTestAgent};
+use amfiteatr_rl::agent::{RlSimpleLearningAgent};
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};
 use amfiteatr_rl::tch::{nn, Tensor};
@@ -19,13 +19,13 @@ use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorA2C};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractState};
-use brydz_core::contract::{Contract, ContractMechanics, ContractParameters};
+use brydz_core::contract::{Contract, ContractMechanics};
 use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
-use brydz_core::player::role::PlayRole;
+
 use brydz_core::player::side::Side;
 use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, ContractInfoSetSeedLegacy, DynamicBridgeModel, PolicyTypeSelect};
+use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, DynamicBridgeModel, PolicyTypeSelect};
 
 #[derive(Copy, Clone, Debug)]
 pub enum AgentRole{
@@ -69,7 +69,7 @@ impl DynamicBridgeModelBuilder{
 
         let contract = ContractGameDescription::new_fair_random(&mut rng);
 
-        let contract_params = contract.parameters();
+        let _contract_params = contract.parameters();
         let deal_description = DescriptionDeckDeal{
             probabilities: contract.distribution().clone(),
             cards: contract.cards().clone(),
