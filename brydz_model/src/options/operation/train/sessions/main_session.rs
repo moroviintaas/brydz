@@ -66,9 +66,9 @@ where
     test_whist: TracingAgentGen<ContractDP, TestPolicyW, ContractAgentSyncComm>,
     test_offside: TracingAgentGen<ContractDP, TestPolicyO, ContractAgentSyncComm>,
 
-    declarer_trajectories: Vec<Trajectory<ContractDP, <PolicyD as Policy<ContractDP>>::InfoSetType>>,
-    whist_trajectories: Vec<Trajectory<ContractDP, <PolicyW as Policy<ContractDP>>::InfoSetType>>,
-    offside_trajectories: Vec<Trajectory<ContractDP, <PolicyO as Policy<ContractDP>>::InfoSetType>>,
+    declarer_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyD as Policy<ContractDP>>::InfoSetType>>,
+    whist_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyW as Policy<ContractDP>>::InfoSetType>>,
+    offside_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyO as Policy<ContractDP>>::InfoSetType>>,
     declarer_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
     whist_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
     offside_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
@@ -544,9 +544,9 @@ where
 
 
         }
-        debug!("Declarer batch input sizes: {:?}", self.declarer_trajectories.iter().map(|v|v.list().len()).collect::<Vec<usize>>());
-        debug!("Whist batch input sizes: {:?}", self.whist_trajectories.iter().map(|v|v.list().len()).collect::<Vec<usize>>());
-        debug!("Offside batch input sizes: {:?}", self.offside_trajectories.iter().map(|v|v.list().len()).collect::<Vec<usize>>());
+        debug!("Declarer batch input sizes: {:?}", self.declarer_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
+        debug!("Whist batch input sizes: {:?}", self.whist_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
+        debug!("Offside batch input sizes: {:?}", self.offside_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
 
         if !self.declarer_trajectories.is_empty(){
             self.declarer.policy_mut().train_on_trajectories_env_reward(&self.declarer_trajectories[..])?;
