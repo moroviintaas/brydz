@@ -1,6 +1,6 @@
 use karty::cards::Card;
 use karty::hand::CardSet;
-use amfiteatr_core::agent::EvaluatedInformationSet;
+use amfiteatr_core::agent::{EvaluatedInformationSet, InformationSet};
 use crate::contract::{Contract, ContractMechanics};
 use crate::deal::BiasedHandDistribution;
 use crate::player::side::Side;
@@ -18,7 +18,7 @@ pub trait ContractInfoSet{
 
 }
 
-pub trait RenewableContractInfoSet: EvaluatedInformationSet<ContractDP>{
+pub trait RenewableContractInfoSet: InformationSet<ContractDP>{
     fn renew(&mut self, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>);
 
 }
@@ -28,7 +28,7 @@ impl<T: RenewableContractInfoSet> RenewableContractInfoSet for Box<T>{
     }
 }
 
-pub trait CreatedContractInfoSet: EvaluatedInformationSet<ContractDP>{
+pub trait CreatedContractInfoSet: InformationSet<ContractDP>{
     fn create_new(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>, distribution: BiasedHandDistribution) -> Self;
 }
 

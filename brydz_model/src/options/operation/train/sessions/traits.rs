@@ -6,7 +6,7 @@ use brydz_core::amfiteatr::comm::{ContractAgentSyncComm};
 
 use brydz_core::amfiteatr::spec::ContractDP;
 
-use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions, EvaluatedInformationSet, StatefulAgent};
+use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions, EvaluatedInformationSet, StatefulAgent, InformationSet};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};
@@ -14,13 +14,13 @@ use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};
 pub trait ContractInfoSetForLearning<ISW: ConversionToTensor>:
 CtxTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ EvaluatedInformationSet<ContractDP>
++ InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug {}
 
 impl<ISW: ConversionToTensor, T: CtxTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ EvaluatedInformationSet<ContractDP>
++ InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug > ContractInfoSetForLearning<ISW> for T{}
 
@@ -50,7 +50,7 @@ impl<
     P: Policy<ContractDP>
 > SessionAgentTrait<ISW, P> for TracingAgentGen<ContractDP, P, ContractAgentSyncComm>
 where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ EvaluatedInformationSet<ContractDP> + CtxTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
++ InformationSet<ContractDP> + CtxTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
@@ -67,7 +67,7 @@ impl<
 where for<'a> <P as Policy<ContractDP>>::InfoSetType:
     From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
     + PresentPossibleActions<ContractDP>
-    + EvaluatedInformationSet<ContractDP> + CtxTryIntoTensor<ISW>
+    + InformationSet<ContractDP> + CtxTryIntoTensor<ISW>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
@@ -92,12 +92,12 @@ where <P as Policy<ContractDP>>::StateType: ContractInfoSetForLearning<ISW>
 
 pub trait ContractLearningAgent: AutomaticAgentRewarded<ContractDP>  + PolicyAgent<ContractDP>
 where <Self as PolicyAgent<ContractDP>>::Policy: LearningNetworkPolicy<ContractDP>,
-<Self as StatefulAgent<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>{}
+<Self as StatefulAgent<ContractDP>>::InfoSetType: InformationSet<ContractDP>{}
 
 impl <T: AutomaticAgentRewarded<ContractDP>  + PolicyAgent<ContractDP>>
 ContractLearningAgent for T
 where <T as PolicyAgent<ContractDP>>::Policy: LearningNetworkPolicy<ContractDP>,
-<T as StatefulAgent<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+<T as StatefulAgent<ContractDP>>::InfoSetType: InformationSet<ContractDP>
 {}
 
 

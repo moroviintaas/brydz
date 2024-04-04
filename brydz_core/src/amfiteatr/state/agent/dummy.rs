@@ -73,14 +73,13 @@ impl PresentPossibleActions<ContractDP> for ContractDummyState {
     }
 }
 
-impl EvaluatedInformationSet<ContractDP> for ContractDummyState{
-    type RewardType = i32;
+impl EvaluatedInformationSet<ContractDP, i32> for ContractDummyState{
 
-    fn current_subjective_score(&self) -> Self::RewardType {
+    fn current_subjective_score(&self) -> i32 {
         self.contract.total_tricks_taken_axis(self.side.axis()) as i32
     }
 
-    fn penalty_for_illegal(&self) -> Self::RewardType {
+    fn penalty_for_illegal(&self) -> i32 {
         -100
     }
 }

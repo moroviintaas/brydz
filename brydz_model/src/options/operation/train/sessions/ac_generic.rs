@@ -38,7 +38,7 @@ where P: Policy<ContractDP, InfoSetType= ContractAgentInfoSetAllKnowing>{
 #[allow(clippy::type_complexity)]
 pub fn t_session_a2c_symmetric<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
-    W2T: ConversionToTensor + Default
+    W2T: ConversionToTensor + Default,
 >(
     //declarer_policy: QLearningPolicy<ContractDP, DIS, DISW2T, ContractActionWayToTensor>,
     //whist_policy: QLearningPolicy<ContractDP, WIS, WISW2T, ContractActionWayToTensor>,
@@ -54,7 +54,7 @@ pub fn t_session_a2c_symmetric<
     W2T, W2T, W2T, W2T, W2T, W2T,
 
 >, AmfiteatrRlError<ContractDP>>
-where <InfoSet as EvaluatedInformationSet<ContractDP>>::RewardType: FloatTensorReward{
+where InfoSet: InformationSet<ContractDP>{
 
     let mut rng = thread_rng();
     let contract_params = ContractRandomizer::default().sample(&mut rng);

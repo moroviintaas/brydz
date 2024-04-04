@@ -5,7 +5,7 @@ use std::path::{Path};
 use std::sync::{Arc, Mutex};
 
 use rand::thread_rng;
-use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
+use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdEnvironmentEndpoint};
 use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
@@ -111,7 +111,7 @@ impl DynamicBridgeModelBuilder{
 
 
     pub fn create_agent_q_policy<
-        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
+        InfoSet: InformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
         IS2T: ConversionToTensor>
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, is2t: IS2T)
         -> Result<QLearningPolicy<ContractDP, InfoSet, IS2T, ContractActionWayToTensor>, AmfiteatrRlError<ContractDP>>{
@@ -174,7 +174,7 @@ impl DynamicBridgeModelBuilder{
     }
 
     pub fn create_agent_a2c_policy<
-        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
+        InfoSet: InformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>,
         IS2T: ConversionToTensor>
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, is2t: IS2T)
      -> Result<ActorCriticPolicy<ContractDP, InfoSet, IS2T>, AmfiteatrRlError<ContractDP>>{
@@ -248,7 +248,7 @@ impl DynamicBridgeModelBuilder{
     }
 
     fn create_dyn_agent_l3<
-        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>
+        InfoSet: InformationSet<ContractDP> + Debug + CtxTryIntoTensor<IS2T> + PresentPossibleActions<ContractDP>
          + for<'a> Renew<ContractDP, (&'a Side, &'a ContractGameDescription)> + Clone + 'static,
         IS2T: ConversionToTensor + 'static,
         >
@@ -269,7 +269,7 @@ impl DynamicBridgeModelBuilder{
     }
 
     fn create_dyn_agent_l2<
-        InfoSet: EvaluatedInformationSet<ContractDP> + Debug + PresentPossibleActions<ContractDP>
+        InfoSet: InformationSet<ContractDP> + Debug + PresentPossibleActions<ContractDP>
         + CtxTryIntoTensor<ContractInfoSetConvertSparse> + CtxTryIntoTensor<ContractInfoSetConvertSparseHistoric>
         + CtxTryIntoTensor<ContractInfoSetConvert420>
         + for<'a> Renew<ContractDP, (&'a Side, &'a ContractGameDescription)> + Clone + 'static,

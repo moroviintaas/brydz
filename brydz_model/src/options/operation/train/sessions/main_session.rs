@@ -47,12 +47,12 @@ pub struct TSession<
     OISTest2T: ConversionToTensor,
 >
 where
-    <PolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
-    <PolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
-    <PolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
-    <TestPolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
-    <TestPolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
-    <TestPolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>,
+    <PolicyD as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
+    <PolicyW as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
+    <PolicyO as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
+    <TestPolicyD as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
+    <TestPolicyW as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
+    <TestPolicyO as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>,
 
 {
 
@@ -113,27 +113,27 @@ impl <
     OISTest2T,
 >
 where
-    <PolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <PolicyD as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
-    <PolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <PolicyW as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
          + PresentPossibleActions<ContractDP>
         + Clone,
-    <PolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <PolicyO as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
-    <TestPolicyD as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <TestPolicyD as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
-    <TestPolicyW as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <TestPolicyW as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + PresentPossibleActions<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + Clone,
-    <TestPolicyO as Policy<ContractDP>>::InfoSetType: EvaluatedInformationSet<ContractDP>
+    <TestPolicyO as Policy<ContractDP>>::InfoSetType: InformationSet<ContractDP>
         + for<'a> From<ContractInfoSetSeedLegacy<'a>>
         + PresentPossibleActions<ContractDP>
         + Clone,
