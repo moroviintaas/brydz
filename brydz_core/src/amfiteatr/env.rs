@@ -13,6 +13,7 @@ use amfiteatr_core::env::{
     ScoreEnvironment,
     StatefulEnvironment};
 use amfiteatr_core::domain::{AgentMessage, DomainParameters, EnvironmentMessage, Reward};
+use amfiteatr_core::error::AmfiteatrError;
 use crate::error::BridgeCoreError;
 use crate::amfiteatr::spec::ContractDP;
 
@@ -114,9 +115,9 @@ where S: EnvironmentStateSequential<ContractDP> {
     }
 
     fn process_action(&mut self, agent: &Side, action: &ContractAction)
-        -> Result<<Self::State as EnvironmentStateSequential<ContractDP>>::Updates, BridgeCoreError> {
+        -> Result<<Self::State as EnvironmentStateSequential<ContractDP>>::Updates, AmfiteatrError<ContractDP>> {
 
-        self.state.forward(*agent, *action)
+        self.state.forward(*agent, *action).map_err(|e|AmfiteatrError::Game(e))
     }
 }
 
@@ -134,32 +135,13 @@ where S: EnvironmentStateSequential<ContractDP> {
         penalty_reward: <ContractDP as DomainParameters>::UniversalReward)
 
         -> Result<
-            <<Self as StatefulEnvironment<ContractDP>>::State as EnvironmentStateSequential<ContractDP>>::Updates, <ContractDP as DomainParameters>::GameErrorType> {
-
-        /*
-        let state_update =
-        if self.state.is_turn_of_dummy() && Some(*agent) == self.state.current_player(){
-            ContractStateUpdate::new(self.state.dummy_side(), *action)
-        } else {
-            ContractStateUpdate::new(agent.to_owned(), *action)
-        };
+            <<Self as StatefulEnvironment<ContractDP>>::State as EnvironmentStateSequential<ContractDP>>::Updates, AmfiteatrError<ContractDP>> {
 
 
-
-
-        match self.state.update(state_update){
-            Ok(_) => Ok([(North,state_update),(East,state_update),(South,state_update), (West, state_update)].into_iter()),
-            Err(err) => {
-                //self.state.add_player_penalty_reward(agent, &penalty_reward);
-                self.penalties[agent] += &penalty_reward;
-                Err(err)
-            }
-        }
-        */
 
         self.state.forward(*agent, *action).map_err(|e|{
             self.penalties[agent] += &penalty_reward;
-            e
+            AmfiteatrError::Game(e)
         })
 
 
