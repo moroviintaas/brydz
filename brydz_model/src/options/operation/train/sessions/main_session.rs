@@ -544,9 +544,9 @@ where
 
 
         }
-        debug!("Declarer batch input sizes: {:?}", self.declarer_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
-        debug!("Whist batch input sizes: {:?}", self.whist_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
-        debug!("Offside batch input sizes: {:?}", self.offside_trajectories.iter().map(|v|v.completed_len()).collect::<Vec<usize>>());
+        debug!("Declarer batch input sizes: {:?}", self.declarer_trajectories.iter().map(|v|v.number_of_steps()).collect::<Vec<usize>>());
+        debug!("Whist batch input sizes: {:?}", self.whist_trajectories.iter().map(|v|v.number_of_steps()).collect::<Vec<usize>>());
+        debug!("Offside batch input sizes: {:?}", self.offside_trajectories.iter().map(|v|v.number_of_steps()).collect::<Vec<usize>>());
 
         if !self.declarer_trajectories.is_empty(){
             self.declarer.policy_mut().train_on_trajectories_env_reward(&self.declarer_trajectories[..])?;

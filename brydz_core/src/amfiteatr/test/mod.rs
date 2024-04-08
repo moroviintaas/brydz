@@ -69,6 +69,6 @@ fn random_agents_sync_comm(){
         });
     });
 
-    assert_eq!(agent_east.info_set().current_subjective_score() + agent_north.info_set().current_subjective_score(), 13);
+    assert_eq!(agent_east.info_set().current_assessment() + agent_north.info_set().current_assessment(), 13);
     assert_eq!(agent_east.current_universal_score() + agent_north.current_universal_score(), 13);
 }

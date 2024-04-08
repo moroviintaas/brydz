@@ -1,6 +1,6 @@
 use karty::cards::Card;
 use karty::hand::CardSet;
-use amfiteatr_core::agent::{EvaluatedInformationSet, InformationSet};
+use amfiteatr_core::agent::{InformationSet};
 use crate::contract::{Contract, ContractMechanics};
 use crate::deal::BiasedHandDistribution;
 use crate::player::side::Side;

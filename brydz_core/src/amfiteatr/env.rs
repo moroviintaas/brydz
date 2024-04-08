@@ -14,7 +14,6 @@ use amfiteatr_core::env::{
     StatefulEnvironment};
 use amfiteatr_core::domain::{AgentMessage, DomainParameters, EnvironmentMessage, Reward};
 use amfiteatr_core::error::AmfiteatrError;
-use crate::error::BridgeCoreError;
 use crate::amfiteatr::spec::ContractDP;
 
 pub struct ContractEnv<S: EnvironmentStateSequential<ContractDP> + ContractState, C: BidirectionalEndpoint>{

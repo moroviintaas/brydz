@@ -207,7 +207,7 @@ impl PresentPossibleActions<ContractDP> for ContractAgentInfoSetAssuming{
 
 impl EvaluatedInformationSet<ContractDP, i32> for ContractAgentInfoSetAssuming {
 
-    fn current_subjective_score(&self) -> i32{
+    fn current_assessment(&self) -> i32{
         self.contract.total_tricks_taken_axis(self.side.axis()) as i32
     }
 
