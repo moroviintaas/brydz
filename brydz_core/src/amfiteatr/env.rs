@@ -116,7 +116,7 @@ where S: EnvironmentStateSequential<ContractDP> {
     fn process_action(&mut self, agent: &Side, action: &ContractAction)
         -> Result<<Self::State as EnvironmentStateSequential<ContractDP>>::Updates, AmfiteatrError<ContractDP>> {
 
-        self.state.forward(*agent, *action).map_err(|e|AmfiteatrError::Game(e))
+        self.state.forward(*agent, *action).map_err(|e|AmfiteatrError::Game{source: e})
     }
 }
 
@@ -140,7 +140,7 @@ where S: EnvironmentStateSequential<ContractDP> {
 
         self.state.forward(*agent, *action).map_err(|e|{
             self.penalties[agent] += &penalty_reward;
-            AmfiteatrError::Game(e)
+            AmfiteatrError::Game{source: e}
         })
 
 

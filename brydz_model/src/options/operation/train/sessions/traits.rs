@@ -6,7 +6,7 @@ use brydz_core::amfiteatr::comm::{ContractAgentSyncComm};
 
 use brydz_core::amfiteatr::spec::ContractDP;
 
-use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions, EvaluatedInformationSet, StatefulAgent, InformationSet};
+use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions,StatefulAgent, InformationSet};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};

@@ -14,7 +14,7 @@ use brydz_core::amfiteatr::state::*;
 use amfiteatr_core::agent::*;
 use amfiteatr_rl::policy::ActorCriticPolicy;
 use amfiteatr_rl::error::AmfiteatrRlError;
-use amfiteatr_rl::tensor_data::{FloatTensorReward, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{ ConversionToTensor};
 use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, TensorA2C};
 use crate::options::operation::train::sessions::{ContractInfoSetForLearning, TSession};
 use crate::options::operation::train::TrainOptions;

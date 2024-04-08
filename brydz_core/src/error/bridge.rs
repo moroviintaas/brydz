@@ -75,6 +75,6 @@ pub type BridgeCoreError = BridgeCoreErrorGen<Card>;
 #[cfg(feature = "amfiteatr")]
 impl From<BridgeCoreError> for AmfiteatrError<ContractDP>{
     fn from(value: BridgeCoreError) -> Self {
-        Self::Game(value)
+        Self::Game{source: value}
     }
 }

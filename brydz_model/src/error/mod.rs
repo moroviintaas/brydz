@@ -43,7 +43,7 @@ pub enum BrydzModelError {
 
 impl From<BridgeCoreError> for BrydzModelError {
     fn from(value: BridgeCoreError) -> Self {
-        Self::Amfiteatr(AmfiteatrError::Game(value))
+        Self::Amfiteatr(AmfiteatrError::Game{source: value})
     }
 }
 
@@ -61,7 +61,7 @@ impl From<AmfiteatrRlError<ContractDP>> for BrydzModelError {
 
 impl From<WorldError<ContractDP>> for BrydzModelError {
     fn from(value: WorldError<ContractDP>) -> Self {
-        Amfiteatr(AmfiteatrError::World(value))
+        Amfiteatr(AmfiteatrError::World{source: value})
     }
 }
 

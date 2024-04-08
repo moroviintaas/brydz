@@ -5,7 +5,7 @@ use std::path::{Path};
 use std::sync::{Arc, Mutex};
 
 use rand::thread_rng;
-use amfiteatr_core::agent::{AgentGen, EvaluatedInformationSet, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
+use amfiteatr_core::agent::{AgentGen, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdEnvironmentEndpoint};
 use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};

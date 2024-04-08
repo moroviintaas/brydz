@@ -18,10 +18,10 @@ pub use dynamic::*;
 use clap::Subcommand;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
-use amfiteatr_core::agent::{EvaluatedInformationSet, InformationSet};
+use amfiteatr_core::agent::{InformationSet};
 
 
-use amfiteatr_rl::tensor_data::{FloatTensorReward, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{ ConversionToTensor};
 use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect, TrainOptions};
 
