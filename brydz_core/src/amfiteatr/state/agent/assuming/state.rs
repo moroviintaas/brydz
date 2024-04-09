@@ -267,10 +267,10 @@ impl ContractInfoSet for ContractAgentInfoSetAssuming{
             return 0.0;
         }
         if self.side == side{
-            return match self.hand.contains(card){
+            match self.hand.contains(card){
                 true => 1.0,
                 false => 0.0
-            };
+            }
         } else {
             if self.hand.contains(card){
                 return 0.0; //this player has, other cant
@@ -302,7 +302,7 @@ impl ContractInfoSet for ContractAgentInfoSetAssuming{
                 let initial_proba_this: f32 = self.card_distribution[self.side][card].into();
                 let remaining_proba = 1.0 -  initial_proba_this;
                 let c_proba: f32 = self.card_distribution[side][card].into();
-                return c_proba / remaining_proba;
+                c_proba / remaining_proba
             }
         }
     }

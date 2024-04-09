@@ -548,10 +548,10 @@ impl ContractInfoSet for ContractAgentInfoSetSimple{
             return 0.0;
         }
         if self.side == side{
-            return match self.hand.contains(card){
+            match self.hand.contains(card){
                 true => 1.0,
                 false => 0.0
-            };
+            }
         } else {
             if self.hand.contains(card){
                 return 0.0; //this player has, other cant
@@ -576,7 +576,7 @@ impl ContractInfoSet for ContractAgentInfoSetSimple{
 
             } else {
                 //dummy not shown, anyone except this can have
-                return 1.0/3.0;
+                1.0/3.0
             }
         }
 

@@ -1,7 +1,7 @@
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, SimpleConvertToTensor};
-use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert420, ContractInfoSetConvert420Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
+use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 
 
 
@@ -18,15 +18,21 @@ use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert
 //  0316:   TRICKS [TRICK_NUMBER * TRICK_REPRESENTATION_SIZE]
 //              representing trick: [DECLARER[S,F], WHIST[S,F], DUMMY[S,F], OFFSIDE[S,F]] (-1.0, -1.0) for non yet
 //  0420:
-impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConvert420 {
+impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConvertDense1 {
 
     fn make_tensor(&self, t: &ContractAgentInfoSetSimple) -> Tensor {
         use crate::amfiteatr::state::contract_state_converter_common::*;
 
         let mut state_repr = [0f32; STATE_REPR_SIZE];
         write_contract_params(&mut state_repr, t);
+        /*
         for i in DECLARER_DIST_OFFSET..CURRENT_DUMMY_CARDS{
             state_repr[i] = 0.25;
+        }
+
+         */
+        for byte_repr in state_repr.iter_mut().take(CURRENT_DUMMY_CARDS).skip(DECLARER_DIST_OFFSET){
+            *byte_repr = 0.25;
         }
 
         write_current_dummy(&mut state_repr, t);
@@ -39,14 +45,20 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
     }
 }
 
-impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConvert420Normalised{
+impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConvertDense1Normalised {
     fn make_tensor(&self, t: &ContractAgentInfoSetSimple) -> Tensor {
         use crate::amfiteatr::state::contract_state_converter_common::*;
 
         let mut state_repr = [0f32; STATE_REPR_SIZE];
         write_contract_params_n(&mut state_repr, t);
+        /*
         for i in DECLARER_DIST_OFFSET..CURRENT_DUMMY_CARDS{
             state_repr[i] = 0.25;
+        }
+
+         */
+        for repr_byte in state_repr.iter_mut().take(CURRENT_DUMMY_CARDS).skip(DECLARER_DIST_OFFSET){
+            *repr_byte = 0.25;
         }
 
         write_current_dummy(&mut state_repr, t);
@@ -61,8 +73,8 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
 
 
 
-impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvert420) -> Result<Tensor, TensorRepresentationError> {
+impl CtxTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetSimple{
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }
@@ -207,8 +219,8 @@ impl CtxTryIntoTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInf
     }
 }
 
-impl CtxTryIntoTensor<ContractInfoSetConvert420Normalised> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvert420Normalised) -> Result<Tensor, TensorRepresentationError> {
+impl CtxTryIntoTensor<ContractInfoSetConvertDense1Normalised> for ContractAgentInfoSetSimple{
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1Normalised) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }

@@ -7,7 +7,7 @@ use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 /// use brydz_core::contract::{Contract, ContractParameters};
 /// use brydz_core::contract::SmartTrickSolver::Trump;
 /// use brydz_core::player::side::Side::*;
-/// use brydz_core::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvert420, ContractStateUpdate};
+/// use brydz_core::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractStateUpdate};
 /// use brydz_core::amfiteatr::state::ContractAction::PlaceCard;
 /// use karty::card_set;
 /// use karty::suits::Suit::Diamonds;
@@ -26,7 +26,7 @@ use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 /// let mut whist_state = ContractAgentInfoSetSimple::new(South, whist_hand, contract, Some(dummy_hand));
 /// whist_state.update(ContractStateUpdate::new(South, PlaceCard(JACK_SPADES))).unwrap();
 /// whist_state.update(ContractStateUpdate::new(West, PlaceCard(TWO_SPADES))).unwrap();
-/// let tensor = ContractInfoSetConvert420{}.make_tensor(&whist_state);
+/// let tensor = ContractInfoSetConvertDense1{}.make_tensor(&whist_state);
 /// let v: Vec<f32> = tensor.try_into().unwrap();
 /// assert_eq!(v[0], 1.0);
 /// assert_eq!(v[1], 1.0);
@@ -57,16 +57,16 @@ use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 /// }
 /// ```
 #[derive(Default)]
-pub struct ContractInfoSetConvert420 {}
+pub struct ContractInfoSetConvertDense1 {}
 
-impl ConversionToTensor for ContractInfoSetConvert420 {
+impl ConversionToTensor for ContractInfoSetConvertDense1 {
     fn desired_shape(&self) -> &'static [i64] {
         &[STATE_REPR_SIZE as i64]
     }
 }
 #[derive(Default)]
-pub struct ContractInfoSetConvert420Normalised {}
-impl ConversionToTensor for ContractInfoSetConvert420Normalised{
+pub struct ContractInfoSetConvertDense1Normalised {}
+impl ConversionToTensor for ContractInfoSetConvertDense1Normalised {
     fn desired_shape(&self) -> &'static [i64] {
         &[STATE_REPR_SIZE as i64]
     }
@@ -141,8 +141,14 @@ pub(crate) mod contract_state_converter_common {
                 }
             }
         } else {
+            /*
             for i in CURRENT_DUMMY_CARDS..CURRENT_DUMMY_CARDS+DECK_SIZE{
                 state_repr[i] = -1.0;
+            }
+
+             */
+            for repr_byte in state_repr.iter_mut().skip(CURRENT_DUMMY_CARDS).take(DECK_SIZE){
+                *repr_byte = -1.0;
             }
         }
     }

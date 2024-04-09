@@ -31,7 +31,7 @@ use crate::options::operation::train::sessions::{ContractInfoSetSeed};
 use crate::error::BrydzModelError;
 use crate::options::operation::generate::{generate_biased_deal_distributions};
 
-type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
+pub type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
 
 
 #[derive(Default, Debug)]
@@ -93,14 +93,14 @@ pub struct DynamicBridgeModel{
     
     //pub env: ContractEnv<ContractEnvStateComplete, StdEnvironmentEndpoint<ContractDP>>,
     pub env: HashMapEnvironment<ContractDP, ContractEnvStateComplete, StdEnvironmentEndpoint<ContractDP>>,
-    pub declarer: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub declarer: BrydzDynamicAgent,
 
-    pub whist: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
-    pub offside: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub whist: BrydzDynamicAgent,
+    pub offside: BrydzDynamicAgent,
     pub dummy: AgentGen<ContractDP, RandomPolicy<ContractDP, ContractDummyState>, ContractAgentSyncComm>,
-    pub test_declarer: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
-    pub test_whist: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
-    pub test_offside: Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>,
+    pub test_declarer: BrydzDynamicAgent,
+    pub test_whist: BrydzDynamicAgent,
+    pub test_offside: BrydzDynamicAgent,
     
 
 
@@ -258,7 +258,7 @@ impl DynamicBridgeModel{
         Ok(())
     }
 
-    fn set_explore_agent(&self, agent: &Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, explore: bool)
+    fn set_explore_agent(&self, agent: &BrydzDynamicAgent, explore: bool)
     -> Result<(), BrydzModelError>{
         agent.lock()
             .map_err(|_e|BrydzModelError::Mutex("Failed locking mutex preparing agent in tests".into()))?
@@ -388,7 +388,7 @@ impl DynamicBridgeModel{
             let description = ContractGameDescription::new(
                 contract_params, d, cards);
 
-            self.play_learning_episode_one_explorer(&description, explorer.clone())?;
+            self.play_learning_episode_one_explorer(&description, *explorer)?;
 
         }
         debug!("Played {} games in epoch", number_of_games);

@@ -21,7 +21,7 @@ impl CtxTryIntoTensor<ContractActionWayToTensor> for ContractAction{
         match self{
             ContractAction::ShowHand(_) => {panic!("Not prepared to convert show hand to tensor")}
             ContractAction::PlaceCard(c) => {
-                let v = vec![c.suit().usize_index() as f32, c.figure().usize_index() as f32];
+                let v = [c.suit().usize_index() as f32, c.figure().usize_index() as f32];
                 Ok(Tensor::from_slice(&v[..]))
             }
         }

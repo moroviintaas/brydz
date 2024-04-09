@@ -5,10 +5,10 @@ use karty::symbol::CardSymbol;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, SimpleConvertToTensor};
 use crate::contract::ContractMechanics;
 use crate::amfiteatr::state::agent::assuming::ContractAgentInfoSetAssuming;
-use crate::amfiteatr::state::{ContractInfoSet, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
+use crate::amfiteatr::state::{ContractInfoSet, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 use crate::amfiteatr::state::contract_state_converter_common::{DECLARER_DIST_OFFSET, STATE_REPR_SIZE, write_contract_params, write_current_dummy, write_current_hand, write_tricks};
 
-impl SimpleConvertToTensor<ContractAgentInfoSetAssuming> for ContractInfoSetConvert420 {
+impl SimpleConvertToTensor<ContractAgentInfoSetAssuming> for ContractInfoSetConvertDense1 {
 
     fn make_tensor(&self, t: &ContractAgentInfoSetAssuming) -> Tensor {
 
@@ -32,8 +32,8 @@ impl SimpleConvertToTensor<ContractAgentInfoSetAssuming> for ContractInfoSetConv
 
     }
 }
-impl CtxTryIntoTensor<ContractInfoSetConvert420> for ContractAgentInfoSetAssuming{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvert420) -> Result<Tensor, TensorRepresentationError> {
+impl CtxTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetAssuming{
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, TensorRepresentationError> {
         Ok(way.make_tensor(self))
     }
 }

@@ -36,7 +36,7 @@ pub enum InfoSetTypeSelect{
 
 #[derive(ValueEnum, Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum InfoSetWayToTensorSelect{
-    _420,
+    Dense1,
     Sparse,
     SparseHistoric
 }

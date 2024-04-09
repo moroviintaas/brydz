@@ -240,7 +240,7 @@ impl From<(&Side, &ContractGameDescription)> for ContractAgentInfoSetAllKnowing{
         let (side, description) = base;
 
         let contract = Contract::new(description.parameters().clone());
-        Self::new(*side, description.cards().clone(), contract)
+        Self::new(*side, *description.cards(), contract)
     }
 }
 impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoSetAllKnowing{
@@ -250,8 +250,8 @@ impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractAgentInfoS
         let contract = Contract::new(description.parameters().clone());
         self.contract = contract;
         self.side = *side;
-        self.initial_deal = description.cards().clone();
-        self.deal = description.cards().clone();
+        self.initial_deal = *description.cards();
+        self.deal = *description.cards();
         Ok(())
     }
 }

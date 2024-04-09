@@ -9,7 +9,6 @@ use amfiteatr_core::agent::{AgentGen, InformationSet, PresentPossibleActions, Ra
 use amfiteatr_core::comm::{StdEnvironmentEndpoint};
 use amfiteatr_core::domain::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
-use amfiteatr_rl::agent::{RlSimpleLearningAgent};
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};
 use amfiteatr_rl::tch::{nn, Tensor};
@@ -18,14 +17,29 @@ use amfiteatr_rl::tensor_data::{ConversionToTensor, CtxTryIntoTensor};
 use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorA2C};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateComplete, ContractInfoSetConvert420, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractState};
+use brydz_core::amfiteatr::state::{
+    ContractActionWayToTensor,
+    ContractAgentInfoSetAllKnowing,
+    ContractAgentInfoSetAssuming,
+    ContractAgentInfoSetSimple,
+    ContractDummyState,
+    ContractEnvStateComplete,
+    ContractInfoSetConvertDense1,
+    ContractInfoSetConvertSparse,
+    ContractInfoSetConvertSparseHistoric,
+    ContractState};
 use brydz_core::contract::{Contract, ContractMechanics};
 use brydz_core::deal::{ContractGameDescription, DescriptionDeckDeal};
 
 use brydz_core::player::side::Side;
 use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect};
-use crate::options::operation::train::sessions::{AgentConfiguration, ContractInfoSetSeed, DynamicBridgeModel, PolicyTypeSelect};
+use crate::options::operation::train::sessions::{
+    AgentConfiguration,
+    BrydzDynamicAgent,
+    DynamicBridgeModel,
+    PolicyTypeSelect
+};
 
 #[derive(Copy, Clone, Debug)]
 pub enum AgentRole{
@@ -42,15 +56,15 @@ pub enum AgentRole{
 pub struct DynamicBridgeModelBuilder{
 
     env: HashMapEnvironment<ContractDP, ContractEnvStateComplete, StdEnvironmentEndpoint<ContractDP>>,
-    declarer: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
-    whist: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
-    offside: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
+    declarer: Option<BrydzDynamicAgent>,
+    whist: Option<BrydzDynamicAgent>,
+    offside: Option<BrydzDynamicAgent>,
 
     pub dummy: AgentGen<ContractDP, RandomPolicy<ContractDP, ContractDummyState>, ContractAgentSyncComm>,
 
-    test_declarer: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
-    test_whist: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
-    test_offside: Option<Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>>,
+    test_declarer: Option<BrydzDynamicAgent>,
+    test_whist: Option<BrydzDynamicAgent>,
+    test_offside: Option<BrydzDynamicAgent>,
 
     inactive_declarer_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
     inactive_whist_comm: Option<StdEnvironmentEndpoint<ContractDP>>,
@@ -62,6 +76,11 @@ pub struct DynamicBridgeModelBuilder{
 
 
 }
+impl Default for DynamicBridgeModelBuilder{
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl DynamicBridgeModelBuilder{
     pub fn new() -> Self{
@@ -72,7 +91,7 @@ impl DynamicBridgeModelBuilder{
         let _contract_params = contract.parameters();
         let deal_description = DescriptionDeckDeal{
             probabilities: contract.distribution().clone(),
-            cards: contract.cards().clone(),
+            cards: *contract.cards(),
         };
         let mut hm  = HashMap::new();
         let dummy_side = contract.parameters().dummy();
@@ -123,8 +142,8 @@ impl DynamicBridgeModelBuilder{
         //let description = self.initial_deal.distribution();
 
         let input_shape: i64 = match agent_configuration.info_set_conversion_type{
-            InfoSetWayToTensorSelect::_420 => {
-                ContractInfoSetConvert420::default().desired_shape().iter().sum()
+            InfoSetWayToTensorSelect::Dense1 => {
+                ContractInfoSetConvertDense1::default().desired_shape().iter().sum()
             },
             InfoSetWayToTensorSelect::Sparse => {
                 ContractInfoSetConvertSparse::default().desired_shape().iter().sum()
@@ -143,8 +162,17 @@ impl DynamicBridgeModelBuilder{
                 last_dim = Some(ld);
                 seq = seq.add(nn::linear(path / "INPUT", input_shape+2, ld, Default::default()));
 
+                /*
                 for i in 0..hidden_layers.len(){
                     let ld_new = hidden_layers[i];
+                    seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
+                        .add_fn(|xs| xs.tanh());
+                    ld = ld_new;
+                    last_dim = Some(ld);
+                }
+
+                 */
+                for (i, &ld_new) in hidden_layers.iter().enumerate(){
                     seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
                         .add_fn(|xs| xs.tanh());
                     ld = ld_new;
@@ -186,8 +214,8 @@ impl DynamicBridgeModelBuilder{
         //let description = self.initial_deal.distribution();
 
         let input_shape: i64 = match agent_configuration.info_set_conversion_type{
-            InfoSetWayToTensorSelect::_420 => {
-                ContractInfoSetConvert420::default().desired_shape().iter().sum()
+            InfoSetWayToTensorSelect::Dense1 => {
+                ContractInfoSetConvertDense1::default().desired_shape().iter().sum()
             },
             InfoSetWayToTensorSelect::Sparse => {
                 ContractInfoSetConvertSparse::default().desired_shape().iter().sum()
@@ -206,12 +234,20 @@ impl DynamicBridgeModelBuilder{
                 last_dim = Some(ld);
                 seq = seq.add(nn::linear(path / "INPUT", input_shape, ld, Default::default()));
 
+                /*
                 for i in 1..hidden_layers.len(){
                     let ld_new = hidden_layers[i];
                     seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, ld_new, Default::default()))
                         .add_fn(|xs| xs.tanh());
 
                     ld = ld_new;
+                    last_dim = Some(ld);
+                }*/
+                for (i, ld_new) in hidden_layers.iter().enumerate().skip(1){
+                    seq = seq.add(nn::linear(path / &format!("h_{:}", i+1), ld, *ld_new, Default::default()))
+                        .add_fn(|xs| xs.tanh());
+
+                    ld = *ld_new;
                     last_dim = Some(ld);
                 }
             }
@@ -253,16 +289,16 @@ impl DynamicBridgeModelBuilder{
         IS2T: ConversionToTensor + 'static,
         >
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, info_set: InfoSet, is2t: IS2T)
-    -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
+    -> Result<(BrydzDynamicAgent, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
         let (env_endpoint, agent_endpoint ) = StdEnvironmentEndpoint::new_pair();
         match agent_configuration.policy_params.select_policy{
 
             PolicyTypeSelect::Q => {
-                let policy = self.create_agent_q_policy(&agent_configuration, var_store, is2t)?;
+                let policy = self.create_agent_q_policy(agent_configuration, var_store, is2t)?;
                 Ok((Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy))), env_endpoint))
             }
             PolicyTypeSelect::A2C => {
-                let policy = self.create_agent_a2c_policy(&agent_configuration, var_store, is2t)?;
+                let policy = self.create_agent_a2c_policy(agent_configuration, var_store, is2t)?;
                 Ok((Arc::new(Mutex::new(TracingAgentGen::new(info_set, agent_endpoint, policy))), env_endpoint))
             }
         }
@@ -271,13 +307,13 @@ impl DynamicBridgeModelBuilder{
     fn create_dyn_agent_l2<
         InfoSet: InformationSet<ContractDP> + Debug + PresentPossibleActions<ContractDP>
         + CtxTryIntoTensor<ContractInfoSetConvertSparse> + CtxTryIntoTensor<ContractInfoSetConvertSparseHistoric>
-        + CtxTryIntoTensor<ContractInfoSetConvert420>
+        + CtxTryIntoTensor<ContractInfoSetConvertDense1>
         + for<'a> Renew<ContractDP, (&'a Side, &'a ContractGameDescription)> + Clone + 'static,
     >
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, info_set: InfoSet)
-     -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
+     -> Result<(BrydzDynamicAgent, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
         match agent_configuration.info_set_conversion_type{
-            InfoSetWayToTensorSelect::_420 => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvert420::default()),
+            InfoSetWayToTensorSelect::Dense1 => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvertDense1::default()),
             InfoSetWayToTensorSelect::Sparse => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvertSparse::default()),
             InfoSetWayToTensorSelect::SparseHistoric => self.create_dyn_agent_l3(agent_configuration, var_store, info_set, ContractInfoSetConvertSparseHistoric::default()),
         }
@@ -285,12 +321,12 @@ impl DynamicBridgeModelBuilder{
 
     fn create_dyn_agent_l1
     (&self, agent_configuration: &AgentConfiguration, var_store: VarStore, side: Side)
-     -> Result<(Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
+     -> Result<(BrydzDynamicAgent, StdEnvironmentEndpoint<ContractDP> ), BrydzModelError>{
 
         let description = ContractGameDescription::new(
             self.env.state().contract_data().contract_spec().clone(),
             self.initial_deal.distribution().clone(),
-            self.initial_deal.cards().clone());
+            *self.initial_deal.cards());
 
         match agent_configuration.info_set_type{
             InfoSetTypeSelect::Simple => {

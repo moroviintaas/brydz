@@ -150,12 +150,12 @@ pub fn run_dynamic_model(options: &DynamicModelOptions) -> Result<(), BrydzModel
 
 
     let mut model = DynamicBridgeModelBuilder::new()
-        .with_agent(&conf_declarer, AgentRole::Declarer)?
-        .with_agent(&conf_whist, AgentRole::Whist)?
-        .with_agent(&conf_offside, AgentRole::Offside)?
-        .with_agent(&conf_test_declarer, AgentRole::TestDeclarer)?
-        .with_agent(&conf_test_whist, AgentRole::TestWhist)?
-        .with_agent(&conf_test_offside, AgentRole::TestOffside)?
+        .with_agent(conf_declarer, AgentRole::Declarer)?
+        .with_agent(conf_whist, AgentRole::Whist)?
+        .with_agent(conf_offside, AgentRole::Offside)?
+        .with_agent(conf_test_declarer, AgentRole::TestDeclarer)?
+        .with_agent(conf_test_whist, AgentRole::TestWhist)?
+        .with_agent(conf_test_offside, AgentRole::TestOffside)?
         .build()?;
 
     if let Some(test_vec_file) = &config.test_set{

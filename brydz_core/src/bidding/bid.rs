@@ -84,10 +84,8 @@ impl<S: SuitTrait> PartialOrd for Bid<S> {
 
 impl<S: SuitTrait + Display> Display for Bid<S>{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if f.alternate(){
 
-        }
-        todo!();
+        write!(f, "{:?}", self)
     }
 }
 

@@ -15,7 +15,7 @@ pub fn test_sample_biased_distribution_parameters() -> Result<(), AmfiteatrError
         let sample: BiasedHandDistribution = trng.gen();
         //println!("{:?}", ron::to_string(&sample));
         print!("\r{:3}/100",i+1);
-        ace_spades_north.push(f32::try_from(sample[North][&ACE_SPADES]).unwrap());
+        ace_spades_north.push(f32::from(sample[North][&ACE_SPADES]));
 
     }
 

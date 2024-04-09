@@ -117,7 +117,7 @@ pub struct NoTrumpTrickSolver<Crd: Card2SymTrait>{
 }
 impl <Crd: Card2SymTrait> NoTrumpTrickSolver<Crd>{
     pub fn new() -> Self{
-        Self{_phantom: PhantomData::default()}
+        Self{_phantom: Default::default()}
     }
 }
 

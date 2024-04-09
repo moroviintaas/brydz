@@ -64,7 +64,7 @@ mod neuro_impls{
             let action_index = v[0];
             Card::from_usize_index(action_index as usize)
                 .map_err(|e| ConvertError::ActionDeserialize(format!("Bad index of card: {e:}")))
-                .map(|ok| Self::PlaceCard(ok))
+                .map(Self::PlaceCard)
 
         }
     }
