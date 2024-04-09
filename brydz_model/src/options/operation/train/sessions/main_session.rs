@@ -351,7 +351,7 @@ where
                 }
             });
             s.spawn(||{
-                match self.declarer.run_rewarded(){
+                match self.declarer.run(){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Declarer run error: {e:}");
@@ -360,7 +360,7 @@ where
             });
 
             s.spawn(||{
-                match self.whist.run_rewarded(){
+                match self.whist.run(){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Whist run error: {e:}");
@@ -369,7 +369,7 @@ where
             });
 
             s.spawn(||{
-                match self.dummy.run_rewarded(){
+                match self.dummy.run(){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Dummy run error: {e:}");
@@ -378,7 +378,7 @@ where
             });
 
             s.spawn(||{
-                match self.offside.run_rewarded(){
+                match self.offside.run(){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Offside run error: {e:}");
@@ -414,7 +414,7 @@ where
             match team{
                 Team::Contractors => {
                     s.spawn(||{
-                        match self.declarer.run_rewarded(){
+                        match self.declarer.run(){
                             Ok(_) => {}
                             Err(e) => {
                                 debug!("Declarer run error: {e:}");
@@ -441,7 +441,7 @@ where
                 }
                 Team::Defenders => {
                     s.spawn(||{
-                        match self.whist.run_rewarded(){
+                        match self.whist.run(){
                             Ok(_) => {}
                             Err(e) => {
                                 debug!("Whist run error: {e:}");
@@ -457,7 +457,7 @@ where
                         }
                     });
                     s.spawn(||{
-                        match self.offside.run_rewarded(){
+                        match self.offside.run(){
                             Ok(_) => {}
                             Err(e) => {
                                 debug!("Offside run error: {e:}");

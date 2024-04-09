@@ -238,19 +238,19 @@ impl DynamicBridgeModel{
             s.spawn(|| self.dummy.run());
             match testing{
                 Testing::Declarer => {
-                    s.spawn(|| self.declarer.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.test_whist.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.test_offside.lock().unwrap().run_rewarded());
+                    s.spawn(|| self.declarer.lock().unwrap().run());
+                    s.spawn(|| self.test_whist.lock().unwrap().run());
+                    s.spawn(|| self.test_offside.lock().unwrap().run());
                 }
                 Testing::Defenders => {
-                    s.spawn(|| self.test_declarer.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.whist.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.offside.lock().unwrap().run_rewarded());
+                    s.spawn(|| self.test_declarer.lock().unwrap().run());
+                    s.spawn(|| self.whist.lock().unwrap().run());
+                    s.spawn(|| self.offside.lock().unwrap().run());
                 }
                 Testing::None => {
-                    s.spawn(|| self.declarer.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.whist.lock().unwrap().run_rewarded());
-                    s.spawn(|| self.offside.lock().unwrap().run_rewarded());
+                    s.spawn(|| self.declarer.lock().unwrap().run());
+                    s.spawn(|| self.whist.lock().unwrap().run());
+                    s.spawn(|| self.offside.lock().unwrap().run());
                 }
             }
 

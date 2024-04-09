@@ -6,7 +6,7 @@ use brydz_core::amfiteatr::comm::{ContractAgentSyncComm};
 
 use brydz_core::amfiteatr::spec::ContractDP;
 
-use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgentRewarded, Policy, PolicyAgent, PresentPossibleActions,StatefulAgent, InformationSet};
+use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgent, Policy, PolicyAgent, PresentPossibleActions, StatefulAgent, InformationSet};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};
@@ -90,11 +90,11 @@ where <P as Policy<ContractDP>>::StateType: ContractInfoSetForLearning<ISW>
  */
 
 
-pub trait ContractLearningAgent: AutomaticAgentRewarded<ContractDP>  + PolicyAgent<ContractDP>
+pub trait ContractLearningAgent: AutomaticAgent<ContractDP>  + PolicyAgent<ContractDP>
 where <Self as PolicyAgent<ContractDP>>::Policy: LearningNetworkPolicy<ContractDP>,
 <Self as StatefulAgent<ContractDP>>::InfoSetType: InformationSet<ContractDP>{}
 
-impl <T: AutomaticAgentRewarded<ContractDP>  + PolicyAgent<ContractDP>>
+impl <T: AutomaticAgent<ContractDP>  + PolicyAgent<ContractDP>>
 ContractLearningAgent for T
 where <T as PolicyAgent<ContractDP>>::Policy: LearningNetworkPolicy<ContractDP>,
 <T as StatefulAgent<ContractDP>>::InfoSetType: InformationSet<ContractDP>

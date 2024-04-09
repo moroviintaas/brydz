@@ -1,7 +1,7 @@
 use std::thread;
 use karty::hand::CardSet;
 use karty::suits::Suit::Spades;
-use amfiteatr_core::agent::{AutomaticAgentRewarded, RandomPolicy, RewardedAgent, StatefulAgent, EvaluatedInformationSet};
+use amfiteatr_core::agent::{AutomaticAgent, RandomPolicy, RewardedAgent, StatefulAgent, EvaluatedInformationSet};
 use amfiteatr_core::env::RoundRobinUniversalEnvironment;
 use crate::bidding::Bid;
 use crate::cards::trump::TrumpGen;
@@ -53,19 +53,19 @@ fn random_agents_sync_comm(){
             simple_env.run_round_robin_with_rewards().unwrap();
         });
         s.spawn(||{
-            agent_east.run_rewarded().unwrap();
+            agent_east.run().unwrap();
         });
 
         s.spawn(||{
-            agent_south.run_rewarded().unwrap();
+            agent_south.run().unwrap();
         });
 
         s.spawn(||{
-            agent_west.run_rewarded().unwrap();
+            agent_west.run().unwrap();
         });
 
         s.spawn(||{
-            agent_north.run_rewarded().unwrap();
+            agent_north.run().unwrap();
         });
     });
 

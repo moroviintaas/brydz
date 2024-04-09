@@ -9,7 +9,7 @@ use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateMin};
 use karty::hand::CardSet;
 use karty::suits::Suit::Spades;
-use amfiteatr_core::agent::{AgentGen, AutomaticAgentRewarded, RandomPolicy};
+use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy};
 use amfiteatr_core::comm::DynEndpoint;
 use amfiteatr_core::error::{CommunicationError, AmfiteatrError};
 use amfiteatr_core::domain::{AgentMessage, EnvironmentMessage};
@@ -108,19 +108,19 @@ pub fn test_generic_model() -> Result<(), AmfiteatrError<ContractDP>>{
             environment.run_round_robin_with_rewards().unwrap();
         });
         s.spawn(||{
-            agent_east.run_rewarded().unwrap();
+            agent_east.run().unwrap();
         });
 
         s.spawn(||{
-            agent_south.run_rewarded().unwrap();
+            agent_south.run().unwrap();
         });
 
         s.spawn(||{
-            agent_west.run_rewarded().unwrap();
+            agent_west.run().unwrap();
         });
 
         s.spawn(||{
-            agent_north.run_rewarded().unwrap();
+            agent_north.run().unwrap();
         });
     });
 
