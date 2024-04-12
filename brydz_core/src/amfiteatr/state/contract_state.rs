@@ -1,4 +1,4 @@
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use crate::contract::{Contract, ContractMechanics};
 use crate::player::side::Side;
 
@@ -13,7 +13,7 @@ pub trait ContractState{
     fn is_turn_of_dummy(&self) -> bool{
         self.dummy_side() == self.current_side()
     }
-    fn dummy_hand(&self) -> Option<&CardSet>;
+    fn dummy_hand(&self) -> Option<&CardSetStd>;
     fn contract_data(&self) -> &Contract;
 
     fn declarer_side(&self) -> Side{
@@ -32,7 +32,7 @@ pub trait ContractState{
 impl<T: ContractState> ContractState for Box<T>{
 
 
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         self.as_ref().dummy_hand()
     }
 

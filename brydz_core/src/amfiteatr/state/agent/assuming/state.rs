@@ -2,7 +2,7 @@ use std::ops::{Deref};
 use log::debug;
 use smallvec::SmallVec;
 use karty::cards::{Card, Card2SymTrait};
-use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
+use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
 use amfiteatr_core::domain::{DomainParameters, Renew};
@@ -18,19 +18,19 @@ use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpda
 #[derive(Debug, Clone)]
 pub struct ContractAgentInfoSetAssuming {
     side: Side,
-    hand: CardSet,
-    dummy_hand: Option<CardSet>,
+    hand: CardSetStd,
+    dummy_hand: Option<CardSetStd>,
     contract: Contract,
     card_distribution: BiasedHandDistribution,
 }
 
 impl ContractAgentInfoSetAssuming{
     #[allow(dead_code)]
-    pub fn new(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>, card_distribution: BiasedHandDistribution) -> Self{
+    pub fn new(side: Side, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>, card_distribution: BiasedHandDistribution) -> Self{
         Self{side, hand, dummy_hand, contract, card_distribution}
     }
     #[allow(dead_code)]
-    pub fn new_fair(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>) -> Self{
+    pub fn new_fair(side: Side, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>) -> Self{
         Self{side, hand, dummy_hand, contract, card_distribution: Default::default()}
     }
 
@@ -40,10 +40,10 @@ impl ContractAgentInfoSetAssuming{
     pub fn contract(&self) -> &Contract{
         &self.contract
     }
-    pub fn hand(&self) -> &CardSet{
+    pub fn hand(&self) -> &CardSetStd {
         &self.hand
     }
-    pub fn dummy_hand(&self) -> Option<&CardSet>{
+    pub fn dummy_hand(&self) -> Option<&CardSetStd>{
         self.dummy_hand.as_ref()
     }
     pub fn distribution_assumption(&self) -> &BiasedHandDistribution{
@@ -217,7 +217,7 @@ impl EvaluatedInformationSet<ContractDP, i32> for ContractAgentInfoSetAssuming {
 }
 
 impl RenewableContractInfoSet for ContractAgentInfoSetAssuming{
-    fn renew(&mut self, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>) {
+    fn renew(&mut self, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>) {
         self.hand = hand;
         self.contract = contract;
         self.dummy_hand = dummy_hand;
@@ -225,7 +225,7 @@ impl RenewableContractInfoSet for ContractAgentInfoSetAssuming{
 }
 
 impl CreatedContractInfoSet for ContractAgentInfoSetAssuming{
-    fn create_new(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>, distribution: BiasedHandDistribution) -> Self {
+    fn create_new(side: Side, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>, distribution: BiasedHandDistribution) -> Self {
         Self{
             side,
             hand,
@@ -251,11 +251,11 @@ impl ContractInfoSet for ContractAgentInfoSetAssuming{
         &self.contract
     }
 
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         self.dummy_hand.as_ref()
     }
 
-    fn hand(&self) -> &CardSet {
+    fn hand(&self) -> &CardSetStd {
         &self.hand
     }
 

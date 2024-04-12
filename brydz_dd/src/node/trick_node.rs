@@ -1,7 +1,7 @@
 use brydz_core::error::CardSetErrorGen;
 use brydz_core::karty::cards::{Card, Card2SymTrait};
 use brydz_core::karty::error::CardSetError;
-use brydz_core::karty::hand::{HandTrait, CardSet};
+use brydz_core::karty::set::{CardSet, CardSetStd};
 use brydz_core::karty::suits::Suit;
 use brydz_core::karty::symbol::CardSymbol;
 use brydz_core::player::side::{Side, SideMap, SIDES};
@@ -15,13 +15,13 @@ use brydz_core::player::side::Side::{East, North, South, West};
 /// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct TrickNode {
-    hands: SideMap<CardSet>,
+    hands: SideMap<CardSetStd>,
     current_side: Side,
 
 }
 
 impl TrickNode{
-    pub fn new(hands: SideMap<CardSet>, current_side: Side) -> Self{
+    pub fn new(hands: SideMap<CardSetStd>, current_side: Side) -> Self{
         Self{hands, current_side}
     }
 
@@ -30,7 +30,7 @@ impl TrickNode{
     /// use brydz_core::player::side::Side::{North, West};
     /// use brydz_dd::node::TrickNode;
     /// use brydz_core::karty::cards::Card;
-    /// use brydz_core::karty::hand::HandTrait;
+    /// use brydz_core::karty::set::CardSet;
     /// use brydz_core::error::CardSetErrorGen;
     /// let mut hands = fair_bridge_deal();
     /// let trick_node = TrickNode::new_checked(hands, North).unwrap();
@@ -50,7 +50,7 @@ impl TrickNode{
     /// bidding::Bid,
     /// contract::{Contract, ContractParametersGen, ContractMechanics},
     /// player::side::{Side::*, SideMap},
-    /// karty::{suits::Suit::*, hand::{CardSet, HandTrait}, card_set, cards::{ACE_SPADES, QUEEN_SPADES, JACK_CLUBS, KING_CLUBS, ACE_HEARTS, KING_DIAMONDS, KING_HEARTS, JACK_DIAMONDS, ACE_DIAMONDS, ACE_CLUBS, QUEEN_HEARTS, QUEEN_CLUBS, KING_SPADES, QUEEN_DIAMONDS, JACK_SPADES, JACK_HEARTS}},
+    /// karty::{suits::Suit::*, set::{CardSetStd, CardSet}, card_set, cards::{ACE_SPADES, QUEEN_SPADES, JACK_CLUBS, KING_CLUBS, ACE_HEARTS, KING_DIAMONDS, KING_HEARTS, JACK_DIAMONDS, ACE_DIAMONDS, ACE_CLUBS, QUEEN_HEARTS, QUEEN_CLUBS, KING_SPADES, QUEEN_DIAMONDS, JACK_SPADES, JACK_HEARTS}},
     /// };
     /// use brydz_dd::node::TrickNode;
     /// let mut contract = Contract::new(
@@ -64,7 +64,7 @@ impl TrickNode{
     /// let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     /// ```
 
-    pub fn new_checked(hands: SideMap<CardSet>, current_side: Side) -> Result<Self, CardSetError>{
+    pub fn new_checked(hands: SideMap<CardSetStd>, current_side: Side) -> Result<Self, CardSetError>{
         for s1 in SIDES{
             for s2 in SIDES{
                 if s1 != s2{
@@ -91,10 +91,10 @@ impl TrickNode{
             .union(&self.hands[&North]).into()
     }
     #[allow(dead_code)]
-    fn hands_mut(&mut self) -> &mut SideMap<CardSet>{
+    fn hands_mut(&mut self) -> &mut SideMap<CardSetStd>{
         &mut self.hands
     }
-    pub fn hands(&self) -> &SideMap<CardSet>{
+    pub fn hands(&self) -> &SideMap<CardSetStd>{
         &self.hands
     }
     pub fn current_side(&self) -> Side{
@@ -237,7 +237,7 @@ const SHIFT_LOWER_SPADES: usize = 15;
 #[cfg(test)]
 mod tests{
     use brydz_core::deal::fair_bridge_deal;
-    use brydz_core::karty::hand::{HandTrait, StackHand};
+    use brydz_core::karty::set::{HandTrait, StackHand};
     use brydz_core::agent::side::Side::North;
     //use crate::hash::{PartialHash, StateHash24, StateHash24EntryDistinguish};
     use crate::node::trick_node::TrickNode;

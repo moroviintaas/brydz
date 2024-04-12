@@ -7,7 +7,7 @@ use rand::seq::SliceRandom;
 use smallvec::SmallVec;
 use karty::cards::{Card, DECK_SIZE, STANDARD_DECK};
 use karty::figures::Figure;
-use karty::hand::{CardSet, HandTrait};
+use karty::set::{CardSetStd, CardSet};
 use karty::suits::{Suit, SuitMap};
 use karty::suits::Suit::Spades;
 use karty::symbol::CardSymbol;
@@ -74,9 +74,9 @@ impl BiasedHandDistribution{
 
     fn check_if_auto_alloc_uncertain(&self,
                                      side: &Side,
-                                     allocated_cards: &SideMap<CardSet>,
+                                     allocated_cards: &SideMap<CardSetStd>,
                                      uncertain_card_nums: &SideMap<u8>)
-        -> Result<bool, FuzzyCardSetErrorGen<Card>>{
+                                     -> Result<bool, FuzzyCardSetErrorGen<Card>>{
 
         if allocated_cards[side].len() as u8 == self.side_probabilities[side].expected_card_number(){
             return Ok(false)
@@ -97,12 +97,12 @@ impl BiasedHandDistribution{
 
     fn distribute_uncertain_cards_when_sure(&self,
                                             _side: &Side,
-                                            card_set_to_insert: &mut SideMap<CardSet>,
-                                            used_cards_register: &mut CardSet,
+                                            card_set_to_insert: &mut SideMap<CardSetStd>,
+                                            used_cards_register: &mut CardSetStd,
                                             numbers_of_uncertain: &mut SideMap<u8>,
                                             cards_with_zero: &SmallVec<[Card; 64]>,
                                             cards_uncertain: &SmallVec<[Card; 64]>)
-        -> Result<(), FuzzyCardSetErrorGen<Card>>{
+                                            -> Result<(), FuzzyCardSetErrorGen<Card>>{
 
         for side in SIDES{
             if self.check_if_auto_alloc_uncertain(&side, card_set_to_insert, numbers_of_uncertain)?{
@@ -125,10 +125,10 @@ impl BiasedHandDistribution{
 
     fn alloc_all_uncertain_to_side(&self,
                                    side: &Side,
-                                   card_set_to_insert: &mut SideMap<CardSet>,
+                                   card_set_to_insert: &mut SideMap<CardSetStd>,
                                    cards_to_pick_from: &SmallVec<[Card; 64]>,
-                                    used_cards_register: &mut CardSet,
-                                    numbers_of_uncertain: &mut SideMap<u8>) -> Result<(), FuzzyCardSetErrorGen<Card>>{
+                                   used_cards_register: &mut CardSetStd,
+                                   numbers_of_uncertain: &mut SideMap<u8>) -> Result<(), FuzzyCardSetErrorGen<Card>>{
 
         for c in cards_to_pick_from{
 
@@ -156,8 +156,8 @@ impl BiasedHandDistribution{
     //fn set_card_as_used(&self, card: &Card, )
 
 
-    pub fn sample_deal_single_try<R: Rng + ?Sized>(&self, rng: &mut R) -> Result<SideMap<CardSet>, FuzzyCardSetErrorGen<Card>>{
-        let mut deal = SideMap::new_symmetric(CardSet::empty());
+    pub fn sample_deal_single_try<R: Rng + ?Sized>(&self, rng: &mut R) -> Result<SideMap<CardSetStd>, FuzzyCardSetErrorGen<Card>>{
+        let mut deal = SideMap::new_symmetric(CardSetStd::empty());
         let mut cards_uncertain: SmallVec<[Card; 64]> = SmallVec::new();
         let mut cards_with_zero: SmallVec<[Card; 64]> = SmallVec::new();
         let mut closed_sides = SideMap::new_symmetric(false);
@@ -206,17 +206,17 @@ impl BiasedHandDistribution{
         Ok(deal)
     }
 
-    pub fn sample_deal_crossing<R: Rng + ?Sized>(&self, rng: &mut R) -> Result<SideMap<CardSet>, FuzzyCardSetErrorGen<Card>>{
+    pub fn sample_deal_crossing<R: Rng + ?Sized>(&self, rng: &mut R) -> Result<SideMap<CardSetStd>, FuzzyCardSetErrorGen<Card>>{
 
 
 
 
-        let mut card_sets = SideMap::new_symmetric(CardSet::empty());
+        let mut card_sets = SideMap::new_symmetric(CardSetStd::empty());
         let mut cards_uncertain: SmallVec<[Card; 64]> = SmallVec::new();
         let mut cards_with_zero: SmallVec<[Card; 64]> = SmallVec::new();
 
         //let mut distributed_card_numbers = SideMap::new_symmetric(0u8);
-        let mut cards_distributed = CardSet::empty();
+        let mut cards_distributed = CardSetStd::empty();
 
 
         let mut numbers_of_uncertain = SideMap::new_symmetric(0u8);
@@ -463,8 +463,8 @@ fn choose_certain_zero(probabilities: &SideMap<FProbability>) -> Result<Option<S
 
 
 
-impl Distribution<SideMap<CardSet>> for BiasedHandDistribution{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SideMap<CardSet> {
+impl Distribution<SideMap<CardSetStd>> for BiasedHandDistribution{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SideMap<CardSetStd> {
 
         //let mut distribution_
 

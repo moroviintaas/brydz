@@ -1,6 +1,6 @@
 use rand::distributions::Distribution;
 use rand::prelude::ThreadRng;
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use crate::bidding::Bid;
 use crate::cards::trump::TrumpGen;
 use crate::contract::ContractParameters;
@@ -12,7 +12,7 @@ use crate::player::side::SideMap;
 #[derive(Clone, Debug)]
 pub struct DescriptionDeckDeal{
     pub probabilities: DealDistribution,
-    pub cards: SideMap<CardSet>
+    pub cards: SideMap<CardSetStd>
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21,18 +21,18 @@ pub struct ContractGameDescription {
     parameters: ContractParameters,
     //info_sets: SideMap<DistributionTemplate>
     deal_distribution: DealDistribution,
-    cards: SideMap<CardSet>
+    cards: SideMap<CardSetStd>
 
 }
 
 impl ContractGameDescription {
     pub fn new(parameters: ContractParameters,
                deal_distribution: DealDistribution,
-               cards: SideMap<CardSet>) -> Self{
+               cards: SideMap<CardSetStd>) -> Self{
         Self{parameters, deal_distribution, cards}
     }
 
-    pub fn cards(&self) -> &SideMap<CardSet>{
+    pub fn cards(&self) -> &SideMap<CardSetStd>{
         &self.cards
     }
     pub fn parameters(&self) -> &ContractParameters{

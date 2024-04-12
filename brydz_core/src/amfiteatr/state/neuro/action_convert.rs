@@ -19,7 +19,7 @@ impl ConversionToTensor for ContractActionWayToTensor{
 impl CtxTryIntoTensor<ContractActionWayToTensor> for ContractAction{
     fn try_to_tensor(&self, _way: &ContractActionWayToTensor) -> Result<Tensor, TensorRepresentationError> {
         match self{
-            ContractAction::ShowHand(_) => {panic!("Not prepared to convert show hand to tensor")}
+            ContractAction::ShowHand(_) => {panic!("Not prepared to convert shows hand to tensor")}
             ContractAction::PlaceCard(c) => {
                 let v = [c.suit().usize_index() as f32, c.figure().usize_index() as f32];
                 Ok(Tensor::from_slice(&v[..]))

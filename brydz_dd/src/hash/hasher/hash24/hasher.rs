@@ -162,7 +162,7 @@ const SHIFT_LOWER_8_SPADES: usize = 15;
 #[cfg(test)]
 mod tests{
     use brydz_core::deal::fair_bridge_deal;
-    use brydz_core::karty::hand::{CardSet};
+    use brydz_core::karty::set::{CardSetStd};
     use brydz_core::player::side::Side::North;
     use crate::hash::{ NodeHasher};
     use crate::hash::hash24::Hash24;
@@ -172,7 +172,7 @@ mod tests{
 
     #[test]
     fn check_full_hands_hash(){
-        let mut trick_node = TrickNode::new(fair_bridge_deal::<CardSet>(), North);
+        let mut trick_node = TrickNode::new(fair_bridge_deal::<CardSetStd>(), North);
 
         let (hash, label) = Hash24::<3>::hash_and_label(&trick_node);
         assert_eq!((hash, label), (0x000000, 0xfffffff));

@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 use karty::cards::Card;
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "speedy", derive(speedy::Writable, speedy::Readable))]
 pub enum ContractAction{
-    ShowHand(CardSet),
+    ShowHand(CardSetStd),
     PlaceCard(Card)
 }
 impl Display for ContractAction{

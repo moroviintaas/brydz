@@ -4,7 +4,7 @@ use brydz_core::{
     karty::{
         suits::Suit,
         figures::Figure,
-        hand::CardSet,
+        set::CardSetStd,
         cards::{Card2SymTrait, Card}
     },
     meta::{CONTRACT_ACTION_SPACE_BOUND},
@@ -14,7 +14,7 @@ use smallvec::SmallVec;
 use std::fmt::Debug;
 use brydz_core::error::Mismatch;
 use brydz_core::meta::CONTRACT_ACTION_GROUPING_ESTIMATE;
-use brydz_core::karty::hand::HandSuitedTrait;
+use brydz_core::karty::set::HandSuitedTrait;
 use brydz_core::amfiteatr::re_export::domain::Action;
 use crate::error::GroupingError;
 
@@ -91,7 +91,7 @@ impl CardPack {
 
 
 
-    pub fn vec_no_grouping(hand: &CardSet, suit: &Suit) -> Vec<CardPack>{
+    pub fn vec_no_grouping(hand: &CardSetStd, suit: &Suit) -> Vec<CardPack>{
         hand.suit_iterator(suit).rev().map(|c| CardPack::group_single_card(&c)).collect()
     }
     /// ```
@@ -109,7 +109,7 @@ impl CardPack {
     /// assert!(jack_pack.is_legal(&trick, &hand_no_hearts));
     /// ```
     /// 
-    pub fn is_legal(&self, trick: &Trick, hand: &CardSet) -> bool{
+    pub fn is_legal(&self, trick: &Trick, hand: &CardSetStd) -> bool{
         match trick.called_suit(){
             None => true,
             Some(this) if this == self.suit => true,
@@ -213,14 +213,14 @@ impl Action for CardPack {
 #[cfg(test)]
 mod tests{
     use brydz_core::karty::{
-        hand::{CardSet, HandTrait},
+        set::{CardSetStd, CardSet},
         cards::*,
         suits::Suit};
     use crate::actions::card_pack::CardPack;
 
     #[test]
     fn vec_no_grouping(){
-        let mut hand = CardSet::empty();
+        let mut hand = CardSetStd::empty();
         for c in [ACE_SPADES, KING_SPADES, QUEEN_SPADES, ACE_HEARTS, TEN_SPADES, JACK_SPADES, KING_HEARTS]{
         hand.insert_card(c).unwrap();
         }

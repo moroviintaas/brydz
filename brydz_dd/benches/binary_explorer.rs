@@ -6,7 +6,7 @@ use brydz_core::contract::{Contract, ContractMechanics, ContractParametersGen};
 use brydz_core::deal::fair_bridge_partial_deal;
 use brydz_core::karty::cards::{Card, Card2SymTrait};
 use brydz_core::karty::figures::*;
-use brydz_core::karty::hand::CardSet;
+use brydz_core::karty::set::CardSetStd;
 use brydz_core::karty::suits::{Suit::*, SUITS};
 use brydz_core::player::side::Side::{East, North};
 use criterion::{ criterion_group, criterion_main, Criterion, BenchmarkId};
@@ -15,7 +15,7 @@ use brydz_dd::node::TrickNode;
 use brydz_dd::actions::{DistinctCardGrouper, ActionOptimiser, NeighbourCardGrouper};
 
 pub fn prepare_explorer<G: ActionOptimiser> (card_supply: Vec<Card>, first_side: Side, north_south_target: u8) -> BinaryExplorer<G, DummyNodeStore>{
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), first_side);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), first_side);
     let contract = Contract::new(
         ContractParametersGen::new(East, Bid::init(Trump::Colored(Diamonds), north_south_target).unwrap()));
         let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();

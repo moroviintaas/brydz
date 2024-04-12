@@ -2,7 +2,7 @@ use std::ops::Index;
 use log::{debug, error};
 use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
-use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
+use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use amfiteatr_core::env::{EnvironmentStateSequential, EnvironmentStateUniScore};
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
@@ -20,16 +20,16 @@ use crate::amfiteatr::state::ContractAction::{PlaceCard, ShowHand};
 
 #[derive(Clone, Debug)]
 pub struct ContractEnvStateComplete{
-    dummy_hand: CardSet,
-    declarer_hand: CardSet,
-    whist_hand: CardSet,
-    offside_hand: CardSet,
+    dummy_hand: CardSetStd,
+    declarer_hand: CardSetStd,
+    whist_hand: CardSetStd,
+    offside_hand: CardSetStd,
     contract: Contract,
     dummy_shown: bool,
 }
 
 impl Index<Side> for ContractEnvStateComplete{
-    type Output = CardSet;
+    type Output = CardSetStd;
 
     fn index(&self, index: Side) -> &Self::Output {
         match index - self.contract.declarer(){
@@ -46,12 +46,12 @@ impl Index<Side> for ContractEnvStateComplete{
 
 impl ContractEnvStateComplete{
     pub fn new(contract: Contract,
-               declarer_hand: CardSet, whist_hand: CardSet,
-               dummy_hand: CardSet, offside_hand: CardSet)
-    -> Self{
+               declarer_hand: CardSetStd, whist_hand: CardSetStd,
+               dummy_hand: CardSetStd, offside_hand: CardSetStd)
+               -> Self{
         Self{contract, declarer_hand, whist_hand, dummy_hand, offside_hand, dummy_shown: false}
     }
-    fn _index_mut(&mut self, index: Side) -> &mut CardSet{
+    fn _index_mut(&mut self, index: Side) -> &mut CardSetStd {
         match index - self.contract.declarer(){
             0 => &mut self.declarer_hand,
             1 => &mut self.whist_hand,
@@ -63,7 +63,7 @@ impl ContractEnvStateComplete{
 }
 
 impl ContractState for ContractEnvStateComplete{
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         Some(&self.dummy_hand)
     }
 
@@ -169,7 +169,7 @@ impl EnvironmentStateSequential<ContractDP> for ContractEnvStateComplete{
                 };
 
                 if !self[actual_side].contains(&card){
-                    return Err(CardSetErrorGen::CardNotInHand(card).into());
+                    return Err(CardSetErrorGen::CardNotInSet(card).into());
                 }
                 if let Some(called_suit) = self.contract.current_trick().called_suit(){
                     if called_suit != card.suit() && self[actual_side].contains_in_suit(&called_suit){

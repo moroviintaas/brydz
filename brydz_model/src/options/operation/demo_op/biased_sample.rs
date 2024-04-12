@@ -3,7 +3,7 @@ use brydz_core::deal::BiasedHandDistribution;
 use brydz_core::player::side::Side::North;
 use brydz_core::amfiteatr::spec::ContractDP;
 use karty::cards::ACE_SPADES;
-use karty::hand::HandTrait;
+use karty::set::CardSet;
 use amfiteatr_core::error::AmfiteatrError;
 
 pub fn test_sample_biased_deal_crossing() -> Result<(), AmfiteatrError<ContractDP>>{

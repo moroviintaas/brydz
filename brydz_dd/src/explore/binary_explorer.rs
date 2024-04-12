@@ -3,7 +3,7 @@ use log::debug;
 use smallvec::SmallVec;
 use brydz_core::contract::{Contract, ContractMechanics};
 use brydz_core::error::{BridgeCoreError, BridgeCoreErrorGen};
-use brydz_core::karty::hand::CardSet;
+use brydz_core::karty::set::CardSetStd;
 use brydz_core::player::axis::Axis;
 use brydz_core::player::axis::Axis::{NorthSouth, EastWest};
 use brydz_core::player::side::Side;
@@ -49,7 +49,7 @@ impl<G: ActionOptimiser, A:NodeStoreTrait> BinaryExplorer<G, A>{
     ///     karty::{
     ///         suits::Suit::*,
     ///         cards::*,
-    ///         hand::CardSet,
+    ///         set::CardSetStd,
     ///         card_set
     ///     }
     /// };
@@ -81,7 +81,7 @@ impl<G: ActionOptimiser, A:NodeStoreTrait> BinaryExplorer<G, A>{
             return Ok((self.state().contract().total_tricks_taken_axis(Axis::NorthSouth) as u8) >= self.north_south_target)
         }
         if self.game_state.contract().current_trick().is_empty(){
-            let potential = <CardSet as Into<u64>>::into(self.game_state.actual_node().hands()[&self.current_side()]).count_ones() as u8;
+            let potential = <CardSetStd as Into<u64>>::into(self.game_state.actual_node().hands()[&self.current_side()]).count_ones() as u8;
             let actual = self.game_state.contract().total_tricks_taken_axis(NorthSouth);
             if actual as u8 >= self.north_south_target{
                 return Ok(true)

@@ -7,7 +7,7 @@ use brydz_core::cards::trump::{Trump, TrumpGen};
 use brydz_core::contract::ContractParameters;
 use brydz_core::deal::{BiasedHandDistribution, ContractGameDescription, DealDistribution, fair_bridge_deal};
 use brydz_core::player::side::Side;
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use karty::random::RandomSymbol;
 use karty::suits::Suit;
 use crate::error::BrydzModelError;
@@ -55,7 +55,7 @@ fn generate_single_contract(params: &GenContractOptions, rng: &mut ThreadRng) ->
 
 
     let (template, cards) = match params.deal_method{
-        DealMethod::Fair => (DealDistribution::Fair, fair_bridge_deal::<CardSet>()),
+        DealMethod::Fair => (DealDistribution::Fair, fair_bridge_deal::<CardSetStd>()),
 
         DealMethod::Biased => {
             let mut rng = thread_rng();

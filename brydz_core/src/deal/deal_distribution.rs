@@ -1,7 +1,7 @@
 use std::boxed::Box;
 use rand::distributions::Distribution;
 use rand::Rng;
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use crate::deal::{BiasedHandDistribution, distribute_standard_deck_on_4};
 use crate::player::side::SideMap;
 
@@ -12,8 +12,8 @@ pub enum DealDistribution{
     Biased(Box<BiasedHandDistribution>),
 }
 
-impl Distribution<SideMap<CardSet>> for DealDistribution{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SideMap<CardSet> {
+impl Distribution<SideMap<CardSetStd>> for DealDistribution{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SideMap<CardSetStd> {
         match self{
             DealDistribution::Biased(distr) => {
                 distr.as_ref().sample(rng)

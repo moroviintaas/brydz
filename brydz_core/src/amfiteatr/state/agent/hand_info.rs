@@ -1,21 +1,21 @@
-use karty::hand::{CardSet};
+use karty::set::{CardSetStd};
 
 
 pub trait HandInfo{
     //fn side(&self) -> Side;
-    fn own_cards(&self) -> CardSet;
+    fn own_cards(&self) -> CardSetStd;
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone)]
 pub struct HandInfoSimple {
     //side: Side,
-    own_cards: CardSet,
+    own_cards: CardSetStd,
 }
 
 impl HandInfoSimple{
     //pub fn new(side: Side, cards: CardSet) -> Self{
-    pub fn new(cards: CardSet) -> Self{
+    pub fn new(cards: CardSetStd) -> Self{
         Self{own_cards: cards}
     }
 }
@@ -27,7 +27,7 @@ impl HandInfo for HandInfoSimple{
 
      */
 
-    fn own_cards(&self) -> CardSet {
+    fn own_cards(&self) -> CardSetStd {
         self.own_cards
     }
 }

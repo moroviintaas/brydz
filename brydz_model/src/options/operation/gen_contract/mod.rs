@@ -43,13 +43,13 @@ pub struct GenContractOptions {
     #[arg(short = 'p', long = "probability_file", help = "Path to file with probabilities of cards")]
     pub probability_file: Option<PathBuf>,
     /*
-    #[arg(short = 'n', long = "north_type", help = "Type of North's hand information set", default_value_t = HandInfoVariants::Simple)]
+    #[arg(short = 'n', long = "north_type", help = "Type of North's set information set", default_value_t = HandInfoVariants::Simple)]
     pub north_hand_type: HandInfoVariants,
-    #[arg(short = 'e', long = "east_type", help = "Type of East's hand information set", default_value_t = HandInfoVariants::Simple)]
+    #[arg(short = 'e', long = "east_type", help = "Type of East's set information set", default_value_t = HandInfoVariants::Simple)]
     pub east_hand_type: HandInfoVariants,
-    #[arg(short = 's', long = "south_type", help = "Type of South's hand information set", default_value_t = HandInfoVariants::Simple)]
+    #[arg(short = 's', long = "south_type", help = "Type of South's set information set", default_value_t = HandInfoVariants::Simple)]
     pub south_hand_type: HandInfoVariants,
-    #[arg(short = 'w', long = "west_type", help = "Type of West's hand information set", default_value_t = HandInfoVariants::Simple)]
+    #[arg(short = 'w', long = "west_type", help = "Type of West's set information set", default_value_t = HandInfoVariants::Simple)]
     pub west_hand_type: HandInfoVariants,
 
      */

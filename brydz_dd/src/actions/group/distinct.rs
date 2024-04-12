@@ -4,7 +4,7 @@ use crate::actions::card_pack::CardPack;
 use crate::actions::{ActionOptimiser};
 use brydz_core::contract::{ContractMechanics};
 use brydz_core::error::BridgeCoreError;
-use brydz_core::karty::hand::HandSuitedTrait;
+use brydz_core::karty::set::HandSuitedTrait;
 use brydz_core::karty::suits::{SuitMap};
 use crate::explore::ExplorerGameState;
 

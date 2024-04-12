@@ -1,7 +1,7 @@
 use smallvec::SmallVec;
 use brydz_core::contract::ContractMechanics;
 use brydz_core::error::{BridgeCoreError};
-use brydz_core::karty::hand::{HandSuitedTrait, HandTrait};
+use brydz_core::karty::set::{HandSuitedTrait, CardSet};
 use brydz_core::karty::suits::{Suit, SuitMap};
 use brydz_core::karty::symbol::CardSymbol;
 use brydz_core::meta::{CONTRACT_ACTION_ESTIMATED_SUIT_MAP_BOUND, CONTRACT_ACTION_SPACE_BOUND};
@@ -101,7 +101,7 @@ impl ActionOptimiser for NeighbourCardGrouper{
                 true => {
                     //todo!();
                     //we are forced to iterate over this single suit
-                    //SuitMap::single(*called, hand.suit_iterator(&called).collect())
+                    //SuitMap::single(*called, set.suit_iterator(&called).collect())
                     SuitMap::single(&called, self.stack.last().unwrap_or(&NeighbourCache::default())[&state.current_side()][called].clone())//.clone()
                 }
                 false => self.stack.last().unwrap_or(&NeighbourCache::default())[&state.current_side()].clone()

@@ -1,5 +1,5 @@
 use std::thread;
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use karty::suits::Suit::Spades;
 use amfiteatr_core::agent::{AutomaticAgent, RandomPolicy, RewardedAgent, StatefulAgent, EvaluatedInformationSet};
 use amfiteatr_core::env::RoundRobinUniversalEnvironment;
@@ -31,7 +31,7 @@ fn random_agents_sync_comm(){
     let env_initial_state = ContractEnvStateMin::new(initial_contract.clone(), None);
     let mut simple_env = ContractEnv::new(env_initial_state, comm_assotiation);
 
-    let card_deal = fair_bridge_deal::<CardSet>();
+    let card_deal = fair_bridge_deal::<CardSetStd>();
     let (hand_north, hand_east, hand_south, hand_west) = card_deal.destruct();
 
     let initial_state_east = ContractAgentInfoSetSimple::new(East, hand_east, initial_contract.clone(), None);

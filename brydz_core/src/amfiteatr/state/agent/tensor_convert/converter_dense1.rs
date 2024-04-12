@@ -84,7 +84,7 @@ ConvStateToTensor<Box<dyn InformationSet<ContractDP, ActionIteratorType=S::Actio
 pub(crate) mod contract_state_converter_common {
     use karty::cards::{Card2SymTrait, DECK_SIZE, STANDARD_DECK_CDHS};
     use karty::figures::Figure;
-    use karty::hand::{ HandTrait};
+    use karty::set::{CardSet};
     use karty::suits::Suit;
     use karty::symbol::CardSymbol;
     use crate::bidding::Doubling;

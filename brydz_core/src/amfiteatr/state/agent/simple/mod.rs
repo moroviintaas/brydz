@@ -1,5 +1,5 @@
 use smallvec::SmallVec;
-use karty::hand::{HandSuitedTrait, HandTrait, CardSet};
+use karty::set::{HandSuitedTrait, CardSet, CardSetStd};
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::error::BridgeCoreError;
 use crate::meta::HAND_SIZE;
@@ -24,13 +24,13 @@ use amfiteatr_core::error::AmfiteatrError;
 #[derive(Debug, Clone)]
 pub struct ContractAgentInfoSetSimple {
     side: Side,
-    hand: CardSet,
-    dummy_hand: Option<CardSet>,
+    hand: CardSetStd,
+    dummy_hand: Option<CardSetStd>,
     contract: Contract
 }
 
 impl ContractAgentInfoSetSimple {
-    pub fn new(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>) -> Self{
+    pub fn new(side: Side, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>) -> Self{
         Self{side, hand, dummy_hand, contract}
     }
 
@@ -58,10 +58,10 @@ impl ContractAgentInfoSetSimple {
     /// assert!(!i_s.possibly_has_card(East, &KING_SPADES)); // hand not known, card used
     /// assert!(!i_s.possibly_has_card(North, &TWO_SPADES)); // hand not known, exhausted suit
     /// assert!(i_s.possibly_has_card(North, &THREE_HEARTS)); //hand not known, maybe
-    /// assert!(!i_s.possibly_has_card(North, &KING_HEARTS)); //hand not known, card in own hand
-    /// assert!(!i_s.possibly_has_card(North, &TEN_HEARTS)); //hand not known, card in dummy hand
-    /// assert!(!i_s.possibly_has_card(South, &TWO_SPADES)); // dummy hand known, does not have
-    /// assert!(i_s.possibly_has_card(South, &TEN_HEARTS)); // dummy hand known, has
+    /// assert!(!i_s.possibly_has_card(North, &KING_HEARTS)); //hand not known, card in own set
+    /// assert!(!i_s.possibly_has_card(North, &TEN_HEARTS)); //hand not known, card in dummy set
+    /// assert!(!i_s.possibly_has_card(South, &TWO_SPADES)); // dummy set known, does not have
+    /// assert!(i_s.possibly_has_card(South, &TEN_HEARTS)); // dummy set known, has
     /// ```
     pub fn possibly_has_card(&self, side: Side, card: &Card) -> bool{
         if !self.contract.side_possibly_has_card(side, card){
@@ -223,7 +223,7 @@ impl EvaluatedInformationSet<ContractDP, i32> for ContractAgentInfoSetSimple {
 }
 
 impl RenewableContractInfoSet for ContractAgentInfoSetSimple{
-    fn renew(&mut self, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>) {
+    fn renew(&mut self, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>) {
         self.hand = hand;
         self.contract = contract;
         self.dummy_hand = dummy_hand;
@@ -231,7 +231,7 @@ impl RenewableContractInfoSet for ContractAgentInfoSetSimple{
 }
 
 impl CreatedContractInfoSet for ContractAgentInfoSetSimple{
-    fn create_new(side: Side, hand: CardSet, contract: Contract, dummy_hand: Option<CardSet>, _distribution: BiasedHandDistribution) -> Self {
+    fn create_new(side: Side, hand: CardSetStd, contract: Contract, dummy_hand: Option<CardSetStd>, _distribution: BiasedHandDistribution) -> Self {
         Self{
             side,
             hand,
@@ -253,7 +253,7 @@ mod tensor{
     //use tensorflow::{QUInt8, Tensor};
     use crate::amfiteatr::state::ContractAgentInfoSetSimple;
     use karty::cards::{Card2SymTrait, DECK_SIZE, STANDARD_DECK_CDHS};
-    use karty::hand::{ HandTrait};
+    use karty::set::{CardSet};
     use karty::register::Register;
     use karty::symbol::CardSymbol;
     use crate::bidding::Doubling;
@@ -337,7 +337,7 @@ mod tensor{
                 } else if !state.contract.used_cards().is_registered(&card){
                     match state.dummy_hand{
                         None => {
-                            //dummy's hand not shown yet
+                            //dummy's set not shown yet
                             for i in 1..=3{
                                 array[(i*DECK_SIZE) + card.usize_index()] = ONE_IN_THREE;
                             }
@@ -425,7 +425,7 @@ mod tensor{
                 } else if !state.contract.used_cards().is_registered(&card){
                     match state.dummy_hand{
                         None => {
-                            //dummy's hand not shown yet
+                            //dummy's set not shown yet
                             for i in 1..=3{
                                 array[(i*DECK_SIZE) + card.usize_index()] = 1.0/3.0;
                             }
@@ -532,11 +532,11 @@ impl ContractInfoSet for ContractAgentInfoSetSimple{
         &self.contract
     }
 
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         self.dummy_hand.as_ref()
     }
 
-    fn hand(&self) -> &CardSet {
+    fn hand(&self) -> &CardSetStd {
         &self.hand
     }
 
@@ -588,7 +588,7 @@ impl ContractInfoSet for ContractAgentInfoSetSimple{
 mod tests{
     use std::str::FromStr;
     use karty::cards::{*};
-    use karty::hand::CardSet;
+    use karty::set::CardSetStd;
     use karty::suits::Suit::Hearts;
     use amfiteatr_core::agent::InformationSet;
     use crate::bidding::Bid;
@@ -606,8 +606,8 @@ mod tests{
                 East,
                 Bid::init(TrumpGen::Colored(Hearts), 2).unwrap() ));
         let mut info_set = ContractAgentInfoSetSimple::new(North,
-                                                       CardSet::from_str("AT86.KJT93.4T.2A").unwrap(),
-                                                       contract, None);
+                                                           CardSetStd::from_str("AT86.KJT93.4T.2A").unwrap(),
+                                                           contract, None);
 
         let state_as_vec:[u8; 222] = (&info_set).into();
         assert_eq!(Vec::from(state_as_vec),
@@ -657,7 +657,7 @@ mod tests{
         );
         //AT86.KJT93.4T.2A
         info_set.update(ContractStateUpdate::new(West,
-                                                 ShowHand(CardSet::from_str("QJ3.8764.A95.T96").unwrap()))).unwrap();
+                                                 ShowHand(CardSetStd::from_str("QJ3.8764.A95.T96").unwrap()))).unwrap();
         info_set.update(ContractStateUpdate::new(West,
                                                  PlaceCard(FIVE_DIAMONDS))).unwrap();
 

@@ -6,7 +6,7 @@ use brydz_core::contract::{Contract, ContractMechanics, ContractParametersGen};
 use brydz_core::deal::fair_bridge_partial_deal;
 use brydz_core::karty::cards::{Card, Card2SymTrait};
 use brydz_core::karty::figures::*;
-use brydz_core::karty::hand::CardSet;
+use brydz_core::karty::set::CardSetStd;
 use brydz_core::karty::suits::{Suit::*, SUITS};
 use brydz_core::player::side::Side::{East, North};
 use criterion::{ criterion_group, criterion_main, Criterion, BenchmarkId};
@@ -15,7 +15,7 @@ use brydz_dd::node::TrickNode;
 use brydz_dd::actions::DistinctCardGrouper;
 
 pub fn prepare_explorer(card_supply: Vec<Card>, first_side: Side) -> Explorer<DistinctCardGrouper, DummyNodeStore>{
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), first_side);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), first_side);
     let contract = Contract::new(
         ContractParametersGen::new(East, Bid::init(Trump::Colored(Diamonds), 1).unwrap()));
         let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
@@ -23,7 +23,7 @@ pub fn prepare_explorer(card_supply: Vec<Card>, first_side: Side) -> Explorer<Di
 }
 
 
-pub fn alphabeta_hint(hands: SideMap<CardSet>){
+pub fn alphabeta_hint(hands: SideMap<CardSetStd>){
     let contract = Contract::new(
     ContractParametersGen::new(East, Bid::init(Trump::Colored(Diamonds), 1).unwrap()));
 
@@ -39,7 +39,7 @@ pub fn hint_12_cards(){
 
     let card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen], vec![Spades, Hearts, Diamonds, Clubs]).collect();
 
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
     let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     let mut explorer = Explorer::<DistinctCardGrouper, DummyNodeStore>::new_checked(contract, node).unwrap();
     let _result_h = explorer.hint().unwrap();
@@ -55,7 +55,7 @@ pub fn hint_16_cards(){
 
     let card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen, Jack], vec![Spades, Hearts, Diamonds, Clubs]).collect();
 
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
     let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     let mut explorer = Explorer::<DistinctCardGrouper, DummyNodeStore>::new_checked(contract, node).unwrap();
     let _result_h = explorer.hint().unwrap();
@@ -70,7 +70,7 @@ pub fn hint_20_cards(){
 
     let card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen, Jack, F10], vec![Spades, Hearts, Diamonds, Clubs]).collect();
 
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
     let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     let mut explorer = Explorer::<DistinctCardGrouper, DummyNodeStore>::new_checked(contract, node).unwrap();
     let _result_h = explorer.hint().unwrap();
@@ -87,7 +87,7 @@ pub fn hint_24_cards(){
 
     let card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen, Jack, F10, F9], vec![Spades, Hearts, Diamonds, Clubs]).collect();
 
-    let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+    let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
     let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     let mut explorer = Explorer::<DistinctCardGrouper, DummyNodeStore>::new_checked(contract, node).unwrap();
     let _result_h = explorer.hint().unwrap();
@@ -96,7 +96,7 @@ pub fn hint_24_cards(){
 
 }
 
-pub fn explorer_hint(hands: &SideMap<CardSet>){
+pub fn explorer_hint(hands: &SideMap<CardSetStd>){
     let contract = Contract::new(
     ContractParametersGen::new(East, Bid::init(Trump::Colored(Diamonds), 1).unwrap()));
     let node = TrickNode::new_checked(*hands, contract.current_side()).unwrap();
@@ -118,7 +118,7 @@ pub fn hint_range_2_6(c: &mut Criterion){
         group.bench_function(BenchmarkId::new("Alpha beta on ", parameter_string),  |b|{
             b.iter(|| {
                 let card_supply: Vec<Card> = Card::card_subset(figures[..num].to_vec(), SUITS).collect();
-                let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+                let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
                 explorer_hint(&hands)
             })
         });

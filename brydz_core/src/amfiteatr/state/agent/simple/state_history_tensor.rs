@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use karty::cards::{ DECK_SIZE, STANDARD_DECK_CDHS};
-use karty::hand::{HandTrait};
+use karty::set::{CardSet};
 use karty::symbol::CardSymbol;
 use crate::cards::trump::TrumpGen;
 use crate::contract::ContractMechanics;

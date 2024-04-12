@@ -8,7 +8,7 @@ mod deal_distribution;
 //mod stack_hand;
 //mod hand_vector;
 //mod hand_set;
-//pub mod hand;
+//pub mod set;
 
 pub use hand_distribution::*;
 #[cfg(feature = "amfiteatr")]
@@ -19,4 +19,4 @@ pub use contract_game_description::*;
 pub use deal_distribution::*;
 
 
-//pub use crate::karty::hand;
+//pub use crate::karty::set;

@@ -12,7 +12,7 @@ use std::fmt::{Debug};
 use std::sync::mpsc::channel;
 use std::thread;
 use smallvec::SmallVec;
-use brydz_core::karty::hand::CardSet;
+use brydz_core::karty::set::CardSetStd;
 use brydz_core::player::axis::Axis::NorthSouth;
 use crate::actions::ActionOptimiser;
 use crate::explore::{ExploreOutput, ExplorerGameState, ExplorerStateUpdate};
@@ -80,7 +80,7 @@ impl<G: ActionOptimiser, A: NodeStoreTrait > Explorer<G, A>{
     ///     karty::{
     ///         suits::Suit::*,
     ///         cards::*,
-    ///         hand::CardSet,
+    ///         set::CardSetStd,
     ///         card_set
     ///     }
     /// };
@@ -116,7 +116,7 @@ impl<G: ActionOptimiser, A: NodeStoreTrait > Explorer<G, A>{
             }
 
             if let ExploreOutput::Number(min) = north_south_min{
-                let potential = <CardSet as Into<u64>>::into(self.game_state.actual_node().hands()[&self.current_side()]).count_ones() as u8
+                let potential = <CardSetStd as Into<u64>>::into(self.game_state.actual_node().hands()[&self.current_side()]).count_ones() as u8
                 + self.game_state.contract().total_tricks_taken_axis(NorthSouth) as u8;
                 if potential < min{
                     return Ok(ExploreOutput::Number(potential))
@@ -490,7 +490,7 @@ mod tests{
     use brydz_core::karty::cards::{Card, Card2SymTrait};
     use brydz_core::karty::error::CardSetError;
     use brydz_core::karty::figures::{Ace, King, Queen};
-    use brydz_core::karty::hand::{HandTrait, CardSet};
+    use brydz_core::karty::set::{CardSet, CardSetStd};
     use brydz_core::karty::suits::Suit::{Clubs, Diamonds, Hearts, Spades};
     use brydz_core::player::side::Side::{East, North, South, West};
     use crate::actions::DistinctCardGrouper;
@@ -504,7 +504,7 @@ mod tests{
         let card_supply: Vec<Card> = Card::card_subset(
             vec![Ace, King, Queen],
             vec![Spades, Hearts, Diamonds, Clubs]).collect();
-        let hands = fair_bridge_partial_deal::<CardSet>(card_supply, North);
+        let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply, North);
         let cards_north = hands[&North].to_vec();
         let cards_east = hands[&East].to_vec();
 
@@ -530,7 +530,7 @@ mod tests{
             vec![Ace, King, Queen],
             vec![Spades, Hearts, Diamonds, Clubs]).collect();
         card_supply.pop();
-        let hands = fair_bridge_partial_deal::<CardSet>(card_supply, North);
+        let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply, North);
 
         let result_node = TrickNode::new_checked(hands, North);
         assert_eq!(result_node, Err(CardSetError::DifferentLengths(2, 3)));
@@ -541,7 +541,7 @@ mod tests{
         let card_supply: Vec<Card> = Card::card_subset(
             vec![Ace, King, Queen],
             vec![Spades, Hearts, Diamonds, Clubs]).collect();
-        let hands = fair_bridge_partial_deal::<CardSet>(card_supply, North);
+        let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply, North);
         //let mut cards_north = hands[&North].to_vec();
         //let mut cards_east = hands[&East].to_vec();
 

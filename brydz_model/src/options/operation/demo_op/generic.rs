@@ -7,7 +7,7 @@ use brydz_core::player::side::{Side, SideMap};
 use brydz_core::amfiteatr::comm::ContractEnvSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAgentInfoSetSimple, ContractDummyState, ContractEnvStateMin};
-use karty::hand::CardSet;
+use karty::set::CardSetStd;
 use karty::suits::Suit::Spades;
 use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy};
 use amfiteatr_core::comm::DynEndpoint;
@@ -54,7 +54,7 @@ pub fn test_generic_model() -> Result<(), AmfiteatrError<ContractDP>>{
     let comm_south = ComplexComm2048::StdSync(comm_south);
     let comm_west = ComplexComm2048::StdSync(comm_west);
 */
-    let card_deal = fair_bridge_deal::<CardSet>();
+    let card_deal = fair_bridge_deal::<CardSetStd>();
     let (hand_north, hand_east, hand_south, hand_west) = card_deal.destruct();
     let initial_contract = Contract::new(contract_params);
 

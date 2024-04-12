@@ -2,12 +2,12 @@ use karty::symbol::CardSymbol;
 use rand::{prelude::SliceRandom, Rng, thread_rng};
 
 use karty::cards::STANDARD_DECK;
-use karty::hand::{CardSet, HandTrait};
+use karty::set::{CardSetStd, CardSet};
 
 use crate::player::side::{Side, SideMap};
 use crate::player::side::Side::{East, North, South, West};
 
-//use super::hand::HandTrait;
+//use super::set::HandTrait;
 
 pub struct HandDistribution{
 
@@ -20,7 +20,7 @@ pub struct HandDistribution{
 /// ```
 /// use brydz_core::deal::fair_bridge_deal;
 /// use karty::cards::STANDARD_DECK;
-/// use karty::hand::{HandSetStd, HandTrait};
+/// use karty::set::{HandSetStd, CardSet};
 /// let mut table = fair_bridge_deal::<HandSetStd>();
 /// assert_eq!(table.north.len(), 13);
 /// assert_eq!(table.east.len(), 13);
@@ -34,8 +34,8 @@ pub struct HandDistribution{
 /// ```
 /// use brydz_core::deal::fair_bridge_deal;
 /// use karty::cards::STANDARD_DECK;
-/// use karty::hand::{HandTrait, CardSet};
-/// let mut table = fair_bridge_deal::<CardSet>();
+/// use karty::set::{CardSet, CardSetStd};
+/// let mut table = fair_bridge_deal::<CardSetStd>();
 /// assert_eq!(table.north.len(), 13);
 /// assert_eq!(table.east.len(), 13);
 /// assert_eq!(table.west.len(), 13);
@@ -45,7 +45,7 @@ pub struct HandDistribution{
 /// }
 ///
 /// ```
-pub fn fair_bridge_deal<H: HandTrait>() -> SideMap<H>{
+pub fn fair_bridge_deal<H: CardSet>() -> SideMap<H>{
     let mut result = SideMap::<H>{
         north: H::empty(),
         east: H::empty(),
@@ -79,9 +79,9 @@ pub fn fair_bridge_deal<H: HandTrait>() -> SideMap<H>{
 }
 
 
-pub fn distribute_standard_deck_on_4<R: Rng + ?Sized>(rng: &mut R) -> SideMap<CardSet>{
+pub fn distribute_standard_deck_on_4<R: Rng + ?Sized>(rng: &mut R) -> SideMap<CardSetStd>{
     let mut cards = STANDARD_DECK;
-    let mut result = SideMap::<CardSet>::new_symmetric(CardSet::empty());
+    let mut result = SideMap::<CardSetStd>::new_symmetric(CardSetStd::empty());
     cards.shuffle(rng);
     for i in 0..cards.len()/4{
         result.north.insert_card(cards[i*4]).unwrap();
@@ -101,10 +101,10 @@ pub fn distribute_standard_deck_on_4<R: Rng + ?Sized>(rng: &mut R) -> SideMap<Ca
 /// use brydz_core::player::side::Side::{North, West};
 /// use karty::cards::{Card, Card2SymTrait};
 /// use karty::figures::{Ace, Jack, King, Queen, F10};
-/// use karty::hand::{HandTrait, CardSet};
+/// use karty::set::{CardSet, CardSetStd};
 /// use karty::suits::Suit::{Clubs, Diamonds, Hearts, Spades};
 /// let card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen], vec![Spades, Hearts, Diamonds, Clubs]).collect();
-/// let hands = fair_bridge_partial_deal::<CardSet>(card_supply, North);
+/// let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply, North);
 /// assert_eq!(hands[&North].len(), 3);
 /// assert_eq!(hands[&West].len(), 3);
 /// ```
@@ -113,22 +113,22 @@ pub fn distribute_standard_deck_on_4<R: Rng + ?Sized>(rng: &mut R) -> SideMap<Ca
 /// use brydz_core::player::side::Side::{East, North, South, West};
 /// use karty::cards::{Card, Card2SymTrait};
 /// use karty::figures::{Ace, Jack, King, Queen, F10};
-/// use karty::hand::{HandTrait, CardSet};
+/// use karty::set::{CardSet, CardSetStd};
 /// use karty::suits::Suit::{Clubs, Diamonds, Hearts, Spades};
 /// let mut card_supply: Vec<Card> = Card::card_subset(vec![Ace, King, Queen], vec![Spades, Hearts, Diamonds, Clubs]).collect();
 /// card_supply.pop();
 /// card_supply.pop();
-/// let hands = fair_bridge_partial_deal::<CardSet>(card_supply.clone(), North);
+/// let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply.clone(), North);
 /// assert_eq!(hands[&North].len(), 2);
 /// assert_eq!(hands[&West].len(), 3);
 /// assert_eq!(hands[&South].len(), 3);
 /// assert_eq!(hands[&East].len(), 2);
 /// card_supply.pop();
-/// let hands = fair_bridge_partial_deal::<CardSet>(card_supply, North);
+/// let hands = fair_bridge_partial_deal::<CardSetStd>(card_supply, North);
 /// assert_eq!(hands[&West].len(), 3);
 /// assert_eq!(hands[&South].len(), 2);
 /// ```
-pub fn fair_bridge_partial_deal<H: HandTrait>(mut card_supply: Vec<H::CardType>, first_side: Side ) -> SideMap<H> {
+pub fn fair_bridge_partial_deal<H: CardSet>(mut card_supply: Vec<H::CardType>, first_side: Side ) -> SideMap<H> {
     let mut result = SideMap::<H>{
         north: H::empty(),
         east: H::empty(),

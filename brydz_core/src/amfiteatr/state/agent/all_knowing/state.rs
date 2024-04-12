@@ -1,7 +1,7 @@
 use log::{debug, error};
 use smallvec::SmallVec;
 use karty::cards::{Card, Card2SymTrait};
-use karty::hand::{CardSet, HandSuitedTrait, HandTrait};
+use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
 use amfiteatr_core::domain::{DomainParameters, Renew};
@@ -21,13 +21,13 @@ use crate::amfiteatr::state::{ContractAction, ContractInfoSet, ContractStateUpda
 
 pub struct ContractAgentInfoSetAllKnowing {
     side: Side,
-    deal: SideMap<CardSet>,
-    initial_deal: SideMap<CardSet>,
+    deal: SideMap<CardSetStd>,
+    initial_deal: SideMap<CardSetStd>,
     contract: Contract,
 }
 
 impl ContractAgentInfoSetAllKnowing{
-    pub fn new(side: Side, deal: SideMap<CardSet>, contract: Contract) -> Self{
+    pub fn new(side: Side, deal: SideMap<CardSetStd>, contract: Contract) -> Self{
         Self{side, deal, contract, initial_deal: deal}
     }
     pub fn side(&self) -> &Side{
@@ -36,13 +36,13 @@ impl ContractAgentInfoSetAllKnowing{
     pub fn contract(&self) -> &Contract{
         &self.contract
     }
-    pub fn hand(&self) -> &CardSet{
+    pub fn hand(&self) -> &CardSetStd {
         &self.deal[&self.side]
     }
-    pub fn dummy_hand(&self) -> Option<&CardSet>{
+    pub fn dummy_hand(&self) -> Option<&CardSetStd>{
         Some(&self.deal[&self.contract.dummy()])
     }
-    pub fn initial_deal(&self) -> &SideMap<CardSet>{
+    pub fn initial_deal(&self) -> &SideMap<CardSetStd>{
         &self.initial_deal
     }
 
@@ -82,10 +82,10 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
             ContractAction::ShowHand(dhand) => {
                 let local_dhand = self.dummy_hand().unwrap();
                 if local_dhand != &dhand{
-                    error!("Dummy shown hand ({dhand:#}) which is different than known before ({local_dhand:#})");
+                    error!("Dummy shown set ({dhand:#}) which is different than known before ({local_dhand:#})");
                     return Err(BridgeCoreError::Hand(CardSetErrorGen::ExpectedEqualCardSets {expected: local_dhand.into_iter().collect(), found: dhand.into_iter().collect()}))
                     //todo!()
-                    //panic!("Currenly not implemented what to do when dummys showed hand is different than known in infoset")
+                    //panic!("Currenly not implemented what to do when dummys showed set is different than known in infoset")
                 }
                 Ok(())
 
@@ -101,7 +101,7 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
                 };
                 debug!("Agent {:?}: actual_side: {:?}", &self.side, &actual_side);
                 if !self.deal[&actual_side].contains(&card){
-                    //used card known to not be in players hand
+                    //used card known to not be in players set
                     error!("Player {} reports error due to his complete knowledge. Current player: {actual_side: } does not have card {card:#} in hand (to my knowledge: {:#}).\
                     Cards are: North: {:#}, East: {:#}, West: {:#}, South: {:#}. Declarer is on {:?}.",
                         self.side(),
@@ -187,11 +187,11 @@ impl ContractInfoSet for ContractAgentInfoSetAllKnowing{
         &self.contract
     }
 
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         self.dummy_hand()
     }
 
-    fn hand(&self) -> &CardSet {
+    fn hand(&self) -> &CardSetStd {
         self.hand()
     }
 

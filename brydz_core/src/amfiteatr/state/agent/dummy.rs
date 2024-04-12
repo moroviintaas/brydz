@@ -1,5 +1,5 @@
 use smallvec::{SmallVec, smallvec};
-use karty::hand::{HandTrait, CardSet};
+use karty::set::{CardSet, CardSetStd};
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::error::BridgeCoreError;
 use crate::player::side::Side;
@@ -16,12 +16,12 @@ use crate::amfiteatr::spec::ContractDP;
 #[derive(Debug, Clone)]
 pub struct ContractDummyState {
     side: Side,
-    hand: CardSet,
+    hand: CardSetStd,
     contract: Contract
 }
 
 impl ContractDummyState {
-    pub fn new(side: Side, hand: CardSet, contract: Contract) -> Self{
+    pub fn new(side: Side, hand: CardSetStd, contract: Contract) -> Self{
         Self{side, hand, contract}
     }
 }
@@ -44,7 +44,7 @@ impl InformationSet<ContractDP> for ContractDummyState {
 
         match action{
             ContractAction::ShowHand(h) =>{
-                debug!("Dummy ({}) got state update of shown hand {:#}", side, h);
+                debug!("Dummy ({}) got state update of shown set {:#}", side, h);
                 Ok(())
 
             }

@@ -15,7 +15,7 @@ pub use score::*;
 pub use trick::*;
 pub use distribution::*;
 pub use correctness::*;
-//pub use hand::*;
+//pub use set::*;
 pub use crate::karty::error::CardSetErrorGen;
 
 

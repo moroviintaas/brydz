@@ -1,7 +1,7 @@
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use karty::cards::{Card, DECK_SIZE};
-use karty::hand::HandTrait;
+use karty::set::CardSet;
 use karty::symbol::CardSymbol;
 use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, SimpleConvertToTensor};
 use crate::contract::ContractMechanics;

@@ -1,4 +1,4 @@
-use karty::hand::{HandTrait, CardSet};
+use karty::set::{CardSet, CardSetStd};
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::error::BridgeCoreError;
 use crate::amfiteatr::state::{ContractAction, ContractState, ContractStateUpdate};
@@ -13,17 +13,17 @@ use crate::amfiteatr::state::ContractAction::{PlaceCard, ShowHand};
 
 #[derive(Clone, Debug)]
 pub struct ContractEnvStateMin{
-    dummy_hand: Option<CardSet>,
+    dummy_hand: Option<CardSetStd>,
     contract: Contract,
 }
 
 impl ContractEnvStateMin{
 
-    pub fn new(contract: Contract, dummy_hand: Option<CardSet>) -> Self{
+    pub fn new(contract: Contract, dummy_hand: Option<CardSetStd>) -> Self{
         Self{dummy_hand, contract }
     }
 
-    pub fn dummy_hand(&self) -> Option<&CardSet>{
+    pub fn dummy_hand(&self) -> Option<&CardSetStd>{
         self.dummy_hand.as_ref()
     }
 
@@ -37,7 +37,7 @@ impl ContractEnvStateMin{
 }
 
 impl ContractState for ContractEnvStateMin{
-    fn dummy_hand(&self) -> Option<&CardSet> {
+    fn dummy_hand(&self) -> Option<&CardSetStd> {
         self.dummy_hand.as_ref()
     }
 

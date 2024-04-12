@@ -4,7 +4,7 @@ use brydz_core::error::{BridgeCoreError, ContractError, DistributionError, CardS
 use brydz_core::error::ContractErrorGen::{BadTrick, CurrentSidePresume};
 use brydz_core::error::TrickErrorGen::DuplicateCard;
 use brydz_core::karty::cards::Card;
-use brydz_core::karty::hand::{HandTrait, CardSet};
+use brydz_core::karty::set::{CardSet, CardSetStd};
 use brydz_core::meta::{CONTRACT_ACTION_ESTIMATED_SUIT_MAP_BOUND,  CONTRACT_ACTION_STACK_SIZE_BOUND};
 use brydz_core::player::side::{Side, SideMap, SIDES};
 use brydz_core::player::side::Side::{East, North, South, West};
@@ -88,10 +88,10 @@ impl<G: ActionOptimiser> ExplorerGameState<G>{
         })
     }
 
-    pub fn hands(&self) -> &SideMap<CardSet>{
+    pub fn hands(&self) -> &SideMap<CardSetStd>{
         self.node_stack.last().unwrap().hands()
     }
-    pub fn hand(&self, side: Side) -> &CardSet {
+    pub fn hand(&self, side: Side) -> &CardSetStd {
         &self.hands()[&side]
     }
 
@@ -181,7 +181,7 @@ impl<G: ActionOptimiser> ExplorerGameState<G>{
                 }
                 Err(e) => Err(e.into())
             }
-            false => Err(CardSetErrorGen::CardNotInHand(*card).into())
+            false => Err(CardSetErrorGen::CardNotInSet(*card).into())
         }
 
     }
@@ -189,7 +189,7 @@ impl<G: ActionOptimiser> ExplorerGameState<G>{
         self.node_stack.last().unwrap()
     }
 
-    pub fn current_hand(&self) -> CardSet {
+    pub fn current_hand(&self) -> CardSetStd {
         self.hands()[&self.contract().current_side()]
     }
     pub fn current_side(&self) -> Side{
@@ -370,7 +370,7 @@ impl<G: ActionOptimiser> InformationSet<ContractProtocolSpec> for ExplorerGameSt
         self.contract.current_side()
     }
 
-    fn hand(&self) -> &Self::HandType {
+    fn set(&self) -> &Self::HandType {
         &self.node_stack.last().unwrap().hands()[&self.contract.current_side()]
     }
     */
