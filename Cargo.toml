@@ -10,3 +10,4 @@ members = [
 brydz_core = {path = "brydz_core"}
 brydz_model = {path = "brydz_model"}
 brydz_dd = {path = "brydz_dd"}
+amfiteatr_core = {path = "../amfiteatr/amfiteatr_core"}

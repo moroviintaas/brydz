@@ -1,6 +1,6 @@
 [package]
 name = "brydz_dd"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 repository = "https://github.com/moroviintaas/brydz_dd"
 license-file = "LICENSE"
@@ -18,7 +18,7 @@ chrono = "0.4.37"
 smallvec = "1.13.2"
 criterion = "0.5.1"
 
-brydz_core = {version = "0.5.0", path = "../brydz_core", features = ["amfiteatr"]}
+brydz_core = {version = "0.6.0", path = "../brydz_core", features = ["amfiteatr"]}
 
 [[bench]]
 name = "alphabeta_explorer"

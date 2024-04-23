@@ -32,7 +32,7 @@ use crate::error::BrydzModelError;
 use crate::options::operation::generate::{generate_biased_deal_distributions};
 
 pub type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
-
+//pub type BrydzDynamicPlayerAgent = Arc<Mutex<dyn for<'a> MultiEpisodeCliAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
 
 #[derive(Default, Debug)]
 pub struct RolePayoffSummary {
@@ -101,6 +101,8 @@ pub struct DynamicBridgeModel{
     pub test_declarer: BrydzDynamicAgent,
     pub test_whist: BrydzDynamicAgent,
     pub test_offside: BrydzDynamicAgent,
+
+
     
 
 
