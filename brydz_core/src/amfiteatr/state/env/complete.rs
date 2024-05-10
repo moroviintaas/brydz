@@ -3,7 +3,7 @@ use log::{debug, error};
 use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
 use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
-use amfiteatr_core::env::{EnvironmentStateSequential, EnvironmentStateUniScore};
+use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs};
 use amfiteatr_core::domain::{DomainParameters, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
@@ -72,7 +72,7 @@ impl ContractState for ContractEnvStateComplete{
     }
 }
 
-impl EnvironmentStateSequential<ContractDP> for ContractEnvStateComplete{
+impl SequentialGameState<ContractDP> for ContractEnvStateComplete{
     type Updates = [(Side, ContractStateUpdate);4];
 
     fn current_player(&self) -> Option<Side> {
@@ -108,7 +108,7 @@ impl EnvironmentStateSequential<ContractDP> for ContractEnvStateComplete{
     /// use karty::card_set;
     /// use karty::cards::*;
     /// use karty::suits::Suit::Spades;
-    /// use amfiteatr_core::env::EnvironmentStateSequential;
+    /// use amfiteatr_core::env::SequentialGameState;
     /// let hand_north = card_set!(TEN_CLUBS, ACE_DIAMONDS, QUEEN_HEARTS, QUEEN_SPADES);
     /// let hand_east = card_set!(FOUR_CLUBS, THREE_DIAMONDS, SIX_HEARTS, EIGHT_SPADES);
     /// let hand_south = card_set!(NINE_CLUBS, SIX_DIAMONDS, TEN_HEARTS, ACE_SPADES);
@@ -212,10 +212,10 @@ impl EnvironmentStateSequential<ContractDP> for ContractEnvStateComplete{
 
 }
 
-impl EnvironmentStateUniScore<ContractDP> for ContractEnvStateComplete{
+impl GameStateWithPayoffs<ContractDP> for ContractEnvStateComplete{
 
 
-    fn state_score_of_player(&self, agent: &Side) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn state_payoff_of_player(&self, agent: &Side) -> <ContractDP as DomainParameters>::UniversalReward {
         self.contract.total_tricks_taken_axis(agent.axis()) as i32
     }
 
