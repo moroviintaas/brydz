@@ -21,7 +21,7 @@ use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgent
 use amfiteatr_core::agent::{InformationSet};
 
 
-use amfiteatr_rl::tensor_data::{ ConversionToTensor};
+use amfiteatr_rl::tensor_data::{ConversionToTensor};
 use crate::error::BrydzModelError;
 use crate::options::operation::train::{InfoSetTypeSelect, InfoSetWayToTensorSelect, TrainOptions};
 

@@ -33,9 +33,9 @@ pub type ContractInfoSetSeed<'a> = (&'a Side, &'a ContractGameDescription);
 
 
 pub struct TSession<
-    PolicyD: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
-    PolicyW: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
-    PolicyO: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
+    PolicyD: LearningNetworkPolicy<ContractDP>,
+    PolicyW: LearningNetworkPolicy<ContractDP>,
+    PolicyO: LearningNetworkPolicy<ContractDP>,
     TestPolicyD: Policy<ContractDP>,
     TestPolicyW: Policy<ContractDP>,
     TestPolicyO: Policy<ContractDP>,
@@ -86,9 +86,9 @@ where
 
 }
 impl <
-    PolicyD: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
-    PolicyW: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
-    PolicyO: LearningNetworkPolicy<ContractDP, TrainConfig=TrainConfig>,
+    PolicyD: LearningNetworkPolicy<ContractDP>,
+    PolicyW: LearningNetworkPolicy<ContractDP>,
+    PolicyO: LearningNetworkPolicy<ContractDP>,
     TestPolicyD: Policy<ContractDP>,
     TestPolicyW: Policy<ContractDP>,
     TestPolicyO: Policy<ContractDP>,
@@ -343,7 +343,7 @@ where
     fn play_game(&mut self) -> Result<(), AmfiteatrRlError<ContractDP>>{
         thread::scope(|s|{
             s.spawn(||{
-                match self.environment.run_round_robin_with_rewards_penalise(-100){
+                match self.environment.run_round_robin_with_rewards_penalise(|_,_| -100){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Environment run error: {e:}");
@@ -393,7 +393,7 @@ where
     (&mut self, team: &Team) -> Result<(), AmfiteatrRlError<ContractDP>> {
         thread::scope(|s|{
             s.spawn(||{
-                match self.environment.run_round_robin_with_rewards_penalise(-100){
+                match self.environment.run_round_robin_with_rewards_penalise(|_,_| -100){
                     Ok(_) => {}
                     Err(e) => {
                         debug!("Environment run error: {e:}");
