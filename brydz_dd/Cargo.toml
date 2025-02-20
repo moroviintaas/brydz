@@ -1,6 +1,6 @@
 [package]
 name = "brydz_dd"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 repository = "https://github.com/moroviintaas/brydz_dd"
 license-file = "LICENSE"
@@ -12,13 +12,13 @@ description =  "Work in progress - implementation of double dummy solver for con
 [dependencies]
 
 #brydz_framework = {path = "../brydz_framework"}
-fern = "0.6.2"
+fern = "0.7.1"
 log = "0.4.21"
 chrono = "0.4.37"
 smallvec = "1.13.2"
 criterion = "0.5.1"
 
-brydz_core = {version = "0.6.0", path = "../brydz_core", features = ["amfiteatr"]}
+brydz_core = {version = "0.7.0", path = "../brydz_core", features = ["amfiteatr"]}
 
 [[bench]]
 name = "alphabeta_explorer"
