@@ -4,6 +4,7 @@ use amfiteatr_rl::tch::nn::{Adam, Optimizer, OptimizerConfig, VarStore};
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAction, ContractAgentInfoSetSimple};
 use amfiteatr_core::agent::{Policy, PresentPossibleActions};
+use amfiteatr_core::error::AmfiteatrError;
 use crate::policy::nn::Model;
 
 
@@ -61,7 +62,7 @@ impl SyntheticContractQNetSimple {
 impl Policy<ContractDP> for SyntheticContractQNetSimple {
     type InfoSetType = ContractAgentInfoSetSimple;
 
-    fn select_action(&self, state: &Self::InfoSetType) -> Option<ContractAction> {
+    fn select_action(&self, state: &Self::InfoSetType) -> Result<ContractAction, AmfiteatrError<ContractDP>> {
         let in_array_state:[f32; CONTRACT_STATE_SIZE as usize] = state.into();
         let mut q_input: Vec<f32> = Vec::from(in_array_state);
         q_input.append(&mut vec![0.0, 0.0]);
@@ -95,7 +96,9 @@ impl Policy<ContractDP> for SyntheticContractQNetSimple {
             }
 
         }
-        current_best_action
+        current_best_action.ok_or(AmfiteatrError::NoActionAvailable {
+            context: "Synthetic contract Qnet".to_string()
+        })
         /*state.available_actions().into_iter().fold((None, f32::MIN), |acc, x|{
 
         })*/

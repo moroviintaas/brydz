@@ -5,6 +5,7 @@ use amfiteatr_rl::tch::nn::{Adam, Optimizer, OptimizerConfig, Path, Sequential, 
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{BuildStateHistoryTensor, ContractAction};
 use amfiteatr_core::agent::{InformationSet, Policy, PresentPossibleActions};
+use amfiteatr_core::error::AmfiteatrError;
 use crate::policy::nn::Model;
 use crate::{tch_model};
 use crate::options::operation::train::{SequentialB, SequentialGen};
@@ -52,7 +53,7 @@ Policy<ContractDP> for ContractStateHistQPolicy<S>
 {
     type InfoSetType = S;
 
-    fn select_action(&self, state: &Self::InfoSetType) -> Option<ContractAction> {
+    fn select_action(&self, state: &Self::InfoSetType) -> Result<ContractAction, AmfiteatrError<ContractDP>> {
         let in_array_state = state.state_history_tensor().f_flatten(0,1).unwrap();
         let mut current_best_action = None;
         let mut q_max: f32 = f32::MIN;
@@ -84,7 +85,9 @@ Policy<ContractDP> for ContractStateHistQPolicy<S>
             }
 
         }
-        current_best_action
+        current_best_action.ok_or(AmfiteatrError::NoActionAvailable {
+            context: "ContractStateHistQPolicy".into()
+        })
     }
 
 }
