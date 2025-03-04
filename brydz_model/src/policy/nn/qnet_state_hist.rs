@@ -85,7 +85,7 @@ Policy<ContractDP> for ContractStateHistQPolicy<S>
             }
 
         }
-        current_best_action.ok_or(AmfiteatrError::NoActionAvailable {
+        current_best_action.ok_or_else(|| AmfiteatrError::NoActionAvailable {
             context: "ContractStateHistQPolicy".into()
         })
     }

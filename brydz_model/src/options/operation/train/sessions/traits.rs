@@ -9,16 +9,16 @@ use brydz_core::amfiteatr::spec::ContractDP;
 use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgent, Policy, PolicyAgent, PresentPossibleActions, StatefulAgent, InformationSet};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
-use amfiteatr_rl::tensor_data::{CtxTryIntoTensor, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{ContextTryIntoTensor, ConversionToTensor};
 
 pub trait ContractInfoSetForLearning<ISW: ConversionToTensor>:
-CtxTryIntoTensor<ISW>
+ContextTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug {}
 
-impl<ISW: ConversionToTensor, T: CtxTryIntoTensor<ISW>
+impl<ISW: ConversionToTensor, T: ContextTryIntoTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
@@ -50,7 +50,7 @@ impl<
     P: Policy<ContractDP>
 > SessionAgentTrait<ISW, P> for TracingAgentGen<ContractDP, P, ContractAgentSyncComm>
 where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ InformationSet<ContractDP> + CtxTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
++ InformationSet<ContractDP> + ContextTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
@@ -67,7 +67,7 @@ impl<
 where for<'a> <P as Policy<ContractDP>>::InfoSetType:
     From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
     + PresentPossibleActions<ContractDP>
-    + InformationSet<ContractDP> + CtxTryIntoTensor<ISW>
+    + InformationSet<ContractDP> + ContextTryIntoTensor<ISW>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
