@@ -14,7 +14,7 @@ use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainC
 use amfiteatr_rl::tch::{nn, Tensor};
 use amfiteatr_rl::tch::nn::{Adam, OptimizerConfig, VarStore};
 use amfiteatr_rl::tensor_data::{ConversionToTensor, ContextTryIntoTensor};
-use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorA2C};
+use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, QValueNet, TensorCriticActor};
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{
@@ -264,10 +264,10 @@ impl DynamicBridgeModelBuilder{
             let device = path.device();
             {move |xs: &Tensor|{
                 if seq.is_empty(){
-                    TensorA2C{critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                    TensorCriticActor {critic: xs.apply(&critic), actor: xs.apply(&actor)}
                 } else {
                     let xs = xs.to_device(device).apply(&seq);
-                    TensorA2C{critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                    TensorCriticActor {critic: xs.apply(&critic), actor: xs.apply(&actor)}
                 }
             }}
         });
