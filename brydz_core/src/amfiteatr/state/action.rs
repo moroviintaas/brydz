@@ -58,12 +58,15 @@ mod neuro_impls{
             let v: Vec<i64> = match Vec::try_from(value){
                 Ok(v) => v,
                 Err(e) => {
-                    return Err(ConvertError::ConvertFromTensor(format!("{}: {e:}", value)))
+                    return Err(ConvertError::ConvertFromTensor{ origin: "".to_string(), context: format!("TchError: {e:}") })
                 }
             };
             let action_index = v[0];
             Card::from_usize_index(action_index as usize)
-                .map_err(|e| ConvertError::ConvertFromTensor(format!("Bad index of card: {e:}")))
+                .map_err(|e| ConvertError::ConvertFromTensor{
+                    origin: "".to_string(),
+                    context: format!("Bad index of card: {e:}"),
+                })
                 .map(Self::PlaceCard)
 
         }

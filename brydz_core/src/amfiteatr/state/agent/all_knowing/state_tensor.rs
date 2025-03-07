@@ -1,3 +1,4 @@
+use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use karty::cards::{Card, DECK_SIZE};
@@ -37,19 +38,19 @@ impl SimpleConvertToTensor<ContractAgentInfoSetAllKnowing> for ContractInfoSetCo
 }
 
 impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetAllKnowing{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
 impl ContextTryIntoTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetAllKnowing{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
 impl ContextTryIntoTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInfoSetAllKnowing{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }

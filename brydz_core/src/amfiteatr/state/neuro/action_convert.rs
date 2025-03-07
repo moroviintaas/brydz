@@ -1,3 +1,4 @@
+use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use karty::cards::Card2SymTrait;
@@ -17,7 +18,7 @@ impl ConversionToTensor for ContractActionWayToTensor{
 }
 
 impl ContextTryIntoTensor<ContractActionWayToTensor> for ContractAction{
-    fn try_to_tensor(&self, _way: &ContractActionWayToTensor) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, _way: &ContractActionWayToTensor) -> Result<Tensor, ConvertError> {
         match self{
             ContractAction::ShowHand(_) => {panic!("Not prepared to convert shows hand to tensor")}
             ContractAction::PlaceCard(c) => {

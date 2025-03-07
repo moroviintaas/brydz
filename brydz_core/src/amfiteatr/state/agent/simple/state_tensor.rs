@@ -1,3 +1,4 @@
+use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
 use amfiteatr_rl::tensor_data::{ContextTryIntoTensor, SimpleConvertToTensor};
@@ -74,7 +75,7 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
 
 
 impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
@@ -208,19 +209,19 @@ impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSet
 ///  assert_eq!(v, expected);
 /// ```
 impl ContextTryIntoTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
 impl ContextTryIntoTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
 impl ContextTryIntoTensor<ContractInfoSetConvertDense1Normalised> for ContractAgentInfoSetSimple{
-    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1Normalised) -> Result<Tensor, TensorRepresentationError> {
+    fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1Normalised) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
