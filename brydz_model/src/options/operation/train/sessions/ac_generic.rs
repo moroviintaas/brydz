@@ -15,7 +15,7 @@ use amfiteatr_core::agent::*;
 use amfiteatr_rl::policy::ActorCriticPolicy;
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::tensor_data::{ConversionToTensor};
-use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, TensorCriticActor};
+use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, TensorActorCritic};
 use crate::options::operation::train::sessions::{ContractInfoSetForLearning, TSession};
 use crate::options::operation::train::TrainOptions;
 
@@ -109,10 +109,10 @@ where InfoSet: InformationSet<ContractDP>{
         let device = path.device();
         {move |xs: &Tensor|{
             if seq.is_empty(){
-                TensorCriticActor {critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                TensorActorCritic {critic: xs.apply(&critic), actor: xs.apply(&actor)}
             } else {
                 let xs = xs.to_device(device).apply(&seq);
-                TensorCriticActor {critic: xs.apply(&critic), actor: xs.apply(&actor)}
+                TensorActorCritic {critic: xs.apply(&critic), actor: xs.apply(&actor)}
             }
         }}
     });
