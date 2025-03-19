@@ -9,29 +9,29 @@ use brydz_core::amfiteatr::spec::ContractDP;
 use amfiteatr_core::agent::{AgentGen, TracingAgentGen, AutomaticAgent, Policy, PolicyAgent, PresentPossibleActions, StatefulAgent, InformationSet};
 
 use amfiteatr_rl::policy::LearningNetworkPolicy;
-use amfiteatr_rl::tensor_data::{ContextTryIntoTensor, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{ContextEncodeTensor, TensorEncoding};
 
-pub trait ContractInfoSetForLearning<ISW: ConversionToTensor>:
-ContextTryIntoTensor<ISW>
+pub trait ContractInfoSetForLearning<ISW: TensorEncoding>:
+ContextEncodeTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug {}
 
-impl<ISW: ConversionToTensor, T: ContextTryIntoTensor<ISW>
+impl<ISW: TensorEncoding, T: ContextEncodeTensor<ISW>
 + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
 + InformationSet<ContractDP>
 + PresentPossibleActions<ContractDP>
 + Debug > ContractInfoSetForLearning<ISW> for T{}
 
 pub trait SessionAgentTraitDyn<
-    ISW: ConversionToTensor,
+    ISW: TensorEncoding,
     P: Policy<ContractDP>
 > where <P as Policy<ContractDP>>::InfoSetType: ContractInfoSetForLearning<ISW>
  + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>{}
 
 pub trait SessionAgentTrait<
-    ISW: ConversionToTensor,
+    ISW: TensorEncoding,
     P: Policy<ContractDP>
 > where <P as Policy<ContractDP>>::InfoSetType: ContractInfoSetForLearning<ISW>
  + for<'a> From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>{
@@ -46,11 +46,11 @@ pub trait SessionAgentTrait<
 }
 
 impl<
-    ISW: ConversionToTensor,
+    ISW: TensorEncoding,
     P: Policy<ContractDP>
 > SessionAgentTrait<ISW, P> for TracingAgentGen<ContractDP, P, ContractAgentSyncComm>
 where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
-+ InformationSet<ContractDP> + ContextTryIntoTensor<ISW> + PresentPossibleActions<ContractDP>
++ InformationSet<ContractDP> + ContextEncodeTensor<ISW> + PresentPossibleActions<ContractDP>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
@@ -61,13 +61,13 @@ where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a Contra
 }
 
 impl<
-    ISW: ConversionToTensor,
+    ISW: TensorEncoding,
     P: Policy<ContractDP>
 > SessionAgentTrait<ISW, P> for AgentGen<ContractDP, P, ContractAgentSyncComm>
 where for<'a> <P as Policy<ContractDP>>::InfoSetType:
     From<(&'a Side, &'a ContractParameters, &'a DescriptionDeckDeal)>
     + PresentPossibleActions<ContractDP>
-    + InformationSet<ContractDP> + ContextTryIntoTensor<ISW>
+    + InformationSet<ContractDP> + ContextEncodeTensor<ISW>
 {
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;

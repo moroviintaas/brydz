@@ -14,7 +14,7 @@ use brydz_core::amfiteatr::state::*;
 use amfiteatr_core::agent::*;
 use amfiteatr_rl::policy::ActorCriticPolicy;
 use amfiteatr_rl::error::AmfiteatrRlError;
-use amfiteatr_rl::tensor_data::{ConversionToTensor};
+use amfiteatr_rl::tensor_data::{TensorEncoding};
 use amfiteatr_rl::torch_net::{A2CNet, NeuralNetTemplate, TensorActorCritic};
 use crate::options::operation::train::sessions::{ContractInfoSetForLearning, TSession};
 use crate::options::operation::train::TrainOptions;
@@ -38,7 +38,7 @@ where P: Policy<ContractDP, InfoSetType= ContractAgentInfoSetAllKnowing>{
 #[allow(clippy::type_complexity)]
 pub fn t_session_a2c_symmetric<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
-    W2T: ConversionToTensor + Default,
+    W2T: TensorEncoding + Default,
 >(
     //declarer_policy: QLearningPolicy<ContractDP, DIS, DISW2T, ContractActionWayToTensor>,
     //whist_policy: QLearningPolicy<ContractDP, WIS, WISW2T, ContractActionWayToTensor>,

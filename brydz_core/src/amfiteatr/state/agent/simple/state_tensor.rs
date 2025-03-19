@@ -1,7 +1,7 @@
 use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::error::TensorRepresentationError;
-use amfiteatr_rl::tensor_data::{ContextTryIntoTensor, SimpleConvertToTensor};
+use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
 use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 
 
@@ -74,7 +74,7 @@ impl SimpleConvertToTensor<ContractAgentInfoSetSimple> for ContractInfoSetConver
 
 
 
-impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetSimple{
+impl ContextEncodeTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
@@ -94,7 +94,7 @@ impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSet
 /// use karty::card_set;
 /// use karty::cards::*;
 /// use amfiteatr_core::agent::InformationSet;
-/// use amfiteatr_rl::tensor_data::ContextTryIntoTensor;
+/// use amfiteatr_rl::tensor_data::ContextEncodeTensor;
 /// let card_set = card_set!(
 ///     THREE_CLUBS, FOUR_CLUBS, FIVE_CLUBS, NINE_CLUBS,
 ///     QUEEN_CLUBS, KING_CLUBS, ACE_CLUBS, TWO_DIAMONDS,
@@ -208,19 +208,19 @@ impl ContextTryIntoTensor<ContractInfoSetConvertDense1> for ContractAgentInfoSet
 ///  let v: Vec<f32> = info_set.to_tensor(&ContractInfoSetConvertSparse{}).try_into().unwrap();
 ///  assert_eq!(v, expected);
 /// ```
-impl ContextTryIntoTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
+impl ContextEncodeTensor<ContractInfoSetConvertSparse> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertSparse) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
-impl ContextTryIntoTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInfoSetSimple{
+impl ContextEncodeTensor<ContractInfoSetConvertSparseHistoric> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertSparseHistoric) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }
 }
 
-impl ContextTryIntoTensor<ContractInfoSetConvertDense1Normalised> for ContractAgentInfoSetSimple{
+impl ContextEncodeTensor<ContractInfoSetConvertDense1Normalised> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1Normalised) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
     }

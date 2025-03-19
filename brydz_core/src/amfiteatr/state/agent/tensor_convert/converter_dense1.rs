@@ -1,4 +1,4 @@
-use amfiteatr_rl::tensor_data::{ConversionToTensor};
+use amfiteatr_rl::tensor_data::{TensorEncoding};
 use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 
 /// ```
@@ -59,14 +59,14 @@ use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 #[derive(Default)]
 pub struct ContractInfoSetConvertDense1 {}
 
-impl ConversionToTensor for ContractInfoSetConvertDense1 {
+impl TensorEncoding for ContractInfoSetConvertDense1 {
     fn desired_shape(&self) -> &'static [i64] {
         &[STATE_REPR_SIZE as i64]
     }
 }
 #[derive(Default)]
 pub struct ContractInfoSetConvertDense1Normalised {}
-impl ConversionToTensor for ContractInfoSetConvertDense1Normalised {
+impl TensorEncoding for ContractInfoSetConvertDense1Normalised {
     fn desired_shape(&self) -> &'static [i64] {
         &[STATE_REPR_SIZE as i64]
     }

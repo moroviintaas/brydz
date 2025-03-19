@@ -1,12 +1,12 @@
 use amfiteatr_rl::tch::Tensor;
-use amfiteatr_rl::tensor_data::{ConversionToTensor, SimpleConvertToTensor};
+use amfiteatr_rl::tensor_data::{TensorEncoding, SimpleConvertToTensor};
 use crate::amfiteatr::state::{ContractInfoSet};
 use crate::player::side::SIDES;
 
 #[derive(Default)]
 pub struct ContractInfoSetConvertSparseHistoric{}
 
-impl ConversionToTensor for ContractInfoSetConvertSparseHistoric {
+impl TensorEncoding for ContractInfoSetConvertSparseHistoric {
     fn desired_shape(&self) -> &[i64] {
         &[contract_state_sparse_with_history::STATE_REPR_SIZE_WITH_HISTORY as i64;1]
     }

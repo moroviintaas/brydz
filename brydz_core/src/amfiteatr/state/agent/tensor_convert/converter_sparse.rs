@@ -1,5 +1,5 @@
 use amfiteatr_rl::tch::Tensor;
-use amfiteatr_rl::tensor_data::{SimpleConvertToTensor, ConversionToTensor};
+use amfiteatr_rl::tensor_data::{SimpleConvertToTensor, TensorEncoding};
 use crate::player::side::SIDES;
 
 use crate::amfiteatr::state::{ContractInfoSet};
@@ -7,7 +7,7 @@ use crate::amfiteatr::state::{ContractInfoSet};
 #[derive(Default)]
 pub struct ContractInfoSetConvertSparse{}
 
-impl ConversionToTensor for ContractInfoSetConvertSparse{
+impl TensorEncoding for ContractInfoSetConvertSparse{
     fn desired_shape(&self) -> &'static [i64] {
         &[contract_state_sparse_convert_with_init_assumption::STATE_REPR_SIZE as i64;1]
     }
