@@ -21,7 +21,7 @@ use amfiteatr_core::error::AmfiteatrError;
 use amfiteatr_core::domain::DomainParameters;
 
 use amfiteatr_rl::error::AmfiteatrRlError;
-use amfiteatr_rl::policy::{LearningNetworkPolicy, TrainConfig};
+use amfiteatr_rl::policy::{LearningNetworkPolicy};
 use amfiteatr_rl::tensor_data::TensorEncoding;
 use crate::error::{BrydzModelError, SimulationError};
 use crate::options::operation::train::sessions::Team;

@@ -1,6 +1,5 @@
 use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
-use amfiteatr_rl::error::TensorRepresentationError;
 use karty::cards::Card2SymTrait;
 use karty::symbol::CardSymbol;
 use amfiteatr_rl::tensor_data::{ContextEncodeTensor, TensorEncoding};

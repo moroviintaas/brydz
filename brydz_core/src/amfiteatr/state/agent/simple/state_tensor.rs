@@ -1,6 +1,5 @@
 use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
-use amfiteatr_rl::error::TensorRepresentationError;
 use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
 use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 

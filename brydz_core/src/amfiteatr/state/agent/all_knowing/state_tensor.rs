@@ -1,6 +1,5 @@
 use amfiteatr_core::error::ConvertError;
 use amfiteatr_rl::tch::Tensor;
-use amfiteatr_rl::error::TensorRepresentationError;
 use karty::cards::{Card, DECK_SIZE};
 use karty::set::CardSet;
 use karty::symbol::CardSymbol;
