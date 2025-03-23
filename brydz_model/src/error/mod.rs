@@ -8,7 +8,7 @@ use brydz_core::error::BridgeCoreError;
 use brydz_core::amfiteatr::spec::ContractDP;
 pub use gen::*;
 pub use simulation::*;
-use amfiteatr_core::error::{AmfiteatrError, WorldError};
+use amfiteatr_core::error::{AmfiteatrError, ModelError};
 use amfiteatr_rl::error::AmfiteatrRlError;
 use crate::error::BrydzModelError::Amfiteatr;
 
@@ -59,9 +59,9 @@ impl From<AmfiteatrRlError<ContractDP>> for BrydzModelError {
     }
 }
 
-impl From<WorldError<ContractDP>> for BrydzModelError {
-    fn from(value: WorldError<ContractDP>) -> Self {
-        Amfiteatr(AmfiteatrError::World{source: value})
+impl From<ModelError<ContractDP>> for BrydzModelError {
+    fn from(value: ModelError<ContractDP>) -> Self {
+        Amfiteatr(AmfiteatrError::Model {source: value})
     }
 }
 
