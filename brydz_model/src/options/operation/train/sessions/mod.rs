@@ -16,9 +16,7 @@ pub use dynamic::*;
 
 
 use clap::Subcommand;
-use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetSimple, ContractAgentInfoSetAssuming, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
-use amfiteatr_core::agent::{InformationSet};
 
 
 use amfiteatr_rl::tensor_data::{TensorEncoding};
@@ -35,8 +33,7 @@ pub enum TrainType{
 fn create_and_run_learning_a2c_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
     W2T: TensorEncoding + Default,
->(options: &TrainOptions) -> Result<(), BrydzModelError>
-where InfoSet: InformationSet<ContractDP>{
+>(options: &TrainOptions) -> Result<(), BrydzModelError> {
     let mut session = t_session_a2c_symmetric::<InfoSet, W2T>(options)?;
     session.load_network_params(options)?;
     session.train_all_at_once(

@@ -311,9 +311,9 @@ where
                 self.test_offside.reinit(<TestPolicyO as Policy<ContractDP>>::InfoSetType::from((&contract.declarer().next_i(3), contract, &deal_description)));
             }
             Team::Defenders => {
-                self.test_declarer.reinit(<TestPolicyD as Policy<ContractDP>>::InfoSetType::from((&contract.declarer(), &contract, &deal_description)));
-                self.whist.reinit(<PolicyW as Policy<ContractDP>>::InfoSetType::from((&contract.declarer().next_i(1), &contract, &deal_description)));
-                self.offside.reinit(<PolicyO as Policy<ContractDP>>::InfoSetType::from((&contract.declarer().next_i(3), &contract, &deal_description)));
+                self.test_declarer.reinit(<TestPolicyD as Policy<ContractDP>>::InfoSetType::from((&contract.declarer(), contract, &deal_description)));
+                self.whist.reinit(<PolicyW as Policy<ContractDP>>::InfoSetType::from((&contract.declarer().next_i(1), contract, &deal_description)));
+                self.offside.reinit(<PolicyO as Policy<ContractDP>>::InfoSetType::from((&contract.declarer().next_i(3), contract, &deal_description)));
                 debug!("Whist's , committed score: {}", self.whist.current_universal_score());
             }
         }

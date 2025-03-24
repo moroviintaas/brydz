@@ -95,7 +95,6 @@ impl <Crd: Card2SymTrait> TrickSolver for TrumpTrickSolver<Crd>{
     /// assert!(TrumpTrickSolver::new(Hearts).does_beat_leader(&trick1, &ACE_HEARTS));
     /// assert!(!TrumpTrickSolver::new(Hearts).does_beat_leader(&trick1, &JACK_HEARTS));
     /// assert!(!TrumpTrickSolver::new(Hearts).does_beat_leader(&trick1, &ACE_SPADES));
-
     fn does_beat_leader(&self, trick: &TrickGen<Self::CardType>, card: &Self::CardType) -> bool {
         match trick.leader_in_suit_with_card(&self.trump_suit){
             None => card.suit() == self.trump_suit

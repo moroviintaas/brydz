@@ -121,10 +121,7 @@ impl<Card: Card2SymTrait> TrickGen<Card>{
 
 
     fn set_card(&mut self, side: Side, card: Card){
-        match self.index(side){
-            None => self.card_num += 1,
-            Some(_) => {}
-        };
+        if self.index(side).is_none() { self.card_num += 1 };
         match side{
             East => self.east_card = Some(card),
             South => self.south_card = Some(card),
@@ -234,7 +231,7 @@ impl<Card: Card2SymTrait> TrickGen<Card>{
     /// ```
     pub fn contains(&self, card: &Card) -> bool{
         for side in [North, East, South, West]{
-            if self[side].as_ref().map_or(false, |c| c == card){
+            if self[side].as_ref() == Some(card) {
                 return true;
             }
         }
@@ -280,14 +277,11 @@ impl<Card: Card2SymTrait> TrickGen<Card>{
     /// assert_eq!(trick1.collision(&trick2), Some(ACE_HEARTS));
     /// ```
     pub fn collision(&self, other: &TrickGen<Card>) -> Option<Card>{
-        for oc in [&other[North], &other[East], &other[South], &other[West]]{
-            match oc {
-                Some(c) => match self.contains(c){
-                    true => {return Some(c.to_owned())},
-                    false => {}
-                },
-                None => {}
-            }
+        for c in [&other[North], &other[East], &other[South], &other[West]].into_iter().flatten(){
+                if self.contains(c){
+                    return Some(c.to_owned());
+                }
+
         }
         None
     }

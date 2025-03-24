@@ -14,7 +14,7 @@ description =  "Work in progress - implementation of double dummy solver for con
 #brydz_framework = {path = "../brydz_framework"}
 fern = "0.7.1"
 log = "0.4.21"
-chrono = "0.4.37"
+chrono = "0.4.39"
 smallvec = "1.13.2"
 criterion = "0.5.1"
 

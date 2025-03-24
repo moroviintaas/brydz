@@ -63,7 +63,6 @@ impl TrickNode{
     /// assert_eq!(hands[&North].len(), 4);
     /// let node = TrickNode::new_checked(hands, contract.current_side()).unwrap();
     /// ```
-
     pub fn new_checked(hands: SideMap<CardSetStd>, current_side: Side) -> Result<Self, CardSetError>{
         for s1 in SIDES{
             for s2 in SIDES{

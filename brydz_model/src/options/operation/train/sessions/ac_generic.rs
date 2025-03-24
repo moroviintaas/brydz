@@ -53,8 +53,7 @@ pub fn t_session_a2c_symmetric<
     ActorCriticPolicy<ContractDP, InfoSet, W2T>,
     W2T, W2T, W2T, W2T, W2T, W2T,
 
->, AmfiteatrRlError<ContractDP>>
-where InfoSet: InformationSet<ContractDP>{
+>, AmfiteatrRlError<ContractDP>> {
 
     let mut rng = thread_rng();
     let contract_params = ContractRandomizer::default().sample(&mut rng);

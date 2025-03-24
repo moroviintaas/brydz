@@ -285,7 +285,7 @@ impl FuzzyCardSet{
     /// let cards_spades =      [0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.0];
     /// let fset = FuzzyCardSet::new_check_epsilon(SuitMap::new(cards_spades, cards_hearts, cards_diamonds, cards_clubs), 13).unwrap();
     /// assert_abs_diff_eq!(fset.sum_uncertain(), 12.0, epsilon=0.001);
-
+    ///
     /// ```
     pub fn sum_uncertain(&self) -> f32{
         SUITS.iter().map(|s|self.sum_uncertain_in_suit(s)).sum()

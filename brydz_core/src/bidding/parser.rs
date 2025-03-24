@@ -1,7 +1,7 @@
 use nom::branch::alt;
 use nom::bytes::complete::{tag_no_case};
 use nom::character::complete::{digit1, space0};
-use nom::IResult;
+use nom::{IResult, Parser};
 use nom::sequence::{delimited, separated_pair};
 use crate::bidding::bid::Bid;
 use crate::cards::trump::TrumpGen;
@@ -19,7 +19,7 @@ use karty::suits::Suit;
 /// assert_eq!(parse_nt("n"), Ok(("", TrumpGen::NoTrump)));
 /// ```
 pub fn parse_nt(s: &str) -> IResult<&str, TrumpGen<Suit>>{
-    alt((tag_no_case("no_trump"), tag_no_case("notrump"), tag_no_case("nt"), tag_no_case("n")))(s)
+    alt((tag_no_case("no_trump"), tag_no_case("notrump"), tag_no_case("nt"), tag_no_case("n"))).parse(s)
         .map(|(i,_)| (i, TrumpGen::NoTrump ))
 }
 ///Parses no trump (delimited)
@@ -31,7 +31,7 @@ pub fn parse_nt(s: &str) -> IResult<&str, TrumpGen<Suit>>{
 /// assert_eq!(parse_nt_delimited("  n "), Ok(("", TrumpGen::NoTrump)));
 /// ```
 pub fn parse_nt_delimited(s: &str) -> IResult<&str, TrumpGen<Suit>>{
-    delimited(space0, parse_nt, space0)(s)
+    delimited(space0, parse_nt, space0).parse(s)
 }
 
 /// Parses colored trump
@@ -56,7 +56,7 @@ pub fn parse_trump_colored(s: &str) -> IResult<&str, TrumpGen<Suit>>{
 /// assert_eq!(parse_nt("notrump\t"), Ok(("\t", TrumpGen::NoTrump)));
 /// ```
 pub fn parse_trump(s: &str) -> IResult<&str, TrumpGen<Suit>>{
-    alt((parse_trump_colored, parse_nt))(s)
+    alt((parse_trump_colored, parse_nt)).parse(s)
 }
 /// parses bid
 /// ```
@@ -73,7 +73,7 @@ pub fn parse_trump(s: &str) -> IResult<&str, TrumpGen<Suit>>{
 /// assert_eq!(parse_bid("h"), Err(nom::Err::Error(nom::error::Error::new("h", ErrorKind::Digit))));
 /// ```
 pub fn parse_bid(s: &str) -> IResult<&str, Bid<Suit>>{
-    match separated_pair(digit1, space0, parse_trump)(s){
+    match separated_pair(digit1, space0, parse_trump).parse(s){
         Ok((remains, (digs, trump))) => match digs.parse::<u8>(){
             Ok(n) => Bid::init(trump, n).map_or_else(
                 |_| Err(nom::Err::Error(nom::error::Error::new(s, ErrorKind::Digit))),

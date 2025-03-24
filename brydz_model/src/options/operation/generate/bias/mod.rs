@@ -28,18 +28,16 @@ pub fn op_generate_biased_distributions(options: &BiasDistributionOptions) -> Re
         .depth_limit(4)
         // definitely superior (okay, just joking)
         .indentor("\t".to_owned());
-    let ser = to_string_pretty(&generated, my_config).map_err(|e|{
+    let ser = to_string_pretty(&generated, my_config).inspect_err(|_e|{
         error!("Error serializing generated biased distributions");
-        e
     })?;
     match &options.distribution_output{
         None => {
             println!("{}", ser);
         }
         Some(file_path) => {
-            let mut output = std::fs::File::create(file_path).map_err(|e|{
+            let mut output = std::fs::File::create(file_path).inspect_err(|_e|{
                 error!("Failed creating distribution output file: {file_path:?}");
-                e
             })?;
             write!(output, "{}", ser).map_err(|e|{
                 error!("Failed writing serialisation to file");

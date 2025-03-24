@@ -12,8 +12,8 @@ use karty::random::RandomSymbol;
 use karty::suits::Suit;
 use crate::error::BrydzModelError;
 use crate::error::GenError::LowerBoundOverUpper;
-use rand_distr::Distribution;
 use std::io::Write;
+use rand::distributions::Distribution;
 
 mod options;
 pub use options::*;

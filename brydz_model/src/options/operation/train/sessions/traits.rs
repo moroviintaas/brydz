@@ -55,7 +55,7 @@ where for<'a> <P as Policy<ContractDP>>::InfoSetType: From<(&'a Side, &'a Contra
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
         TracingAgentGen::new(
-            <IS<P>>::from((&side, &contract_params, &deal_description)),
+            <IS<P>>::from((&side, contract_params, deal_description)),
             comm, policy)
     }
 }
@@ -72,7 +72,7 @@ where for<'a> <P as Policy<ContractDP>>::InfoSetType:
     fn create_for_session(side: Side, contract_params: &ContractParameters, deal_description: &DescriptionDeckDeal, comm: ContractAgentSyncComm, policy: P) -> Self {
         type IS<P> = <P as Policy<ContractDP>>::InfoSetType;
         AgentGen::new(
-            <IS<P>>::from((&side, &contract_params, &deal_description)),
+            <IS<P>>::from((&side, contract_params, deal_description)),
             comm, policy)
     }
 }

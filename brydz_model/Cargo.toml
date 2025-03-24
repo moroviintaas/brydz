@@ -12,22 +12,22 @@ description =  "Minimal (unstable yet) implementation od simulation model for co
 [dependencies]
 
 log = "0.4.21"
-fern = "0.6.2"
-chrono = "0.4.37"
+fern = "0.7.1"
+chrono = "0.4.39"
 
-config = "0.14.0"
-serde = {version = "1.0.197", features = ["derive"]}
-toml = "0.8.12"
-clap = {version = "4.5.2", features = ["derive"]}
-thiserror = "1.0.58"
+config = "0.15.8"
+serde = {version = "1.0.218", features = ["derive"]}
+toml = "0.8.20"
+clap = {version = "4.5.31", features = ["derive"]}
+thiserror = "2.0.11"
 rand = "0.8.5"
 ron = "0.8.1"
 smallvec = "1.13.2"
-rand_distr = "0.4.3"
+rand_distr = "0.5.1"
 enum-map = "2.7.3"
 
 amfiteatr_rl = { version = "0.7.0", features = ["log_trace"] }
-karty = { version = "0.2.1", features = ["fuzzy"]}
+karty = { version = "0.2.2", features = ["fuzzy"]}
 brydz_core = {version = "0.7.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
 amfiteatr_core = {version = "0.7.0", features= ["speedy"]}
 amfiteatr_net_ext = {version = "0.7.0" }

@@ -331,7 +331,7 @@ impl From<(&Side, &ContractParameters, &DescriptionDeckDeal,)> for ContractAgent
         };
 
         let contract = Contract::new(params.clone());
-        Self::new(*side, descript.cards[&side], contract, None, distr)
+        Self::new(*side, descript.cards[side], contract, None, distr)
     }
 }
 
@@ -363,7 +363,7 @@ impl From<(&Side, &ContractGameDescription)> for ContractAgentInfoSetAssuming{
         };
 
         let contract = Contract::new(description.parameters().clone());
-        Self::new(*side, description.cards()[&side], contract, None, distr)
+        Self::new(*side, description.cards()[side], contract, None, distr)
     }
 }
 

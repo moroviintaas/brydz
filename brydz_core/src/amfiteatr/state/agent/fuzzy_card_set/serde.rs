@@ -40,7 +40,7 @@ impl<'de> Deserialize<'de> for FuzzyCardSet{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
         struct FuzzyCardSetVisitor;
 
-        impl<'de> Visitor<'de> for FuzzyCardSetVisitor{
+        impl Visitor<'_> for FuzzyCardSetVisitor{
             type Value = FuzzyCardSet;
 
             fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {

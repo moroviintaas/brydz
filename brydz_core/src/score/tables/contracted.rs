@@ -41,7 +41,6 @@ impl PointsContractedTrick{
     /// assert_eq!(points_table.points(&contract, 8), 160 );
     ///
     /// ```
-
     pub fn points(&self, contract: &ContractParametersGen<Suit>, taken: u8) -> i32{
         let multiplier = match contract.doubling(){
             Doubling::None => 1,

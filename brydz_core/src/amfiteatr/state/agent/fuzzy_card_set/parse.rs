@@ -5,7 +5,7 @@ use nom::character::complete::digit1;
 use nom::error::ErrorKind;
 use nom::IResult;
 use nom::multi::{fold_many0};
-use nom::sequence::{delimited, pair, tuple};
+use nom::sequence::{delimited, pair};
 use karty::cards::Card;
 use karty::figures::{Figure, parse_figure};
 use karty::suits::SuitMap;
@@ -13,6 +13,7 @@ use karty::symbol::CardSymbol;
 use crate::error::FuzzyCardSetErrorGen;
 use crate::amfiteatr::state::FuzzyCardSet;
 use super::card_probability::FProbability;
+use nom::Parser;
 
 pub fn parse_proba_prefix(s: &str) -> IResult<&str, FProbability>{
     delimited(
@@ -20,7 +21,7 @@ pub fn parse_proba_prefix(s: &str) -> IResult<&str, FProbability>{
         digit1,
         tag("]")
 
-    )(s).and_then(|(rem, frac)|{
+    ).parse(s).and_then(|(rem, frac)|{
         let s = "0.".to_owned() + frac;
         match s.parse::<f32>(){
             Ok(proba) => {
@@ -48,7 +49,7 @@ pub fn parse_proba_prefix(s: &str) -> IResult<&str, FProbability>{
 }
 
 pub fn parse_uncertain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
-    pair(parse_proba_prefix, parse_figure)(s)//(s).map(|(rem, (proba, fig))|)
+    pair(parse_proba_prefix, parse_figure).parse(s)//(s).map(|(rem, (proba, fig))|)
 }
 
 pub fn parse_certain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
@@ -56,14 +57,14 @@ pub fn parse_certain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
 }
 
 pub fn parse_probable_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
-    alt((parse_uncertain_figure, parse_certain_figure))(s)
+    alt((parse_uncertain_figure, parse_certain_figure)).parse(s)
 
 }
 
 
 pub fn parse_fuzzy_card_set(s: &str) -> IResult<&str, FuzzyCardSet>{
     type ProbaArray = [FProbability; Figure::SYMBOL_SPACE];
-    tuple((
+    (
         fold_many0(
             parse_probable_figure,
             ProbaArray::default,
@@ -99,7 +100,7 @@ pub fn parse_fuzzy_card_set(s: &str) -> IResult<&str, FuzzyCardSet>{
                 set
             }
         )
-        ))(s).map(|(rem, (s, _, h, _, d, _, c))|
+        ).parse(s).map(|(rem, (s, _, h, _, d, _, c))|
         (rem, FuzzyCardSet::new_derive_sum(SuitMap::new(s, h, d, c)).unwrap()))
 }
 
