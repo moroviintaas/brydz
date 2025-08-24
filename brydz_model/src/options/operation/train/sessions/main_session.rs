@@ -22,6 +22,7 @@ use amfiteatr_core::domain::DomainParameters;
 
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{LearningNetworkPolicy};
+use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::TensorEncoding;
 use crate::error::{BrydzModelError, SimulationError};
 use crate::options::operation::train::sessions::Team;
@@ -549,13 +550,13 @@ where
         debug!("Offside batch input sizes: {:?}", self.offside_trajectories.iter().map(|v|v.number_of_steps()).collect::<Vec<usize>>());
 
         if !self.declarer_trajectories.is_empty(){
-            self.declarer.policy_mut().train_on_trajectories_env_reward(&self.declarer_trajectories[..])?;
+            self.declarer.policy_mut().train_generic(&self.declarer_trajectories[..], |r| Tensor::from(r.reward() as f32))?;
         }
         if !self.whist_trajectories.is_empty(){
-            self.whist.policy_mut().train_on_trajectories_env_reward(&self.whist_trajectories[..])?;
+            self.whist.policy_mut().train_generic(&self.whist_trajectories[..], |r| Tensor::from(r.reward() as f32))?;
         }
         if !self.offside_trajectories.is_empty(){
-            self.offside.policy_mut().train_on_trajectories_env_reward(&self.offside_trajectories[..])?;
+            self.offside.policy_mut().train_generic(&self.offside_trajectories[..], |r| Tensor::from(r.reward() as f32))?;
         }
 
         Ok(())
@@ -740,7 +741,7 @@ where
 
 
 
-
+    /*
 
     pub fn load_network_params_for_role<S: AsRef<std::path::Path>>(&mut self, role: PlayRole, path: S) -> Result<(), BrydzModelError>{
         match role{
@@ -761,6 +762,8 @@ where
     }
 
 
+
+
     pub fn load_network_params(&mut self, options: &TrainOptions) -> Result<(), BrydzModelError>{
         if let Some(ref dpath) = options.declarer_load{
             self.load_network_params_for_role(PlayRole::Declarer, dpath)?;
@@ -771,22 +774,14 @@ where
         if let Some(ref opath) = options.offside_load{
             self.load_network_params_for_role(PlayRole::Offside, opath)?;
         }
-    /*
-        if let Some(ref dpath) = options.test_declarer_load{
-            self.load_network_params_for_test_role(PlayRole::Declarer, dpath)?;
-        }
-        if let Some(ref wpath) = options.whist_load{
-            self.load_network_params_for_test_role(PlayRole::Whist, wpath)?;
-        }
-        if let Some(ref opath) = options.offside_load{
-            self.load_network_params_for_test_role(PlayRole::Offside, opath)?;
-        }
 
-     */
 
         Ok(())
     }
 
+     */
+
+    /*
     pub fn save_network_params_for_role<S: AsRef<std::path::Path>>(&self, role: PlayRole, path: S) -> Result<(), BrydzModelError>{
         match role{
             PlayRole::Whist => {
@@ -817,6 +812,8 @@ where
         }
         Ok(())
     }
+
+     */
 
     pub fn train_all_at_once(
         &mut self,

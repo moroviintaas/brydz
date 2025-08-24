@@ -26,8 +26,8 @@ smallvec = "1.13.2"
 rand_distr = "0.5.1"
 enum-map = "2.7.3"
 
-amfiteatr_rl = { version = "0.7.0", features = ["log_trace"] }
+amfiteatr_rl = { version = "0.12.0", features = ["log_trace"] }
 karty = { version = "0.2.2", features = ["fuzzy"]}
 brydz_core = {version = "0.7.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
-amfiteatr_core = {version = "0.7.0", features= ["speedy"]}
-amfiteatr_net_ext = {version = "0.7.0" }
+amfiteatr_core = {version = "0.12.0", features= ["speedy"]}
+amfiteatr_net_ext = {version = "0.12.0" }

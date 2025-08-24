@@ -16,6 +16,7 @@ use amfiteatr_core::comm::{StdEnvironmentEndpoint};
 use amfiteatr_core::env::{HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
 use amfiteatr_rl::agent::{RlSimpleLearningAgent};
 use amfiteatr_rl::error::AmfiteatrRlError;
+use amfiteatr_rl::policy::LearnSummary;
 use brydz_core::amfiteatr::comm::ContractAgentSyncComm;
 
 use brydz_core::amfiteatr::spec::ContractDP;
@@ -31,7 +32,7 @@ use crate::options::operation::train::sessions::{ContractInfoSetSeed};
 use crate::error::BrydzModelError;
 use crate::options::operation::generate::{generate_biased_deal_distributions};
 
-pub type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
+pub type BrydzDynamicAgent = Arc<Mutex<dyn for<'a> RlSimpleLearningAgent<ContractDP, ContractInfoSetSeed<'a>, LearnSummary>>>;
 //pub type BrydzDynamicPlayerAgent = Arc<Mutex<dyn for<'a> MultiEpisodeCliAgent<ContractDP, ContractInfoSetSeed<'a>>>>;
 
 #[derive(Default, Debug)]
@@ -41,6 +42,7 @@ pub struct RolePayoffSummary {
 
 impl Add<&RolePayoffSummary> for &RolePayoffSummary{
     type Output = RolePayoffSummary;
+
 
     fn add(self, rhs: &RolePayoffSummary) -> Self::Output {
         RolePayoffSummary{
@@ -363,10 +365,14 @@ impl DynamicBridgeModel{
             BrydzModelError::Mutex("Failed locking agent for borrowing varstore to save to file".into())
         })?;
 
+        todo!()
+        /*
         let var = g.get_var_store();
         var.save(file).map_err(|e|{
             BrydzModelError::Tch(e)
         })
+
+         */
     }
     pub fn learning_epoch(&mut self, number_of_games: usize) -> Result<(), BrydzModelError>{
 
@@ -399,7 +405,7 @@ impl DynamicBridgeModel{
 
                 AmfiteatrRlError::NoTrainingData => {
                     warn!("No data training for declarer");
-                    Ok(())
+                    Ok(LearnSummary::default())
                 },
                 e => Err(BrydzModelError::AmfiteatrRL(e))
             }
@@ -409,7 +415,7 @@ impl DynamicBridgeModel{
 
                 AmfiteatrRlError::NoTrainingData => {
                     warn!("No data training for whist");
-                    Ok(())
+                    Ok(LearnSummary::default())
                 },
                 e => Err(BrydzModelError::AmfiteatrRL(e))
             }
@@ -419,7 +425,7 @@ impl DynamicBridgeModel{
 
                 AmfiteatrRlError::NoTrainingData => {
                     warn!("No data training for offside");
-                    Ok(())
+                    Ok(LearnSummary::default())
                 },
                 e => Err(BrydzModelError::AmfiteatrRL(e))
             }

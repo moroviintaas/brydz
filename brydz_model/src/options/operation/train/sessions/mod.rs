@@ -35,6 +35,8 @@ fn create_and_run_learning_a2c_session<
     W2T: TensorEncoding + Default,
 >(options: &TrainOptions) -> Result<(), BrydzModelError> {
     let mut session = t_session_a2c_symmetric::<InfoSet, W2T>(options)?;
+    todo!()
+    /*
     session.load_network_params(options)?;
     session.train_all_at_once(
         options.epochs as usize,
@@ -44,6 +46,8 @@ fn create_and_run_learning_a2c_session<
         &Default::default(), )?;
     session.save_network_params(options)?;
     Ok(())
+
+     */
 }
 
 
@@ -82,11 +86,15 @@ fn session_a2c(options: &TrainOptions) -> Result<(), BrydzModelError>{
     }
 }
 
+//fn session_ppo_masking(options: &TrainOptions)
+
 fn create_and_run_learning_q_session<
     InfoSet: ContractInfoSetForLearning<W2T> + Clone,
     W2T: TensorEncoding + Default
 >(options: &TrainOptions) -> Result<(), BrydzModelError>{
     let mut session = t_session_q_symmetric::<InfoSet, W2T>(options)?;
+    todo!()
+    /*
     session.load_network_params(options)?;
     session.train_all_at_once(
         options.epochs as usize,
@@ -96,6 +104,8 @@ fn create_and_run_learning_q_session<
         &Default::default(),)?;
     session.save_network_params(options)?;
     Ok(())
+    
+     */
 }
 
 fn session_q_420_repr(options: &TrainOptions) -> Result<(), BrydzModelError>{
