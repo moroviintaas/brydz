@@ -95,4 +95,4 @@ mod neuro_impls{
 
 //#[cfg(feature = "neuro")]
 //pub use neuro_impls::*;
-use amfiteatr_core::domain::Action;
+use amfiteatr_core::scheme::Action;

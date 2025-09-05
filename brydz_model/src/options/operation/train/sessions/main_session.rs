@@ -18,7 +18,7 @@ use karty::suits::Suit;
 use amfiteatr_core::agent::*;
 use amfiteatr_core::env::{RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
 use amfiteatr_core::error::AmfiteatrError;
-use amfiteatr_core::domain::DomainParameters;
+use amfiteatr_core::scheme::Scheme;
 
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{LearningNetworkPolicy};
@@ -70,9 +70,9 @@ where
     declarer_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyD as Policy<ContractDP>>::InfoSetType>>,
     whist_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyW as Policy<ContractDP>>::InfoSetType>>,
     offside_trajectories: Vec<AgentTrajectory<ContractDP, <PolicyO as Policy<ContractDP>>::InfoSetType>>,
-    declarer_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
-    whist_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
-    offside_rewards: Vec<<ContractDP as DomainParameters>::UniversalReward>,
+    declarer_rewards: Vec<<ContractDP as Scheme>::UniversalReward>,
+    whist_rewards: Vec<<ContractDP as Scheme>::UniversalReward>,
+    offside_rewards: Vec<<ContractDP as Scheme>::UniversalReward>,
 
     _dis2t: PhantomData<DIS2T>,
     _wis2t: PhantomData<WIS2T>,

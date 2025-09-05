@@ -11,6 +11,6 @@ pub trait ScoreTracker<Co: ContractMechanics<Card = Crd>, Crd: Card2SymTrait>: D
     fn points(&self, axis: &Axis) -> i32;
 }
 
-pub trait ScoreIngredient<S: SuitTrait>{
-    fn calculate(&self, contract: &ContractParametersGen<S>, taken: u8, vulnerability: bool) -> i32;
+pub trait ScoreIngredient<SU: SuitTrait>{
+    fn calculate(&self, contract: &ContractParametersGen<SU>, taken: u8, vulnerability: bool) -> i32;
 }

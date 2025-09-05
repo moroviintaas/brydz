@@ -15,7 +15,7 @@ use std::fmt::Debug;
 use brydz_core::error::Mismatch;
 use brydz_core::meta::CONTRACT_ACTION_GROUPING_ESTIMATE;
 use brydz_core::karty::set::HandSuitedTrait;
-use brydz_core::amfiteatr::re_export::domain::Action;
+use brydz_core::amfiteatr::re_export::scheme::Action;
 use crate::error::GroupingError;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

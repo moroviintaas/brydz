@@ -12,7 +12,7 @@ use karty::suits::Suit::Spades;
 use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy};
 use amfiteatr_core::comm::DynEndpoint;
 use amfiteatr_core::error::{CommunicationError, AmfiteatrError};
-use amfiteatr_core::domain::{AgentMessage, EnvironmentMessage};
+use amfiteatr_core::scheme::{AgentMessage, EnvironmentMessage};
 use amfiteatr_core::env::RoundRobinUniversalEnvironment;
 //use amfiteatr_core::env::RoundRobinModelBuilder;
 use amfiteatr_net_ext::{ComplexComm};

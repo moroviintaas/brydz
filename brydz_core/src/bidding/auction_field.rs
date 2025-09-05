@@ -22,21 +22,21 @@ pub enum AuctionStatus{
 
 
 #[derive(Debug, Eq, PartialEq,  Clone)]
-pub struct AuctionStack<S: SuitTrait, DS: DeclarationStorage<S>>{
-    calls_entries: Vec<CallEntry<S>>,
-    current_contract: Option<ContractParametersGen<S>>,
+pub struct AuctionStack<SU: SuitTrait, DS: DeclarationStorage<SU>>{
+    calls_entries: Vec<CallEntry<SU>>,
+    current_contract: Option<ContractParametersGen<SU>>,
     declaration_storage: DS,
 
 }
 
-impl<S: SuitTrait, DS: DeclarationStorage<S>> AuctionStack<S, DS>{
+impl<SU: SuitTrait, DS: DeclarationStorage<SU>> AuctionStack<SU, DS>{
     pub fn new() -> Self{
         Self{ calls_entries: Vec::new(), current_contract: None,
             declaration_storage: DS::default()}
 
     }
 
-    pub fn current_contract(&self) -> Option<&ContractParametersGen<S>>{
+    pub fn current_contract(&self) -> Option<&ContractParametersGen<SU>>{
         match &self.current_contract{
             Some(x) => Some(x),
             None => None
@@ -57,11 +57,11 @@ impl<S: SuitTrait, DS: DeclarationStorage<S>> AuctionStack<S, DS>{
         counter
     }
 
-    pub fn current_bid(&self) -> Option<&Bid<S>>{
+    pub fn current_bid(&self) -> Option<&Bid<SU>>{
         self.current_contract.as_ref().map(|c| c.bid())
     }
 
-    pub fn add_contract_bid(&mut self, player_side: Side, call: Call<S>) -> Result<AuctionStatus, BiddingErrorGen<S>>{
+    pub fn add_contract_bid(&mut self, player_side: Side, call: Call<SU>) -> Result<AuctionStatus, BiddingErrorGen<SU>>{
         match self.current_contract{
             None => {
                 // First bid, must not be double or redouble
@@ -168,7 +168,7 @@ impl<S: SuitTrait, DS: DeclarationStorage<S>> AuctionStack<S, DS>{
         }
     }
 }
-impl<S: SuitTrait, DS: DeclarationStorage<S>> Default for AuctionStack<S, DS> {
+impl<SU: SuitTrait, DS: DeclarationStorage<SU>> Default for AuctionStack<SU, DS> {
      fn default() -> Self {
          Self::new()
      }

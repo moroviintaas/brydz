@@ -14,7 +14,7 @@ use karty::suits::Suit::Spades;
 use amfiteatr_core::agent::{AutomaticAgent, RandomPolicy};
 use amfiteatr_core::env::RoundRobinUniversalEnvironment;
 use amfiteatr_core::error::CommunicationError;
-use amfiteatr_core::domain::{AgentMessage, EnvironmentMessage};
+use amfiteatr_core::scheme::{AgentMessage, EnvironmentMessage};
 use amfiteatr_net_ext::tcp::TcpCommK1;
 
 pub fn tur_sim_tcp(){

@@ -5,7 +5,7 @@ use karty::cards::{Card, Card2SymTrait};
 use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use karty::register::Register;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::{BiasedHandDistribution, ContractGameDescription, DealDistribution, DescriptionDeckDeal};
@@ -95,7 +95,7 @@ impl ContractAgentInfoSetAssuming{
 
 impl InformationSet<ContractDP> for ContractAgentInfoSetAssuming {
 
-    fn agent_id(&self) -> &<ContractDP as DomainParameters>::AgentId {
+    fn agent_id(&self) -> &<ContractDP as Scheme>::AgentId {
         &self.side
     }
 

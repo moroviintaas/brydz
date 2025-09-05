@@ -59,19 +59,19 @@ pub const LEVEL_3_TRICK_PENALTY: PenaltyTable = PenaltyTable{
     vulnerable_redoubled: 600
 };
 
-pub struct PenaltyUnderTrick<S: SuitTrait, const L: usize, >{
+pub struct PenaltyUnderTrick<SU: SuitTrait, const L: usize, >{
 
     pub penalty_tables: [PenaltyTable;L],
-    _phantom: PhantomData<S>
+    _phantom: PhantomData<SU>
 
     /*pub first_undertrick: PenaltyTable,
     pub following_first_undertricks: PenaltyTable,
     pub following_third_undertricks: PenaltyTable*/
 }
 
-impl<S: SuitTrait, const L: usize> PenaltyUnderTrick<S, L>{
+impl<SU: SuitTrait, const L: usize> PenaltyUnderTrick<SU, L>{
 
-    pub fn penalty_checked(&self, contract: &ContractParametersGen<S>, taken: u8, vulnerability: bool) -> Result<i32, ScoreError>{
+    pub fn penalty_checked(&self, contract: &ContractParametersGen<SU>, taken: u8, vulnerability: bool) -> Result<i32, ScoreError>{
         let number_of_undertricks = contract.bid().number_normalised().saturating_sub(taken);
         if (number_of_undertricks as usize) > self.penalty_tables.len(){
             return Err(ScoreError::NegativeTrickNumber)

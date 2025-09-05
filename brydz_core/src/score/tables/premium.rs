@@ -33,16 +33,16 @@ impl PointsPremiumSport{
 }
 
 
-pub struct PointsPremiumContract<S: SuitTrait>{
+pub struct PointsPremiumContract<SU: SuitTrait>{
     pub on_doubled: i32,
     pub on_redoubled: i32,
-    _phantom: PhantomData<S>
+    _phantom: PhantomData<SU>
 }
 pub type PointsPremiumContractStd = PointsPremiumContract<Suit>;
 
-impl<S: SuitTrait> PointsPremiumContract<S>{
+impl<SU: SuitTrait> PointsPremiumContract<SU>{
 
-    pub fn points(&self, contract: &ContractParametersGen<S>, taken: u8) -> i32{
+    pub fn points(&self, contract: &ContractParametersGen<SU>, taken: u8) -> i32{
         if taken >= contract.bid().number_normalised(){
             return match contract.doubling(){
                 Doubling::None => 0,

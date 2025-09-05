@@ -4,7 +4,7 @@ use crate::error::BridgeCoreError;
 use crate::amfiteatr::state::{ContractAction, ContractState, ContractStateUpdate};
 use log::{debug};
 use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs};
-use amfiteatr_core::domain::{DomainParameters};
+use amfiteatr_core::scheme::{Scheme};
 use crate::deal::DescriptionDeckDeal;
 use crate::player::side::{Side};
 use crate::player::side::Side::*;
@@ -160,7 +160,7 @@ impl SequentialGameState<ContractDP> for ContractEnvStateMin{
 impl GameStateWithPayoffs<ContractDP> for ContractEnvStateMin{
 
 
-    fn state_payoff_of_player(&self, agent: &Side) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn state_payoff_of_player(&self, agent: &Side) -> <ContractDP as Scheme>::UniversalReward {
         self.contract.total_tricks_taken_axis(agent.axis()) as i32
     }
 

@@ -12,29 +12,29 @@ use amfiteatr_core::env::{
     EnvironmentWithAgents,
     ScoreEnvironment,
     StatefulEnvironment};
-use amfiteatr_core::domain::{AgentMessage, DomainParameters, EnvironmentMessage, Reward};
+use amfiteatr_core::scheme::{AgentMessage, Scheme, EnvironmentMessage, Reward};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::amfiteatr::spec::ContractDP;
 
-pub struct ContractEnv<S: SequentialGameState<ContractDP> + ContractState, C: BidirectionalEndpoint>{
-    state: S,
+pub struct ContractEnv<ST: SequentialGameState<ContractDP> + ContractState, C: BidirectionalEndpoint>{
+    state: ST,
     comm: SideMap<C>,
-    penalties: SideMap<<ContractDP as DomainParameters>::UniversalReward>
+    penalties: SideMap<<ContractDP as Scheme>::UniversalReward>
 }
 
 impl<
-    S: SequentialGameState<ContractDP> + ContractState,
+    ST: SequentialGameState<ContractDP> + ContractState,
     C: BidirectionalEndpoint>
-ContractEnv<S, C>{
-    pub fn new(state: S, comm: SideMap<C>) -> Self{
+ContractEnv<ST, C>{
+    pub fn new(state: ST, comm: SideMap<C>) -> Self{
         Self{
             state,
             comm,
             penalties: SideMap::new_symmetric(
-                <ContractDP as DomainParameters>::UniversalReward::neutral())
+                <ContractDP as Scheme>::UniversalReward::neutral())
         }
     }
-    pub fn replace_state(&mut self, state: S){
+    pub fn replace_state(&mut self, state: ST){
         self.state = state;
     }
 
@@ -44,11 +44,11 @@ ContractEnv<S, C>{
 }
 
 impl<
-    S: SequentialGameState<ContractDP> + ContractState,
+    ST: SequentialGameState<ContractDP> + ContractState,
     C: BidirectionalEndpoint<
         OutwardType=EnvironmentMessage<ContractDP>,
         InwardType=AgentMessage<ContractDP>>>
-CommunicatingEndpointEnvironment<ContractDP> for ContractEnv< S, C>{
+CommunicatingEndpointEnvironment<ContractDP> for ContractEnv< ST, C>{
 
     type CommunicationError = C::Error;
     //type AgentId = Side;
@@ -71,11 +71,11 @@ CommunicatingEndpointEnvironment<ContractDP> for ContractEnv< S, C>{
     }
 }
 
-impl<S: SequentialGameState<ContractDP> + ContractState,
+impl<ST: SequentialGameState<ContractDP> + ContractState,
     C: BidirectionalEndpoint<
         OutwardType=EnvironmentMessage<ContractDP>,
         InwardType=AgentMessage<ContractDP>>>
-BroadcastingEndpointEnvironment<ContractDP> for ContractEnv<S, C>
+BroadcastingEndpointEnvironment<ContractDP> for ContractEnv<ST, C>
 where <C as BidirectionalEndpoint>::OutwardType: Clone{
 
     fn send_to_all(&mut self, message: EnvironmentMessage<ContractDP>) -> Result<(), Self::CommunicationError> {
@@ -90,9 +90,9 @@ where <C as BidirectionalEndpoint>::OutwardType: Clone{
 }
 
 impl<
-    S: SequentialGameState<ContractDP> + ContractState,
+    ST: SequentialGameState<ContractDP> + ContractState,
     C: BidirectionalEndpoint>
-EnvironmentWithAgents<ContractDP> for ContractEnv<S, C>{
+EnvironmentWithAgents<ContractDP> for ContractEnv<ST, C>{
 
     type PlayerIterator = [Side; 4];
 
@@ -102,11 +102,11 @@ EnvironmentWithAgents<ContractDP> for ContractEnv<S, C>{
 }
 
 impl<
-    S: SequentialGameState<ContractDP> + ContractState + ContractState,
+    ST: SequentialGameState<ContractDP> + ContractState + ContractState,
     C: BidirectionalEndpoint>
-StatefulEnvironment<ContractDP> for ContractEnv<S, C>
-where S: SequentialGameState<ContractDP> {
-    type State = S;
+StatefulEnvironment<ContractDP> for ContractEnv<ST, C>
+where ST: SequentialGameState<ContractDP> {
+    type State = ST;
     //type Updates = <[(Side, ContractStateUpdate);4] as IntoIterator>::IntoIter;
 
     fn state(&self) -> &Self::State {
@@ -122,16 +122,16 @@ where S: SequentialGameState<ContractDP> {
 
 
 impl<
-    S: SequentialGameState<ContractDP>
+    ST: SequentialGameState<ContractDP>
         + ContractState + GameStateWithPayoffs<ContractDP> ,
     C: BidirectionalEndpoint>
-ScoreEnvironment<ContractDP> for ContractEnv<S, C>
-where S: SequentialGameState<ContractDP> {
+ScoreEnvironment<ContractDP> for ContractEnv<ST, C>
+where ST: SequentialGameState<ContractDP> {
     fn process_action_penalise_illegal(
         &mut self,
-        agent: &<ContractDP as DomainParameters>::AgentId,
-        action: &<ContractDP as DomainParameters>::ActionType,
-        penalty_reward: <ContractDP as DomainParameters>::UniversalReward)
+        agent: &<ContractDP as Scheme>::AgentId,
+        action: &<ContractDP as Scheme>::ActionType,
+        penalty_reward: <ContractDP as Scheme>::UniversalReward)
 
         -> Result<
             <<Self as StatefulEnvironment<ContractDP>>::State as SequentialGameState<ContractDP>>::Updates, AmfiteatrError<ContractDP>> {
@@ -146,15 +146,15 @@ where S: SequentialGameState<ContractDP> {
 
     }
 
-    fn actual_state_score_of_player(&self, agent: &<ContractDP as DomainParameters>::AgentId) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn actual_state_score_of_player(&self, agent: &<ContractDP as Scheme>::AgentId) -> <ContractDP as Scheme>::UniversalReward {
         self.state.state_payoff_of_player(agent)
     }
 
-    fn actual_penalty_score_of_player(&self, agent: &<ContractDP as DomainParameters>::AgentId) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn actual_penalty_score_of_player(&self, agent: &<ContractDP as Scheme>::AgentId) -> <ContractDP as Scheme>::UniversalReward {
         self.penalties[agent]
     }
 
-    fn actual_score_of_player(&self, agent: &Side) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn actual_score_of_player(&self, agent: &Side) -> <ContractDP as Scheme>::UniversalReward {
         self.state.state_payoff_of_player(agent)
     }
 

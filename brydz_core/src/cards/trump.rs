@@ -15,16 +15,16 @@ use crate::cards::trump::TrumpGen::{Colored, NoTrump};
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[cfg_attr(feature = "speedy", derive(Writable, Readable))]
 #[cfg_attr(all(feature = "serde_derive", not(feature = "serde_dedicate")), derive(serde::Serialize, serde::Deserialize))]
-pub enum TrumpGen<S: SuitTrait>{
-    Colored(S),
+pub enum TrumpGen<SU: SuitTrait>{
+    Colored(SU),
     NoTrump
 }
 
-impl<R: Rng, S: SuitTrait> RandomSymbol<R> for TrumpGen<S>{
+impl<R: Rng, SU: SuitTrait> RandomSymbol<R> for TrumpGen<SU>{
     fn random(rng: &mut R) -> Self {
-        match rng.gen_range(0..=S::SYMBOL_SPACE){
-            special if special == S::SYMBOL_SPACE => NoTrump,
-            i => Colored(S::from_usize_index(i).unwrap())
+        match rng.gen_range(0..=SU::SYMBOL_SPACE){
+            special if special == SU::SYMBOL_SPACE => NoTrump,
+            i => Colored(SU::from_usize_index(i).unwrap())
         }
     }
 }
@@ -32,7 +32,7 @@ impl<R: Rng, S: SuitTrait> RandomSymbol<R> for TrumpGen<S>{
 
 /*
 
-impl<S: SuitTrait> Distribution<TrumpGen<S>> for Standard
+impl<SU: SuitTrait> Distribution<TrumpGen<S>> for Standard
 where Standard: Distribution<S>{
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TrumpGen<S> {
         match rng.gen_range(0..=S::SYMBOL_SPACE){
@@ -49,13 +49,13 @@ pub type Trump = TrumpGen<Suit>;
 
 
 
-impl<S: SuitTrait> PartialOrd for TrumpGen<S>{
+impl<SU: SuitTrait> PartialOrd for TrumpGen<SU>{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<S: SuitTrait> Ord for TrumpGen<S>{
+impl<SU: SuitTrait> Ord for TrumpGen<SU>{
     fn cmp(&self, other: &Self) -> Ordering {
         match self{
             NoTrump => match other{
@@ -70,7 +70,7 @@ impl<S: SuitTrait> Ord for TrumpGen<S>{
     }
 }
 
-impl <S: SuitTrait + Display> Display for TrumpGen<S>{
+impl <SU: SuitTrait + Display> Display for TrumpGen<SU>{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self{
             Colored(c) => {write!(f, "Trump: {c:}")}

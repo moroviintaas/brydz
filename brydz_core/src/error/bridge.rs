@@ -30,7 +30,7 @@ impl<T: Copy> Copy for Mismatch<T>{}
 
 
 
-impl<S: SuitTrait> Display for BiddingErrorGen<S>{
+impl<SU: SuitTrait> Display for BiddingErrorGen<SU>{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")
     }

@@ -4,7 +4,7 @@ use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
 use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs};
-use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
@@ -215,7 +215,7 @@ impl SequentialGameState<ContractDP> for ContractEnvStateComplete{
 impl GameStateWithPayoffs<ContractDP> for ContractEnvStateComplete{
 
 
-    fn state_payoff_of_player(&self, agent: &Side) -> <ContractDP as DomainParameters>::UniversalReward {
+    fn state_payoff_of_player(&self, agent: &Side) -> <ContractDP as Scheme>::UniversalReward {
         self.contract.total_tricks_taken_axis(agent.axis()) as i32
     }
 

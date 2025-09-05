@@ -14,53 +14,27 @@ use crate::speedy::{Readable, Writable};
 #[cfg_attr(feature = "speedy", derive(Writable, Readable))]
 #[derive(Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(all(feature = "serde_derive", not(feature = "serde_dedicate")), derive(serde::Serialize, serde::Deserialize))]
-pub struct Bid<S: SuitTrait> {
-    trump: TrumpGen<S>,
+pub struct Bid<SU: SuitTrait> {
+    trump: TrumpGen<SU>,
     number: u8
 }
 
 
 
-/*
-#[cfg(feature = "serde")]
-impl Serialize for Bid<Suit>{
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-
-        let sym = match self.trump{
-            TrumpGen::Colored(c) => match c{
-                Suit::Spades => "S",
-                Suit::Hearts => "H",
-                Suit::Diamonds => "D",
-                Suit::Clubs => "C"
-            }
-            TrumpGen::NoTrump => "NT"
-        };
-
-        serializer.serialize_str(&format!("{}{}", self.number, sym))
-
-
-
-        let mut state = serializer.serialize_struct("Bid", 2)?;
-        state.serialize_field("trump", )
-
-
-    }
-}*/
-
 
 pub type BidStd = Bid<Suit>;
 
-impl <S: SuitTrait + Copy> Copy for Bid<S>{}
+impl <SU: SuitTrait + Copy> Copy for Bid<SU>{}
 
-impl<S: SuitTrait>  Bid<S> {
-    pub fn init(trump: TrumpGen<S>, number: u8) -> Result<Self, BiddingErrorGen<S>>{
+impl<SU: SuitTrait>  Bid<SU> {
+    pub fn init(trump: TrumpGen<SU>, number: u8) -> Result<Self, BiddingErrorGen<SU>>{
         match number{
             legit @MIN_BID_NUMBER..=MAX_BID_NUMBER => Ok(Self{trump, number: legit}),
             no_legit => Err(IllegalBidNumber(no_legit))
 
         }
     }
-    pub fn trump(&self) -> &TrumpGen<S>{
+    pub fn trump(&self) -> &TrumpGen<SU>{
         &self.trump
     }
     pub fn number(&self) -> u8{
@@ -70,7 +44,7 @@ impl<S: SuitTrait>  Bid<S> {
         self.number + HALF_TRICKS
     }
 }
-impl<S: SuitTrait> PartialOrd for Bid<S> {
+impl<SU: SuitTrait> PartialOrd for Bid<SU> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         /*
         Some(self.number.cmp(&other.number).then_with(|| {
@@ -82,7 +56,7 @@ impl<S: SuitTrait> PartialOrd for Bid<S> {
     }
 }
 
-impl<S: SuitTrait + Display> Display for Bid<S>{
+impl<SU: SuitTrait + Display> Display for Bid<SU>{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 
         write!(f, "{:?}", self)
@@ -106,7 +80,7 @@ impl<S: SuitTrait + Display> Display for Bid<S>{
 /// assert!(bid2 < bid4);
 /// assert!(bid1 > bid5);
 /// ```
-impl<S: SuitTrait> Ord for Bid<S> {
+impl<SU: SuitTrait> Ord for Bid<SU> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.number.cmp(&other.number).then_with(||{
             self.trump.cmp(&other.trump)

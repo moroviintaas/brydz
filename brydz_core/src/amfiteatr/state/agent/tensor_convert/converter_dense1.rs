@@ -72,7 +72,7 @@ impl TensorEncoding for ContractInfoSetConvertDense1Normalised {
     }
 }
 /*
-impl<S: InformationSet<ContractDP>, T: ConvStateToTensor<S>>
+impl<IS: InformationSet<ContractDP>, T: ConvStateToTensor<S>>
 ConvStateToTensor<Box<dyn InformationSet<ContractDP, ActionIteratorType=S::ActionIteratorType>>> for T{
     fn make_tensor(&self, t: &Box<dyn InformationSet<ContractDP, ActionIteratorType=S::ActionIteratorType>>) -> Tensor {
         self.make_tensor(t.as_ref())

@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 use rand::thread_rng;
 use amfiteatr_core::agent::{AgentGen, InformationSet, PresentPossibleActions, RandomPolicy, TracingAgentGen};
 use amfiteatr_core::comm::{StdEnvironmentEndpoint};
-use amfiteatr_core::domain::Renew;
+use amfiteatr_core::scheme::Renew;
 use amfiteatr_core::env::{HashMapEnvironment, StatefulEnvironment};
 use amfiteatr_rl::error::AmfiteatrRlError;
 use amfiteatr_rl::policy::{ActorCriticPolicy, QLearningPolicy, QSelector, TrainConfig};

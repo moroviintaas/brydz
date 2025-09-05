@@ -9,7 +9,7 @@ use crate::speedy::{Readable, Writable};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "speedy", derive(Writable, Readable))]
-pub enum BiddingErrorGen<S: SuitTrait>{
+pub enum BiddingErrorGen<SU: SuitTrait>{
     DoubleAfterDouble,
     DoubleAfterReDouble,
     ReDoubleWithoutDouble,
@@ -18,7 +18,7 @@ pub enum BiddingErrorGen<S: SuitTrait>{
     ReDoubleOnVoidCall,
     IllegalBidNumber(u8),
     ViolatedOrder(Mismatch<Side>),
-    BidTooLow(Mismatch<Bid<S>>),
+    BidTooLow(Mismatch<Bid<SU>>),
     DoubleOnSameAxis,
     ReDoubleOnSameAxis
 

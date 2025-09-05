@@ -19,8 +19,8 @@ pub enum Doubling{
 
 #[derive(Debug, Eq, PartialEq,  Copy, Clone)]
 #[cfg_attr(feature = "speedy", derive(Writable, Readable))]
-pub enum Call<S: SuitTrait> {
-    NewBid(Bid<S>),
+pub enum Call<SU: SuitTrait> {
+    NewBid(Bid<SU>),
     Double,
     Redouble,
     Pass
@@ -28,7 +28,7 @@ pub enum Call<S: SuitTrait> {
 
 pub type CallStd = Call<Suit>;
 
-impl<S: SuitTrait + Display> Display for Call<S>{
+impl<SU: SuitTrait + Display> Display for Call<SU>{
     fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
         todo!();
         /*
@@ -48,20 +48,20 @@ impl<S: SuitTrait + Display> Display for Call<S>{
 }
 
 #[derive(Debug, Eq, PartialEq,  Copy, Clone)]
-pub struct CallEntry<S: SuitTrait>{
+pub struct CallEntry<SU: SuitTrait>{
     player_side: Side,
-    call: Call<S>
+    call: Call<SU>
 }
 
 
-impl<S: SuitTrait> CallEntry<S> {
-    pub fn new(player_side: Side, call: Call<S>) -> Self{
+impl<SU: SuitTrait> CallEntry<SU> {
+    pub fn new(player_side: Side, call: Call<SU>) -> Self{
         Self{ player_side, call}
     }
     pub fn player_side(&self)-> Side{
         self.player_side
     }
-    pub fn call(&self) -> &Call<S> {
+    pub fn call(&self) -> &Call<SU> {
         &self.call
     }
 }

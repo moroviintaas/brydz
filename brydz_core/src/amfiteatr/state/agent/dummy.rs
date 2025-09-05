@@ -6,7 +6,7 @@ use crate::player::side::Side;
 use crate::amfiteatr::state::{ContractAction, ContractStateUpdate, StateWithSide};
 use log::debug;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::meta::HAND_SIZE;
@@ -28,7 +28,7 @@ impl ContractDummyState {
 
 
 impl InformationSet<ContractDP> for ContractDummyState {
-    fn agent_id(&self) -> &<ContractDP as DomainParameters>::AgentId {
+    fn agent_id(&self) -> &<ContractDP as Scheme>::AgentId {
         &self.side
     }
 

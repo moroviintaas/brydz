@@ -1,4 +1,4 @@
-use amfiteatr_core::domain::DomainParameters;
+use amfiteatr_core::scheme::Scheme;
 use crate::error::BridgeCoreError;
 use crate::player::side::Side;
 use crate::amfiteatr::state::{ContractAction, ContractStateUpdate};
@@ -8,7 +8,7 @@ pub struct ContractDP {
 
 }
 
-impl DomainParameters for ContractDP {
+impl Scheme for ContractDP {
     type ActionType = ContractAction;
     type GameErrorType = BridgeCoreError;
     type UpdateType = ContractStateUpdate;

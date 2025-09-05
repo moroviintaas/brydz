@@ -11,22 +11,22 @@ use crate::player::role::PlayRole;
 
 #[derive(Debug, Eq, PartialEq,  Clone)]
 #[cfg_attr(all(feature = "serde_derive", not(feature = "serde_dedicate")), derive(serde::Serialize, serde::Deserialize))]
-pub struct ContractParametersGen<S: SuitTrait> {
+pub struct ContractParametersGen<SU: SuitTrait> {
     declarer: Side,
-    bid: Bid<S>,
+    bid: Bid<SU>,
     doubling: Doubling
 }
 
 pub type ContractParameters = ContractParametersGen<Suit>;
 
-impl<S: SuitTrait> ContractParametersGen<S> {
-    pub fn new_d(owner: Side, bid: Bid<S>, doubling: Doubling) -> Self{
+impl<SU: SuitTrait> ContractParametersGen<SU> {
+    pub fn new_d(owner: Side, bid: Bid<SU>, doubling: Doubling) -> Self{
         Self{bid, doubling, declarer: owner }
     }
-    pub fn new(player: Side, bid: Bid<S>) -> Self{
+    pub fn new(player: Side, bid: Bid<SU>) -> Self{
         Self{ declarer: player, bid, doubling: Doubling::None}
     }
-    pub fn bid(&self) -> &Bid<S>{
+    pub fn bid(&self) -> &Bid<SU>{
         &self.bid
     }
     pub fn doubling(&self) -> Doubling{
@@ -45,7 +45,7 @@ impl<S: SuitTrait> ContractParametersGen<S> {
         self.declarer.next_i(3)
     }
 
-    pub fn double(&mut self) -> Result<(), BiddingErrorGen<S>>{
+    pub fn double(&mut self) -> Result<(), BiddingErrorGen<SU>>{
         match self.doubling{
             Doubling::None => {
                 self.doubling = Doubling::Double;
@@ -56,7 +56,7 @@ impl<S: SuitTrait> ContractParametersGen<S> {
         }
     }
 
-    pub fn redouble(&mut self) -> Result<(), BiddingErrorGen<S>>{
+    pub fn redouble(&mut self) -> Result<(), BiddingErrorGen<SU>>{
         match self.doubling{
             Doubling::Double => {
                 self.doubling = Doubling::Redouble;

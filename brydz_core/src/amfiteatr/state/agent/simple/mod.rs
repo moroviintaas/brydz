@@ -18,7 +18,7 @@ mod state_tensor;
 //#[cfg(feature = "neuro")]
 //pub use state_tensor::*;
 use amfiteatr_core::agent::{InformationSet, PresentPossibleActions, EvaluatedInformationSet};
-use amfiteatr_core::domain::{DomainParameters, Renew};
+use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 
 #[derive(Debug, Clone)]
@@ -101,7 +101,7 @@ impl ContractAgentInfoSetSimple {
 }
 
 impl InformationSet<ContractDP> for ContractAgentInfoSetSimple {
-    fn agent_id(&self) -> &<ContractDP as DomainParameters>::AgentId {
+    fn agent_id(&self) -> &<ContractDP as Scheme>::AgentId {
         &self.side
     }
 
