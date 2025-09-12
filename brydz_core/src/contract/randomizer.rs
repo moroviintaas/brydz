@@ -1,8 +1,8 @@
-use rand::distributions::{Distribution, Standard, Uniform as RandUni};
+use rand::distr::{Distribution, StandardUniform, Uniform as RandUni};
 
 use rand::{Rng};
-use rand::seq::SliceRandom;
-use statrs::distribution::Multinomial;
+use rand::prelude::IndexedRandom;
+use rand_distr::weighted::WeightedIndex;
 use karty::suits::Suit;
 use karty::symbol::CardSymbol;
 use crate::bidding::{Bid, Doubling};
@@ -11,10 +11,8 @@ use crate::contract::ContractParameters;
 use crate::player::side::{Side, SIDES};
 
 pub struct ContractRandomizer{
-    //min_contract: u8,
-    //max_contract: u8,
     contract_value_distr: RandUni<u8>,
-    trump_distribution: Multinomial,
+    trump_distribution: WeightedIndex<f64>,
     declarer_side: Option<Side>,
     doubling: Option<Doubling>
 
@@ -22,7 +20,7 @@ pub struct ContractRandomizer{
 
 }
 
-impl Distribution<ContractParameters> for Standard{
+impl Distribution<ContractParameters> for StandardUniform{
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> ContractParameters {
         let randomizer = ContractRandomizer::default();
         randomizer.sample(rng)
@@ -32,8 +30,8 @@ impl Distribution<ContractParameters> for Standard{
 impl Default for ContractRandomizer{
     fn default() -> Self {
         Self{
-            contract_value_distr: RandUni::new(1,8),
-            trump_distribution: Multinomial::new(&[1.0, 1.0, 1.0, 1.0, 1.0], 1).unwrap(),
+            contract_value_distr: RandUni::new(1,8).unwrap(),
+            trump_distribution: WeightedIndex::new(&[1.0, 1.0, 1.0, 1.0, 1.0]).unwrap(),
 
             declarer_side: None,
             doubling: None,
@@ -52,8 +50,9 @@ impl ContractRandomizer{
      */
     pub fn new(min_contract: u8, max_contract: u8, probabilities: &[f64;5], declarer_side: Option<Side>, doubling: Option<Doubling>) -> Self{
         Self{
-            contract_value_distr: RandUni::new(min_contract, max_contract+1),
-            trump_distribution: Multinomial::new(&probabilities[..], 1).unwrap(),
+            contract_value_distr: RandUni::new(min_contract, max_contract+1)
+                .expect("todo!()"),
+            trump_distribution: WeightedIndex::new(&probabilities[..]).unwrap(),
             declarer_side,
             doubling
         }
@@ -64,7 +63,7 @@ impl ContractRandomizer{
 impl Distribution<ContractParameters> for ContractRandomizer{
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> ContractParameters {
         let v = self.contract_value_distr.sample(rng);
-        let t = match self.trump_distribution.sample(rng)[0] as usize{
+        let t = match self.trump_distribution.sample(rng){
             n @ 0..=3 => Trump::Colored(Suit::from_usize_index(n).unwrap()),
             4 => Trump::NoTrump,
             a => panic!("This should not happen. Trump should be in [0..=4] (4 is for NoTrump). It was {a:}."),

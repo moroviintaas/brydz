@@ -22,7 +22,7 @@ pub enum TrumpGen<SU: SuitTrait>{
 
 impl<R: Rng, SU: SuitTrait> RandomSymbol<R> for TrumpGen<SU>{
     fn random(rng: &mut R) -> Self {
-        match rng.gen_range(0..=SU::SYMBOL_SPACE){
+        match rng.random_range(0..=SU::SYMBOL_SPACE){
             special if special == SU::SYMBOL_SPACE => NoTrump,
             i => Colored(SU::from_usize_index(i).unwrap())
         }
@@ -30,17 +30,6 @@ impl<R: Rng, SU: SuitTrait> RandomSymbol<R> for TrumpGen<SU>{
 }
 
 
-/*
-
-impl<SU: SuitTrait> Distribution<TrumpGen<S>> for Standard
-where Standard: Distribution<S>{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TrumpGen<S> {
-        match rng.gen_range(0..=S::SYMBOL_SPACE){
-            special if special == S::SYMBOL_SPACE => NoTrump,
-            i => Colored(S::from_position(i).unwrap())
-        }
-    }
-}*/
 
 
 

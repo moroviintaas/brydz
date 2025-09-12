@@ -1,10 +1,9 @@
 use std::marker::PhantomData;
 use std::thread;
 use log::{debug, info};
-use rand::distributions::Distribution;
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::rng;
 
 use brydz_core::contract::{ContractMechanics, ContractParametersGen, ContractRandomizer};
 use brydz_core::deal::{ContractGameDescription, DealDistribution, DescriptionDeckDeal};

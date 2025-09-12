@@ -1,6 +1,6 @@
 [package]
 name = "brydz_core"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 repository = "https://github.com/moroviintaas/brydz_core"
 license-file = "LICENSE"
@@ -13,7 +13,7 @@ description =  "Implemented basic rules of contract bridge game"
 [dependencies]
 serde = {version = "1.0.197", features = ["derive"], optional = true}
 serde_json = {version = "1.0.115"}
-rand = "0.8.5"
+rand = "0.9.0"
 itertools = "0.14.0"
 arrayvec = {version = "0.7.4", features = ["serde"]}
 ron = {version = "0.8.1" , optional = true}
@@ -30,11 +30,12 @@ num-rational = {version = "0.4.1", optional = true}
 serde-big-array = "0.5.1"
 approx = "0.5.1"
 thiserror = "2.0.11"
-statrs = {version = "0.16.1"}
+#statrs = {version = "0.16.1"}
+rand_distr = { version = "0.5.1", features = ["alloc"] }
 
 amfiteatr_core = {version = "0.12.0", features = ["serde"] , optional = true}
 amfiteatr_rl = {version = "0.12.0", optional = true}
-karty = {version = "0.2.1", features = ["register", "parse", "speedy", "serde", "random", "parse"]}
+karty = {version = "0.3.0", features = ["register", "parse", "speedy", "serde", "random", "parse"]}
 enum-map = "2.7.3"
 
 

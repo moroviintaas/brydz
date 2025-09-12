@@ -1,5 +1,5 @@
 use karty::symbol::CardSymbol;
-use rand::{prelude::SliceRandom, Rng, thread_rng};
+use rand::{prelude::SliceRandom, Rng, rng};
 
 use karty::cards::STANDARD_DECK;
 use karty::set::{CardSetStd, CardSet};
@@ -7,7 +7,6 @@ use karty::set::{CardSetStd, CardSet};
 use crate::player::side::{Side, SideMap};
 use crate::player::side::Side::{East, North, South, West};
 
-//use super::set::HandTrait;
 
 pub struct HandDistribution{
 
@@ -52,7 +51,7 @@ pub fn fair_bridge_deal<H: CardSet>() -> SideMap<H>{
         south: H::empty(),
         west: H::empty(),
     };
-    let mut rng = thread_rng();
+    let mut rng = rng();
     let mut v  = Vec::from_iter(H::CardType::iterator()); 
     
     v.shuffle(&mut rng);
@@ -149,7 +148,7 @@ pub fn fair_bridge_partial_deal<H: CardSet>(mut card_supply: Vec<H::CardType>, f
             tmp
         }
     };
-    let mut rng = thread_rng();
+    let mut rng = rng();
     card_supply.shuffle(&mut rng);
 
     for _ in 0..hand_sizes[&North]{

@@ -6,10 +6,9 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use enum_map::{enum_map, EnumMap};
 use log::{debug, trace, warn};
-use rand::distributions::{Distribution, Standard};
 use rand::prelude::ThreadRng;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::rng;
 
 use amfiteatr_core::agent::{AgentGen, AutomaticAgent, RandomPolicy, ReseedAgent};
 use amfiteatr_core::comm::{StdEnvironmentEndpoint};

@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Sub};
-use rand::Rng;
+use rand::{Rng, RngCore};
 use karty::random::RandomSymbol;
 use crate::player::axis::Axis;
 use crate::player::axis::Axis::{EastWest, NorthSouth};
@@ -142,9 +142,9 @@ impl Distribution<Side> for rand::distributions::Standard{
     }
 }*/
 
-impl<R: Rng> RandomSymbol<R> for Side{
+impl<R: RngCore> RandomSymbol<R> for Side{
     fn random(rng: &mut R) -> Self {
-        match rng.gen_range(0..4) {
+        match rng.random_range(0..4) {
             0 => North,
             1 => East,
             2 => South,

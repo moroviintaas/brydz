@@ -1,6 +1,6 @@
 use std::ops::Index;
 use log::debug;
-use rand::distributions::Standard;
+use rand::distr::StandardUniform;
 use rand::prelude::{Distribution};
 use rand::Rng;
 use rand::seq::SliceRandom;
@@ -56,7 +56,7 @@ impl BiasedHandDistribution{
         if top_west == 0.0{
             return Err(FuzzyCardSetErrorGen::ImpossibleSideSelection)
         }
-        let sample = rng.gen_range(0f32..top_west);
+        let sample = rng.random_range(0f32..top_west);
         if sample < top_north{
             return Ok(North);
         } else if sample < top_east{
@@ -334,28 +334,13 @@ impl Index<Side> for BiasedHandDistribution {
     }
 }
 
-impl Distribution<BiasedHandDistribution> for Standard{
+
+
+impl Distribution<BiasedHandDistribution> for StandardUniform{
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BiasedHandDistribution {
-        //start with north
-        //we need 52 numbers to sum to 13
-        //or we can have 52 areas in 0..13
-        //so sample 51 numbers in 0.13 and sort them
-        /*
-        let mut intervals = [0; Card::SYMBOL_SPACE];
-        for i in 0..intervals.len(){
-            let p = 
-        }*/
 
-        /*let mut card_probabilities =  SideMap::new_symmetric(FuzzyCardSet::empty());
-        for side in SIDES{
-            &mut card_probabilities[&side].set_expected(13);
-        }*/
-
-        //let mut iteration = 0;
         let mut sides_shuffled = SIDES;
         loop{
-            //iteration += 1;
-            //debug!("Sampling try number {iteration:}");
             let mut probabilities = SideMap::new_symmetric(SuitMap::new_from_f(|_|[0.0f32; HAND_SIZE]));
             let mut sums_per_side = SideMap::new_symmetric(0.0f32);
             for i in 0..DECK_SIZE-1{
@@ -366,9 +351,9 @@ impl Distribution<BiasedHandDistribution> for Standard{
                     sides_shuffled.shuffle(rng);
                     //inner_iteration += 1;
 
-                    let proba_1:f32 = rng.gen_range(0.0..=1.0);
-                    let proba_2: f32 = rng.gen_range(0.0..=1.0);
-                    let proba_3: f32 = rng.gen_range(0.0..=1.0);
+                    let proba_1:f32 = rng.random_range(0.0..=1.0);
+                    let proba_2: f32 = rng.random_range(0.0..=1.0);
+                    let proba_3: f32 = rng.random_range(0.0..=1.0);
 
                     let proba_4: f32 = 1.0 - (proba_1 + proba_2 + proba_3);
 

@@ -1,3 +1,4 @@
+/*
 pub mod settings;
 mod data_formats;
 pub mod options;
@@ -9,3 +10,9 @@ mod domain;
 
 pub use data_formats::*;
 pub use policy::*;
+
+
+ */
+
+pub mod error;
+pub mod options;

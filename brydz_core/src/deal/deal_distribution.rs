@@ -1,9 +1,10 @@
 use std::boxed::Box;
-use rand::distributions::Distribution;
+use rand::distr::Distribution;
 use rand::Rng;
 use karty::set::CardSetStd;
 use crate::deal::{BiasedHandDistribution, distribute_standard_deck_on_4};
 use crate::player::side::SideMap;
+
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive( Clone, Debug)]
@@ -25,3 +26,4 @@ impl Distribution<SideMap<CardSetStd>> for DealDistribution{
         }
     }
 }
+

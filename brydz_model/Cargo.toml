@@ -1,6 +1,6 @@
 [package]
 name = "brydz_model"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 repository = "https://github.com/moroviintaas/brydz_model"
 license-file = "LICENSE"
@@ -9,25 +9,36 @@ categories = ["games"]
 description =  "Minimal (unstable yet) implementation od simulation model for contract bridge"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "generate"
+path = "src/bin/generate.rs"
+
+# [[bin]]
+# name = "model"
+# path = "./src/model.rs"
+
 [dependencies]
 
-log = "0.4.21"
+log = "0.4.27"
 fern = "0.7.1"
-chrono = "0.4.39"
+chrono = "0.4.41"
 
-config = "0.15.8"
-serde = {version = "1.0.218", features = ["derive"]}
-toml = "0.8.20"
-clap = {version = "4.5.31", features = ["derive"]}
-thiserror = "2.0.11"
-rand = "0.8.5"
+config = "0.15.11"
+serde = {version = "1.0.219", features = ["derive"]}
+toml = "0.8.22"
+clap = {version = "4.5.39", features = ["derive"]}
+thiserror = "2.0.12"
+rand = "0.9.2"
 ron = "0.8.1"
+serde_yaml = "0.9.34-deprecated"
+serde_json = "1.0.139"
 smallvec = "1.13.2"
 rand_distr = "0.5.1"
 enum-map = "2.7.3"
 
 amfiteatr_rl = { version = "0.12.0", features = ["log_trace"] }
-karty = { version = "0.2.2", features = ["fuzzy"]}
-brydz_core = {version = "0.7.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
+karty = { version = "0.3.0", features = ["fuzzy"]}
+brydz_core = {version = "0.8.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
 amfiteatr_core = {version = "0.12.0", features= ["speedy"]}
 amfiteatr_net_ext = {version = "0.12.0" }
+anyhow = "1.0.98"

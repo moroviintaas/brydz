@@ -1,8 +1,8 @@
 
 use arrayvec::ArrayVec;
-use rand::{thread_rng};
 use itertools::Itertools;
 use std::ops::Index;
+use rand::rng;
 use rand::seq::SliceRandom;
 use karty::cards::Card2SGen;
 use karty::figures::{FIGURES, Figure};
@@ -10,10 +10,6 @@ use karty::suits::{SUITS, Suit};
 use karty::cards::DECK_SIZE;
 
 
-
-/*pub trait DeckTrait<const S: usize>{
-
-}*/
 
 
 #[derive(Debug, Eq, PartialEq,  Clone)]
@@ -47,7 +43,7 @@ impl Deck{
     }
 
     pub fn shuffle(&mut self){
-        let mut rng = thread_rng();
+        let mut rng = rng();
         self.cards.shuffle(&mut rng);
     }
     pub fn cards(&self) -> &ArrayVec<Card2SGen<Figure, Suit>, DECK_SIZE>{

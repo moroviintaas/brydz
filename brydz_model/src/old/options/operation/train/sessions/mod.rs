@@ -4,7 +4,7 @@ mod q_generic;
 mod options;
 mod main_session;
 mod traits;
-mod dynamic;
+//mod dynamic;
 
 pub use ac_generic::*;
 pub use team::*;
@@ -12,7 +12,7 @@ pub use q_generic::*;
 pub use options::*;
 pub use main_session::*;
 pub use traits::*;
-pub use dynamic::*;
+//pub use dynamic::*;
 
 
 use clap::Subcommand;
