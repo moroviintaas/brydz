@@ -1,14 +1,11 @@
-use std::fmt::{Display, Formatter};
 use clap::{Subcommand, ValueEnum};
-use amfiteatr_core::error::{AmfiteatrError, ConvertError};
-use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::player::side::Side;
+
 use crate::options::bias_generation::BiasDistributionOptions;
 use crate::options::contract_generation::GenContractOptions;
 
-mod contract_generation;
-mod bias_generation;
-mod logger;
+pub mod contract_generation;
+pub mod bias_generation;
+pub mod logger;
 
 #[derive(ValueEnum)]
 #[derive(Clone, Debug)]
@@ -18,12 +15,14 @@ pub enum DataFormat{
     //Json,
 }
 
+
 #[derive(ValueEnum)]
 #[derive(Clone, Debug)]
 pub enum DealMethod {
     Fair,
     Biased
 }
+/*
 
 #[derive(ValueEnum, Clone, Debug)]
 pub enum ChoiceDoubling{
@@ -75,6 +74,7 @@ impl Display for Subtrump{
         })
     }
 }
+*/
 
 #[derive(Subcommand)]
 pub enum GenerateSubcommand{

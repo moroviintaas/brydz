@@ -8,6 +8,8 @@ use ron::ser::{to_string_pretty, PrettyConfig};
 use brydz_core::deal::{BiasedHandDistribution, DealDistribution};
 use brydz_model::options::{DataFormat, GenerateSubcommand};
 use std::io::Write;
+use brydz_model::generate::generate_contracts;
+
 #[derive(Parser)]
 pub struct CliGenerationOptions {
     #[command(subcommand, rename_all = "snake_case")]
@@ -59,7 +61,29 @@ fn main() -> anyhow::Result<()>{
     match cli.command {
         GenerateSubcommand::Contract(contract_options) => {
             debug!("Contract options: {:?}", contract_options);
-            todo!()
+            let contracts = generate_contracts(&contract_options)?;
+            let data_str = match contract_options.format {
+                DataFormat::Ron => {
+                    let my_config = PrettyConfig::new()
+                        .depth_limit(4)
+                        // definitely superior (okay, just joking)
+                        .indentor("\t".to_owned());
+                    let ser = to_string_pretty(&contracts, my_config).inspect_err(|_e|{
+                        error!("Error serializing generated biased distributions");
+                    })?;
+                    ser
+                }
+            };
+            match &contract_options.output_file{
+                None => {
+                    println!("{}",  data_str);
+                }
+                Some(file) => {
+                    let mut output = std::fs::File::create(file)?;
+                    write!(output, "{}", data_str)?;
+                }
+
+            }
 
         }
         GenerateSubcommand::Distribution(distribution_options) => {

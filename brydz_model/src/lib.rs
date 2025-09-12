@@ -16,3 +16,4 @@ pub use policy::*;
 
 pub mod error;
 pub mod options;
+pub mod generate;

@@ -5,7 +5,7 @@ use brydz_core::player::side::Side;
 use crate::error::BrydzModelError;
 use crate::error::GenError::ConvForceDeclarerNoToSide;
 use clap::Args;
-use crate::options::DealMethod;
+use crate::options::{DataFormat, DealMethod};
 
 #[derive(Debug, ValueEnum, Clone )]
 pub enum ChoiceDoubling{
@@ -74,23 +74,15 @@ pub struct GenContractOptions {
     pub output_file: Option<PathBuf>,
     #[arg(short = 'p', long = "probability_file", help = "Path to file with probabilities of cards")]
     pub probability_file: Option<PathBuf>,
-    /*
-    #[arg(short = 'n', long = "north_type", help = "Type of North's hand information set", default_value_t = HandInfoVariants::Simple)]
-    pub north_hand_type: HandInfoVariants,
-    #[arg(short = 'e', long = "east_type", help = "Type of East's hand information set", default_value_t = HandInfoVariants::Simple)]
-    pub east_hand_type: HandInfoVariants,
-    #[arg(short = 's', long = "south_type", help = "Type of South's hand information set", default_value_t = HandInfoVariants::Simple)]
-    pub south_hand_type: HandInfoVariants,
-    #[arg(short = 'w', long = "west_type", help = "Type of West's hand information set", default_value_t = HandInfoVariants::Simple)]
-    pub west_hand_type: HandInfoVariants,
-
-     */
     #[arg(short = 't', long = "trump_limit", help = "Subset of possible trumps", default_value_t = Subtrump::All, rename_all = "snake_case")]
     pub trump_limit: Subtrump,
     #[arg(short = 'f', long = "force_declarer", help = "Force one side to be declarer", default_value_t = ForceDeclarer::DontForce, value_enum)]
     pub force_declarer: ForceDeclarer,
     #[arg(short = 'd', long = "doubling", help = "Force one side to be declarer", default_value_t = ChoiceDoubling::No, value_enum)]
     pub choice_doubling: ChoiceDoubling,
+
+    #[arg(short = 'F', long = "format", help = "Generated biased distributions format", default_value = "ron")]
+    pub format: DataFormat,
 
 
 }
@@ -108,6 +100,7 @@ impl Default for GenContractOptions{
             trump_limit: Subtrump::All,
             force_declarer: ForceDeclarer::DontForce,
             choice_doubling: ChoiceDoubling::Any,
+            format: DataFormat::Ron,
         }
     }
 }
