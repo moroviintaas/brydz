@@ -7,6 +7,8 @@ pub mod contract_generation;
 pub mod bias_generation;
 pub mod logger;
 
+pub mod contract;
+
 #[derive(ValueEnum)]
 #[derive(Clone, Debug)]
 pub enum DataFormat{
