@@ -1,6 +1,5 @@
 use std::path::PathBuf;
-use clap::{Args, ValueEnum};
-use log::LevelFilter;
+use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use amfiteatr_rl::policy::{ConfigA2C, ConfigPPO};
 use brydz_core::player::side::SideMap;
@@ -16,15 +15,20 @@ pub struct PolicyOuterConfig{
 
 #[derive(Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum AgentPolicyInnerConfig{
+    MaskingPPO(ConfigPPO),
+    MaskingA2C(ConfigA2C),
     PPO(ConfigPPO),
-    A2C(ConfigA2C)
+    A2C(ConfigA2C),
+
 }
 
 impl Default for AgentPolicyInnerConfig{
     fn default() -> Self {
-        Self::PPO(ConfigPPO::default())
+        Self::MaskingPPO(ConfigPPO::default())
     }
 }
+
+
 
 #[derive(Copy, Clone, Serialize, Deserialize, ValueEnum, Default, Debug)]
 pub enum InformationSetSelection{
