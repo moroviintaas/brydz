@@ -2,8 +2,9 @@ use std::path::PathBuf;
 use clap::Args;
 use log::LevelFilter;
 use brydz_model::options::contract::ModelConfig;
+use clap::Parser;
 
-#[derive(Debug, Args)]
+#[derive(Debug, Parser)]
 pub struct RunCli{
 
     #[arg(short = 'l', long = "log", default_value_t= LevelFilter::Info)]
@@ -52,7 +53,24 @@ fn main() -> anyhow::Result<()> {
     let config  = ModelConfig::default();
 
     let s = serde_yaml::to_string(&config)?;
-
     println!("{}",s);
+
+    let opt = RunCli::parse();
+    setup_logger(&opt)?;
+
+    let model_config  = match opt.config_path{
+        None => ModelConfig{
+            number_of_epochs: 100,
+            number_of_game_in_epoch: 100,
+            ..ModelConfig::default()
+        },
+        Some(path) => {
+            //let file = std::fs::File::open(path)?;
+            let s = std::fs::read_to_string(path)?;
+            serde_yaml::from_str(&s)?
+        }
+    };
+
+
     Ok(())
 }

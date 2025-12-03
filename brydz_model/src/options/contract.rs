@@ -59,10 +59,11 @@ pub enum InformationSetRepresentation{
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ModelConfig{
-    number_of_epochs: usize,
-    agents: SideMap<AgentConfig>,
-    test_deal_file: Option<PathBuf>,
-    game_deal_biases: Option<PathBuf>,
+    pub number_of_epochs: usize,
+    pub number_of_game_in_epoch: usize,
+    pub agents: SideMap<AgentConfig>,
+    pub test_deal_file: Option<PathBuf>,
+    pub game_deal_biases: Option<PathBuf>,
 }
 
 
