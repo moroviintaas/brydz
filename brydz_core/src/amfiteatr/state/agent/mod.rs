@@ -11,6 +11,7 @@ mod all_knowing;
 
 #[cfg(feature = "torch")]
 mod tensor_convert;
+mod info_set;
 
 pub use simple::*;
 pub use dummy::*;
@@ -21,6 +22,7 @@ pub use traits::*;
 pub use state_id::*;
 pub use all_knowing::*;
 pub use assuming::*;
+pub use info_set::*;
 
 #[cfg(feature = "torch")]
 pub use tensor_convert::*;

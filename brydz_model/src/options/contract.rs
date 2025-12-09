@@ -2,15 +2,48 @@ use std::path::PathBuf;
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use amfiteatr_rl::policy::{ConfigA2C, ConfigPPO};
+use amfiteatr_rl::tch;
+use amfiteatr_rl::tch::Device;
+use amfiteatr_rl::torch_net::Layer;
 use brydz_core::player::side::SideMap;
 
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(remote = "tch::Device")]
+enum DeviceDef {
+    Cpu,
+    Cuda(usize),
+    Mps,
+    Vulkan
+}
+
+fn default_learning_rate() -> f64{
+    0.0001
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PolicyOuterConfig{
     pub var_store_load: Option<PathBuf>,
     pub var_store_save: Option<PathBuf>,
+    #[serde(with = "DeviceDef")]
+    pub device: tch::Device,
+    pub network_layers: Vec<Layer>,
+    #[serde(default = "default_learning_rate")]
+    pub adam_learning_rate: f64,
 
 
+
+}
+
+impl std::default::Default for PolicyOuterConfig {
+    fn default() -> Self {
+        PolicyOuterConfig{
+            device: Device::Cpu,
+            network_layers: vec![Layer::Linear(64), Layer::Relu],
+            adam_learning_rate: 0.0001,
+            ..Self::default()
+        }
+    }
 }
 
 #[derive(Copy, Clone, Serialize, Deserialize, Debug)]
@@ -45,9 +78,12 @@ pub struct AgentConfig{
     pub policy: AgentPolicyInnerConfig,
     pub policy_data: PolicyOuterConfig,
     pub information_set_type: InformationSetSelection,
-    pub information_set_conversion: InformationSetRepresentation
+    pub information_set_conversion: InformationSetRepresentation,
+
 
 }
+
+
 
 #[derive(Clone, Serialize, Deserialize, ValueEnum, Default, Debug)]
 pub enum InformationSetRepresentation{
