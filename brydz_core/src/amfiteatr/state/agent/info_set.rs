@@ -1,10 +1,11 @@
 use crate::amfiteatr::re_export::scheme::Scheme;
 use amfiteatr_core::agent::InformationSet;
-use amfiteatr_core::error::ConvertError;
+use amfiteatr_core::error::{AmfiteatrError, ConvertError};
+use amfiteatr_rl::MaskingInformationSetAction;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::ContextEncodeTensor;
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding};
+use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding};
 
 #[derive(Clone, Debug)]
 pub enum ContractInformationSet{
@@ -76,5 +77,17 @@ impl ContextEncodeTensor<ContractInfoSetEncoding> for ContractInformationSet{
             ContractInfoSetEncoding::Sparse(c) => self.try_to_tensor(c),
             ContractInfoSetEncoding::SparseHistoric(c) => self.try_to_tensor(c),
         }
+    }
+}
+
+impl MaskingInformationSetAction<ContractDP, ActionPlaceCardConvertion1D> for ContractInformationSet{
+    fn try_build_mask(&self, ctx: &ActionPlaceCardConvertion1D) -> Result<Tensor, AmfiteatrError<ContractDP>> {
+
+        match self{
+            ContractInformationSet::Simple(s) => s.try_build_mask(ctx),
+            ContractInformationSet::AllKnowing(s) => s.try_build_mask(ctx),
+            ContractInformationSet::Assuming(s) => s.try_build_mask(ctx),
+        }
+
     }
 }

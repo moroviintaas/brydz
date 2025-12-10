@@ -1,4 +1,5 @@
-use amfiteatr_core::agent::InformationSet;
+use amfiteatr_core::agent::{InformationSet, TracingAgentGen};
+use amfiteatr_core::comm::StdAgentEndpoint;
 use amfiteatr_core::util::TensorboardSupport;
 use amfiteatr_rl::agent::RlSimpleLearningAgent;
 use amfiteatr_rl::policy::{LearnSummary, LearningNetworkPolicy, LearningNetworkPolicyDynamic, LearningNetworkPolicyGeneric, PolicyMaskingDiscretePPO};
@@ -10,6 +11,7 @@ use brydz_core::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractActionWa
 use brydz_core::deal::DealDistribution;
 use crate::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, InformationSetSelection};
 use amfiteatr_rl::tch::nn::OptimizerConfig;
+use crate::model::policy::ContractPolicy;
 
 pub trait SimpleContractAgentT:  RlSimpleLearningAgent<ContractDP, DealDistribution, LearnSummary>
     + TensorboardSupport<ContractDP>
@@ -17,11 +19,14 @@ pub trait SimpleContractAgentT:  RlSimpleLearningAgent<ContractDP, DealDistribut
 
 #[allow(dead_code)]
 pub struct BAgent{
-    agent: Box<dyn SimpleContractAgentT>,
+    //agent: Box<dyn SimpleContractAgentT>,
+    agent: TracingAgentGen<ContractDP, ContractPolicy, StdAgentEndpoint<ContractDP>>,
     config: AgentConfig,
 }
 
 impl BAgent{
+
+    //fn create_policy()
 
     /*
     fn create_policy<

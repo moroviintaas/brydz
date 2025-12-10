@@ -106,6 +106,27 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetSimple {
     }
 
 
+    /// ```
+    /// use brydz_core::bidding::Bid;
+    /// use brydz_core::cards::trump::TrumpGen;
+    /// use brydz_core::contract::{Contract, ContractMechanics, ContractParametersGen};
+    /// use brydz_core::player::side::Side;
+    /// use karty::cards::{ACE_SPADES, KING_HEARTS, KING_SPADES, TWO_SPADES};
+    /// use karty::set::CardSetStd;
+    /// use karty::suits::Suit;
+    /// use std::str::FromStr;
+    /// use amfiteatr_core::agent::InformationSet;
+    /// use brydz_core::amfiteatr::state::{ContractAction, ContractAgentInfoSetSimple};
+    /// let mut contract = Contract::new(
+    ///     ContractParametersGen::new(Side::West, Bid::init(TrumpGen::Colored(Suit::Hearts), 1).unwrap(),));
+    /// contract.insert_card(Side::North, KING_SPADES).unwrap();
+    /// contract.insert_card(Side::East, TWO_SPADES).unwrap();
+    /// let south_deck = CardSetStd::from_str("AT86.KJT93.4T.2A").unwrap();
+    /// let south_info_set = ContractAgentInfoSetSimple::new(Side::East, south_deck, contract.clone(), None);
+    ///
+    /// assert!(south_info_set.is_action_valid(&ContractAction::PlaceCard(ACE_SPADES)));
+    /// assert!(!south_info_set.is_action_valid(&ContractAction::PlaceCard(KING_HEARTS)));
+    /// ```
     fn is_action_valid(&self, action: &ContractAction) -> bool {
         match action{
             ContractAction::ShowHand(_h) => {
@@ -582,6 +603,8 @@ impl ContractInfoSet for ContractAgentInfoSetSimple{
 
     }
 }
+
+
 
 
 #[cfg(test)]

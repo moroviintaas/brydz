@@ -1,7 +1,11 @@
-use amfiteatr_core::error::ConvertError;
+use amfiteatr_core::agent::InformationSet;
+use amfiteatr_core::error::{AmfiteatrError, ConvertError};
+use amfiteatr_rl::MaskingInformationSetAction;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
-use crate::amfiteatr::state::{ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
+use karty::cards::{STANDARD_DECK, STANDARD_DECK_CDHS};
+use crate::amfiteatr::spec::ContractDP;
+use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAction, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 
 
 
@@ -222,6 +226,47 @@ impl ContextEncodeTensor<ContractInfoSetConvertSparseHistoric> for ContractAgent
 impl ContextEncodeTensor<ContractInfoSetConvertDense1Normalised> for ContractAgentInfoSetSimple{
     fn try_to_tensor(&self, way: &ContractInfoSetConvertDense1Normalised) -> Result<Tensor, ConvertError> {
         Ok(way.make_tensor(self))
+    }
+}
+
+impl MaskingInformationSetAction<ContractDP, ActionPlaceCardConvertion1D> for ContractAgentInfoSetSimple{
+
+    /// ```
+    /// use brydz_core::bidding::Bid;
+    /// use brydz_core::cards::trump::TrumpGen;
+    /// use brydz_core::contract::{Contract, ContractMechanics, ContractParametersGen};
+    /// use brydz_core::player::side::Side;
+    /// use karty::cards::{ACE_SPADES, KING_HEARTS, KING_SPADES, TWO_SPADES};
+    /// use karty::set::CardSetStd;
+    /// use karty::suits::Suit;
+    /// use std::str::FromStr;
+    /// use amfiteatr_core::agent::InformationSet;
+    /// use amfiteatr_rl::MaskingInformationSetAction;
+    /// use brydz_core::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAction, ContractAgentInfoSetSimple};
+    /// let mut contract = Contract::new(
+    ///     ContractParametersGen::new(Side::West, Bid::init(TrumpGen::Colored(Suit::Hearts), 1).unwrap(),));
+    /// contract.insert_card(Side::North, KING_SPADES).unwrap();
+    /// contract.insert_card(Side::East, TWO_SPADES).unwrap();
+    /// let south_deck = CardSetStd::from_str("AT86.KJT93.4T.2A").unwrap();
+    /// let south_info_set = ContractAgentInfoSetSimple::new(Side::South, south_deck, contract.clone(), None);
+    ///
+    /// //assert!(south_info_set.is_action_valid(&ContractAction::PlaceCard(ACE_SPADES)));
+    /// //assert!(!south_info_set.is_action_valid(&ContractAction::PlaceCard(KING_HEARTS)));
+    /// let masks_t = south_info_set.try_build_mask(&ActionPlaceCardConvertion1D{}).unwrap();
+    /// let masks: Vec<bool> = Vec::try_from(masks_t).unwrap();
+    /// assert_eq!(&masks[..], &[
+    ///     false, false, false, false, false, false, false, false, false, false, false, false, false,
+    ///     false, false, false, false, false, false, false, false, false, false, false, false, false,
+    ///     false, false, false, false, false, false, false, false, false, false, false, false, false,
+    ///     false, false, false, false, true, false, true, false, true, false, false, false, true,
+    ///     ]);
+    /// ```
+    fn try_build_mask(&self, _ctx: &ActionPlaceCardConvertion1D) -> Result<Tensor, AmfiteatrError<ContractDP>> {
+
+        let action_masks: Vec<bool> = STANDARD_DECK_CDHS.iter()
+            .map(|c| self.is_action_valid(&ContractAction::PlaceCard(*c))).collect();
+
+        Ok(Tensor::from_slice(action_masks.as_slice()))
     }
 }
 
