@@ -93,12 +93,24 @@ pub enum InformationSetRepresentation{
     SparseHistoric
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum TestSet{
+    Saved(PathBuf),
+    New(usize),
+}
+
+impl Default for TestSet{
+    fn default() -> TestSet{
+        Self::New(100)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ModelConfig{
     pub number_of_epochs: usize,
     pub number_of_game_in_epoch: usize,
     pub agents: SideMap<AgentConfig>,
-    pub test_deal_file: Option<PathBuf>,
+    pub test_set: TestSet,
     pub game_deal_biases: Option<PathBuf>,
 }
 

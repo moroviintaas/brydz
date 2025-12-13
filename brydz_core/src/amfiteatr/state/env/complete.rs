@@ -6,7 +6,7 @@ use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs};
 use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
-use crate::contract::{Contract, ContractMechanics, ContractParameters};
+use crate::contract::{Contract, ContractMechanics, ContractParameters, ContractParametersGen};
 use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, ContractErrorGen};
 use crate::player::side::Side;
@@ -14,9 +14,8 @@ use crate::player::side::Side::*;
 use crate::amfiteatr::spec::ContractDP;
 use crate::amfiteatr::state::{ContractAction, ContractState, ContractStateUpdate};
 use crate::amfiteatr::state::ContractAction::{PlaceCard, ShowHand};
-
-
-
+use crate::bidding::consts::BID_H3;
+use std::str::FromStr;
 
 #[derive(Clone, Debug)]
 pub struct ContractEnvStateComplete{
@@ -26,6 +25,20 @@ pub struct ContractEnvStateComplete{
     offside_hand: CardSetStd,
     contract: Contract,
     dummy_shown: bool,
+}
+
+impl Default for ContractEnvStateComplete {
+    fn default() -> Self {
+        ContractEnvStateComplete{
+            dummy_hand:     CardSetStd::from_str("KJT6.T4.K84.AQ94").unwrap(),
+            declarer_hand:  CardSetStd::from_str("A3.KQ862.QJT5.K8").unwrap(),
+            whist_hand:     CardSetStd::from_str("854.AJ73.932.J52").unwrap(),
+            offside_hand:   CardSetStd::from_str("Q792.95.A76.T763").unwrap(),
+            contract: Contract::new(ContractParameters::new(Side::South, BID_H3)),
+            dummy_shown: false,
+        }
+    }
+
 }
 
 impl Index<Side> for ContractEnvStateComplete{

@@ -5,8 +5,11 @@ use crate::cards::trump::TrumpGen;
 use crate::contract::ContractParameters;
 use crate::deal::{DealDistribution};
 use crate::player::side::Side::North;
-use crate::player::side::SideMap;
+use crate::player::side::{Side, SideMap};
 use rand_distr::Distribution as RandDistribution;
+use amfiteatr_core::scheme::Renew;
+use crate::amfiteatr::spec::ContractDP;
+use crate::amfiteatr::state::ContractAgentInfoSetSimple;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
@@ -62,3 +65,4 @@ impl From<ContractGameDescription> for DescriptionDeckDeal{
         }
     }
 }
+

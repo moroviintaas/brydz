@@ -1,11 +1,14 @@
 use crate::amfiteatr::re_export::scheme::Scheme;
 use amfiteatr_core::agent::InformationSet;
 use amfiteatr_core::error::{AmfiteatrError, ConvertError};
+use amfiteatr_core::scheme::Renew;
 use amfiteatr_rl::MaskingInformationSetAction;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::ContextEncodeTensor;
 use crate::amfiteatr::spec::ContractDP;
 use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding};
+use crate::deal::ContractGameDescription;
+use crate::player::side::Side;
 
 #[derive(Clone, Debug)]
 pub enum ContractInformationSet{
@@ -89,5 +92,15 @@ impl MaskingInformationSetAction<ContractDP, ActionPlaceCardConvertion1D> for Co
             ContractInformationSet::Assuming(s) => s.try_build_mask(ctx),
         }
 
+    }
+}
+
+impl Renew<ContractDP, (&Side, &ContractGameDescription)> for ContractInformationSet{
+    fn renew_from(&mut self, base: (&Side, &ContractGameDescription)) -> Result<(), AmfiteatrError<ContractDP>> {
+        match self{
+            ContractInformationSet::Simple(s) => s.renew_from(base),
+            ContractInformationSet::Assuming(s) => s.renew_from(base),
+            ContractInformationSet::AllKnowing(s) => s.renew_from(base),
+        }
     }
 }
