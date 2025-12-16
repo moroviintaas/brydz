@@ -1,17 +1,28 @@
+use rand::prelude::IndexedRandom;
+use rand::seq::SliceRandom;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use amfiteatr_core::agent::{AutomaticAgent, ReseedAgent};
+use rand::seq::IteratorRandom;
+use amfiteatr_core::agent::{AutomaticAgent, MultiEpisodeAutoAgent, PolicyAgent, ReseedAgent, TracingAgent};
 use amfiteatr_core::comm::StdEnvironmentEndpoint;
-use amfiteatr_core::env::{HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment};
+use amfiteatr_core::env::{EpochSummaryGen, GameSummaryGen, HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
+use amfiteatr_core::error::{AmfiteatrError, CommunicationError};
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::ContractEnvStateComplete;
+use brydz_core::bidding::Bid;
+use brydz_core::cards::trump::{Trump, TRUMPS};
+use brydz_core::contract::ContractParameters;
 use brydz_core::deal::{ContractGameDescription, DealDistribution};
-use brydz_core::player::side::{Side, SideMap};
+use brydz_core::error::ContractErrorGen;
+use brydz_core::player::side::{Side, SideMap, SIDES};
 use crate::generate::generate_contracts;
 use crate::model::agent::BAgent;
 use crate::options::contract::{ModelConfig, TestSet};
 use crate::options::contract_generation::{ChoiceDoubling, ForceDeclarer, GenContractOptions, Subtrump};
 use crate::options::{DataFormat, DealMethod};
+use karty::random::RandomSymbol;
+use rand::distr::Distribution;
+use amfiteatr_rl::policy::LearningNetworkPolicyGeneric;
 
 pub struct GameModel{
 
@@ -25,56 +36,155 @@ pub struct GameModel{
     config: ModelConfig,
 
     learn_set_biased_game_distributions: Option<Vec<DealDistribution>>,
-    test_set_contracts: Option<Vec<ContractGameDescription>>,
+    test_set_contracts: Vec<ContractGameDescription>,
     thread_pool: Option<rayon::ThreadPool>,
 
 }
 
 impl GameModel{
 
-    fn play_single_game(&mut self) -> anyhow::Result<()> {
-        match &self.thread_pool{
+    fn play_single_game(&mut self) -> Result<(), AmfiteatrError<ContractDP>> {
+        let (tx, rx) = std::sync::mpsc::channel();
+        match &self.thread_pool {
             Some(pool) => {
-                pool.scope(|s|{
-                    s.spawn(|_|{
-                        self.env.run_round_robin_with_rewards_penalise(|_,_| -10).unwrap();
+                pool.scope(|s| {
+                    s.spawn(|_| {
+                        let result = self.env.run_round_robin_with_rewards_penalise(|_, _| -10);
+                        tx.send(result).unwrap();
                     });
-                    s.spawn(|_|{
+                    s.spawn(|_| {
                         self.agent_north.agent_mut().run().unwrap();
                     });
-                    s.spawn(|_|{
+                    s.spawn(|_| {
                         self.agent_east.agent_mut().run().unwrap();
                     });
-                    s.spawn(|_|{
+                    s.spawn(|_| {
                         self.agent_south.agent_mut().run().unwrap();
                     });
-                    s.spawn(|_|{
+                    s.spawn(|_| {
                         self.agent_west.agent_mut().run().unwrap();
                     });
-
                 });
-
             },
             None => {
                 todo!()
             }
         }
-        Ok(())
+        rx.recv().map_err(|e|{
+            AmfiteatrError::Communication {
+                source: CommunicationError::RecvErrorUnspecified(format!("Environment export result."))
+            }
+        })?
     }
 
-    pub fn play_one_game(&mut self, seed: &ContractGameDescription) -> anyhow::Result<()>{
+    pub fn play_one_game(&mut self, seed: &ContractGameDescription) -> anyhow::Result<GameSummaryGen<ContractDP>>{
         self.env.reseed(seed)?;
         self.agent_east.agent_mut().reseed((&Side::East, seed))?;
         self.agent_north.agent_mut().reseed((&Side::North, seed))?;
         self.agent_west.agent_mut().reseed((&Side::West, seed))?;
         self.agent_south.agent_mut().reseed((&Side::South, seed))?;
 
-        self.play_single_game()?;
+        let game_result = self.play_single_game()?;
 
 
-        Ok(())
+        let mut summary = GameSummaryGen::<ContractDP>::from(self.env.state());
+        summary.set_violating_agent(self.env.game_violator().copied());
+
+
+        //let violator = ;
+
+
+
+        Ok(summary)
 
     }
+
+    pub fn play_train_epoch(&mut self) -> anyhow::Result<EpochSummaryGen<ContractDP>> {
+
+        self.clean_trajectories()?;
+        let mut rng = rand::rng();
+        let mut summaries = Vec::with_capacity(self.config.number_of_games_in_epoch);
+
+        for i in 0..self.config.number_of_games_in_epoch {
+            let declarer = match self.config.force_declarer_when_rand{
+                None => *SIDES.iter().choose(&mut rng).unwrap(),
+                Some(s) => s
+            };
+            let bid_h = (0..3).choose(&mut rng).unwrap();
+            let trump = Trump::random(&mut rng);
+            let parameters = ContractParameters::new(declarer, Bid::init(trump, bid_h)?);
+
+
+            let seed = match &self.learn_set_biased_game_distributions{
+                None => {
+                    let cards = DealDistribution::Fair.sample(&mut rng);
+                    ContractGameDescription::new(parameters, DealDistribution::Fair, cards)
+
+                }
+                Some(v) => {
+                    let d = v.choose(&mut rng).unwrap_or(&DealDistribution::Fair);
+                    let cards  = d.sample(&mut rng);
+                    ContractGameDescription::new(parameters, DealDistribution::Fair, cards)
+                }
+            };
+            let summary = self.play_one_game(&seed)?;
+            summaries.push(summary);
+            log::trace!("Finishing game {i} in epoch");
+
+
+        }
+        let epoch_summary = EpochSummaryGen::new(summaries);
+        Ok(epoch_summary)
+
+    }
+
+    pub fn run_test_epoch(&mut self) -> anyhow::Result<EpochSummaryGen<ContractDP>> {
+
+        self.clean_trajectories()?;
+
+        let mut rng = rand::rng();
+        let mut summaries = Vec::with_capacity(self.config.number_of_games_in_epoch);
+        for i in 0..self.test_set_contracts.len() {
+
+            let seed = self.test_set_contracts[i].clone();
+
+
+            let summary = self.play_one_game(&seed)?;
+            summaries.push(summary);
+            log::trace!("Finishing game {i} in training epoch");
+
+
+        }
+        let epoch_summary = EpochSummaryGen::new(summaries);
+        Ok(epoch_summary)
+    }
+
+    pub fn clean_trajectories(&mut self) -> anyhow::Result<()>{
+        self.agent_east.agent_mut().clear_episodes()?;
+        self.agent_north.agent_mut().clear_episodes()?;
+        self.agent_west.agent_mut().clear_episodes()?;
+        self.agent_south.agent_mut().clear_episodes()?;
+        Ok(())
+    }
+
+    pub fn train_agent_on_trajectory(&mut self, side: Side) -> anyhow::Result<()>{
+         let agent_ref = match side{
+             Side::East => self.agent_east.agent_mut(),
+             Side::South => self.agent_south.agent_mut(),
+             Side::West => self.agent_west.agent_mut(),
+             Side::North => self.agent_north.agent_mut(),
+         };
+
+        let trajectories = agent_ref.take_episodes();
+
+        let mut policy = agent_ref.policy_mut();
+
+        policy.train(&trajectories[..])?;
+
+        Ok(())
+    }
+
+
 }
 
 impl TryFrom<ModelConfig> for GameModel{
@@ -106,7 +216,7 @@ impl TryFrom<ModelConfig> for GameModel{
             TestSet::Saved(ref path) => {
                 let s = std::fs::read_to_string(&path)?;
                 let v: Vec<ContractGameDescription> = ron::from_str(&s)?;
-                Some(v)
+                v
             },
             TestSet::New(n) => {
 
@@ -114,7 +224,7 @@ impl TryFrom<ModelConfig> for GameModel{
                     game_count: n as u64,
                     .. GenContractOptions::default()
                 };
-                Some(generate_contracts(&contracts_options)?)
+                generate_contracts(&contracts_options)?
             }
         };
         let learn_set_biased_game_distributions = match config.game_deal_biases{

@@ -19,7 +19,8 @@ use crate::amfiteatr::spec::ContractDP;
 pub struct ContractEnv<ST: SequentialGameState<ContractDP> + ContractState, C: BidirectionalEndpoint>{
     state: ST,
     comm: SideMap<C>,
-    penalties: SideMap<<ContractDP as Scheme>::UniversalReward>
+    penalties: SideMap<<ContractDP as Scheme>::UniversalReward>,
+    game_violator: Option<Side>,
 }
 
 impl<
@@ -31,7 +32,8 @@ ContractEnv<ST, C>{
             state,
             comm,
             penalties: SideMap::new_symmetric(
-                <ContractDP as Scheme>::UniversalReward::neutral())
+                <ContractDP as Scheme>::UniversalReward::neutral()),
+            game_violator: None,
         }
     }
     pub fn replace_state(&mut self, state: ST){
@@ -117,6 +119,14 @@ where ST: SequentialGameState<ContractDP> {
         -> Result<<Self::State as SequentialGameState<ContractDP>>::Updates, AmfiteatrError<ContractDP>> {
 
         self.state.forward(*agent, *action).map_err(|e|AmfiteatrError::Game{source: e})
+    }
+
+    fn game_violator(&self) -> Option<&<ContractDP as Scheme>::AgentId> {
+        self.game_violator.as_ref()
+    }
+
+    fn set_game_violator(&mut self, game_violator: Option<<ContractDP as Scheme>::AgentId>) {
+        self.game_violator = game_violator;
     }
 }
 

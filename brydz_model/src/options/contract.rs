@@ -5,7 +5,7 @@ use amfiteatr_rl::policy::{ConfigA2C, ConfigPPO};
 use amfiteatr_rl::tch;
 use amfiteatr_rl::tch::Device;
 use amfiteatr_rl::torch_net::Layer;
-use brydz_core::player::side::SideMap;
+use brydz_core::player::side::{Side, SideMap};
 
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -108,10 +108,11 @@ impl Default for TestSet{
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ModelConfig{
     pub number_of_epochs: usize,
-    pub number_of_game_in_epoch: usize,
+    pub number_of_games_in_epoch: usize,
     pub agents: SideMap<AgentConfig>,
     pub test_set: TestSet,
     pub game_deal_biases: Option<PathBuf>,
+    pub force_declarer_when_rand: Option<Side>,
 }
 
 

@@ -61,7 +61,7 @@ fn main() -> anyhow::Result<()> {
     let model_config  = match opt.config_path{
         None => ModelConfig{
             number_of_epochs: 100,
-            number_of_game_in_epoch: 100,
+            number_of_games_in_epoch: 100,
             ..ModelConfig::default()
         },
         Some(path) => {

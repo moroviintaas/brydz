@@ -6,8 +6,9 @@ use crate::error::BridgeCoreErrorGen;
 use crate::player::side::Side;
 #[cfg(feature="speedy")]
 use crate::speedy::{Readable, Writable};
+use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Error, PartialEq, Eq)]
 #[cfg_attr(feature = "speedy", derive(Writable, Readable))]
 pub enum BiddingErrorGen<SU: SuitTrait>{
     DoubleAfterDouble,

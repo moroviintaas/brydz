@@ -3,13 +3,13 @@ use log::{debug, error};
 use karty::cards::Card2SymTrait;
 use karty::error::{CardSetErrorGen};
 use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
-use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs};
+use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs, GameSummaryGen};
 use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
 use crate::contract::{Contract, ContractMechanics, ContractParameters, ContractParametersGen};
 use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, ContractErrorGen};
-use crate::player::side::Side;
+use crate::player::side::{Side, SIDES};
 use crate::player::side::Side::*;
 use crate::amfiteatr::spec::ContractDP;
 use crate::amfiteatr::state::{ContractAction, ContractState, ContractStateUpdate};
@@ -25,6 +25,7 @@ pub struct ContractEnvStateComplete{
     offside_hand: CardSetStd,
     contract: Contract,
     dummy_shown: bool,
+    //fault_of_side: Option<Side>,
 }
 
 impl Default for ContractEnvStateComplete {
@@ -36,6 +37,7 @@ impl Default for ContractEnvStateComplete {
             offside_hand:   CardSetStd::from_str("Q792.95.A76.T763").unwrap(),
             contract: Contract::new(ContractParameters::new(Side::South, BID_H3)),
             dummy_shown: false,
+            //fault_of_side: None,
         }
     }
 
@@ -62,7 +64,9 @@ impl ContractEnvStateComplete{
                declarer_hand: CardSetStd, whist_hand: CardSetStd,
                dummy_hand: CardSetStd, offside_hand: CardSetStd)
                -> Self{
-        Self{contract, declarer_hand, whist_hand, dummy_hand, offside_hand, dummy_shown: false}
+        Self{contract, declarer_hand, whist_hand, dummy_hand, offside_hand, dummy_shown: false,
+            //fault_of_side: None
+            }
     }
     fn _index_mut(&mut self, index: Side) -> &mut CardSetStd {
         match index - self.contract.declarer(){
@@ -300,5 +304,19 @@ impl Renew<ContractDP, &ContractGameDescription> for ContractEnvStateComplete{
         self.offside_hand = base.cards()[&declarer.next_i(3)];
         self.dummy_shown = false;
         Ok(())
+    }
+}
+
+
+impl From<&ContractEnvStateComplete> for GameSummaryGen<ContractDP>{
+    fn from(base: &ContractEnvStateComplete) -> Self {
+        GameSummaryGen::new(
+            SIDES.iter().map(|s| (*s, base.state_payoff_of_player(s))).collect(),
+            base.contract.count_completed_tricks() as u64*4
+                + base.contract.current_trick().count_cards() as u64,
+            None,
+
+
+        )
     }
 }
