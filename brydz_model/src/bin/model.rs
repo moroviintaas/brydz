@@ -1,8 +1,28 @@
 use std::path::PathBuf;
-use clap::Args;
+use clap::{Args, Subcommand};
 use log::LevelFilter;
-use brydz_model::options::contract::ModelConfig;
+use brydz_model::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, ModelConfig, PolicyOuterConfig};
 use clap::Parser;
+
+
+#[derive(Debug, Args)]
+pub struct RunOptions{
+    #[arg(short = 'f', long = "config", help = "File with model configuration")]
+    pub config_path: Option<PathBuf>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ModelTask{
+
+
+    Run(RunOptions),
+    Default
+}
+impl Default for ModelTask{
+    fn default() -> Self{
+        ModelTask::Run(RunOptions{config_path: None})
+    }
+}
 
 #[derive(Debug, Parser)]
 pub struct RunCli{
@@ -19,8 +39,10 @@ pub struct RunCli{
     #[arg(long = "log_file")]
     pub log_file: Option<PathBuf>,
 
-    #[arg(short = 'f', long = "config", help = "File with model configuration")]
-    pub config_path: Option<PathBuf>,
+    #[command(subcommand)]
+    pub task: ModelTask
+
+
 }
 
 pub fn setup_logger(options: &RunCli) -> Result<(), fern::InitError> {
@@ -50,27 +72,44 @@ pub fn setup_logger(options: &RunCli) -> Result<(), fern::InitError> {
 }
 fn main() -> anyhow::Result<()> {
 
-    let config  = ModelConfig::default();
-
-    let s = serde_yaml::to_string(&config)?;
-    println!("{}",s);
-
     let opt = RunCli::parse();
     setup_logger(&opt)?;
 
-    let model_config  = match opt.config_path{
-        None => ModelConfig{
-            number_of_epochs: 100,
-            number_of_games_in_epoch: 100,
-            ..ModelConfig::default()
-        },
-        Some(path) => {
-            //let file = std::fs::File::open(path)?;
-            let s = std::fs::read_to_string(path)?;
-            serde_yaml::from_str(&s)?
+
+
+
+    match opt.task{
+        ModelTask::Default => {
+            let config  = ModelConfig::default();
+
+            let s = serde_yaml::to_string(&config)?;
+            println!("{}",s);
         }
-    };
+
+        ModelTask::Run(run_config) => {
+            let model_config  = match run_config.config_path{
+                None => ModelConfig{
+                    number_of_epochs: 100,
+                    number_of_games_in_epoch: 100,
+                    ..ModelConfig::default()
+                },
+                Some(path) => {
+                    //let file = std::fs::File::open(path)?;
+                    let s = std::fs::read_to_string(path)?;
+                    serde_yaml::from_str(&s)?
+                }
+            };
+        }
+    }
 
 
+
+
+
+
+
+     
     Ok(())
+
+
 }

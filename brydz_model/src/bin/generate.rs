@@ -72,6 +72,12 @@ fn main() -> anyhow::Result<()>{
                         error!("Error serializing generated biased distributions");
                     })?;
                     ser
+                },
+                DataFormat::Yaml => {
+                    let ser = serde_yaml::to_string(&contracts).inspect_err(|e|{
+                        error!("Error serializing generated biased distributions: {e}")
+                    })?;
+                    ser
                 }
             };
             match &contract_options.output_file{
@@ -110,6 +116,12 @@ fn main() -> anyhow::Result<()>{
                     })?;
                     ser
 
+                },
+                DataFormat::Yaml => {
+                    let ser = serde_yaml::to_string(&generated).inspect_err(|e|{
+                        error!("Error serializing generated biased distributions: {e}")
+                    })?;
+                    ser
                 }
             };
 

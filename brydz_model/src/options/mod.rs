@@ -13,7 +13,7 @@ pub mod contract;
 #[derive(Clone, Debug)]
 pub enum DataFormat{
     Ron,
-    //Yaml,
+    Yaml,
     //Json,
 }
 

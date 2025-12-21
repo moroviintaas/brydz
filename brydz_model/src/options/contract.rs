@@ -37,11 +37,14 @@ pub struct PolicyOuterConfig{
 
 impl std::default::Default for PolicyOuterConfig {
     fn default() -> Self {
-        PolicyOuterConfig{
+        //log::debug!("Creating default policy outer config");
+
+        Self{
             device: Device::Cpu,
             network_layers: vec![Layer::Linear(64), Layer::Relu],
             adam_learning_rate: 0.0001,
-            ..Self::default()
+            var_store_load: None,
+            var_store_save: None,
         }
     }
 }
