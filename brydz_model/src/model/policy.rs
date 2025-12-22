@@ -18,6 +18,9 @@ impl Policy<ContractDP> for ContractPolicy {
     type InfoSetType = ContractInformationSet;
 
     fn select_action(&self, state: &Self::InfoSetType) -> Result<<ContractDP as Scheme>::ActionType, AmfiteatrError<ContractDP>> {
+        if state.is_dummy(){
+            return Ok(<ContractDP as Scheme>::ActionType::ShowHand(*state.show_hand()))
+        }
         match self{
             ContractPolicy::Ppo(ppos) => ppos.select_action(state),
             ContractPolicy::MaskedPpo(ppos) => ppos.select_action(state),

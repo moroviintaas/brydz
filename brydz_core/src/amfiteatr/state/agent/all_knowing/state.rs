@@ -1,5 +1,5 @@
 use log::{debug, error};
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 use karty::cards::{Card, Card2SymTrait};
 use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use karty::register::Register;
@@ -46,9 +46,13 @@ impl ContractAgentInfoSetAllKnowing{
         &self.initial_deal
     }
 
-
-
+    pub fn is_dummy(&self) -> bool {
+        self.side == self.contract.dummy()
+    }
 }
+
+
+
 
 impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
     fn agent_id(&self) -> &<ContractDP as Scheme>::AgentId {
@@ -124,6 +128,10 @@ impl PresentPossibleActions<ContractDP> for ContractAgentInfoSetAllKnowing{
     type ActionIteratorType = SmallVec<[ContractAction; HAND_SIZE]>;
 
     fn available_actions(&self) -> Self::ActionIteratorType {
+
+        if self.is_dummy() {
+            return smallvec![ContractAction::ShowHand(self.initial_deal[&self.side])]
+        }
         match self.contract.current_side(){
             dec if dec == self.side => {
 

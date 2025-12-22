@@ -25,6 +25,8 @@ pub struct BAgent{
     //agent: Box<dyn SimpleContractAgentT>,
     agent: TracingAgentGen<ContractDP, ContractPolicy, StdAgentEndpoint<ContractDP>>,
     config: AgentConfig,
+    reference_policy: ContractPolicy,
+    reference_mode: bool,
 }
 
 
@@ -106,18 +108,30 @@ impl BAgent{
         };
 
         let policy = Self::create_policy(&config)?;
+        let reference_policy = Self::create_policy(&config)?;
 
         Ok(
             BAgent{
                 agent: TracingAgentGen::new(info_set, comm, policy),
                 config,
+                reference_policy,
+                reference_mode: false
             }
         )
+    }
 
+    pub fn go_reference_mode(&mut self){
+        if !self.reference_mode{
+            self.agent.swap_policy(&mut self.reference_policy);
+            self.reference_mode = true
+        }
+    }
 
-
-
-
+    pub fn go_main_mode(&mut self){
+        if self.reference_mode{
+            self.agent.swap_policy(&mut self.reference_policy);
+            self.reference_mode = false
+        }
     }
 
     pub fn agent_mut(&mut self) -> &mut TracingAgentGen<ContractDP, ContractPolicy, StdAgentEndpoint<ContractDP>>{

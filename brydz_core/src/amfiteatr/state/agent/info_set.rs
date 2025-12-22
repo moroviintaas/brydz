@@ -5,8 +5,9 @@ use amfiteatr_core::scheme::Renew;
 use amfiteatr_rl::MaskingInformationSetAction;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::ContextEncodeTensor;
+use karty::set::CardSetStd;
 use crate::amfiteatr::spec::ContractDP;
-use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding};
+use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractInfoSet, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding};
 use crate::deal::ContractGameDescription;
 use crate::player::side::Side;
 
@@ -15,6 +16,24 @@ pub enum ContractInformationSet{
     Simple(ContractAgentInfoSetSimple),
     AllKnowing(ContractAgentInfoSetAllKnowing),
     Assuming(ContractAgentInfoSetAssuming)
+}
+
+impl ContractInformationSet{
+    pub fn is_dummy(&self) -> bool{
+        match self{
+            Self::Simple(s) => s.is_dummy(),
+            Self::Assuming(s) => s.is_dummy(),
+            Self::AllKnowing(s) => s.is_dummy(),
+        }
+    }
+
+    pub fn show_hand(&self) -> &CardSetStd{
+        match self{
+            ContractInformationSet::Simple(s) => s.hand(),
+            ContractInformationSet::AllKnowing(s) => s.hand(),
+            ContractInformationSet::Assuming(s) => s.hand(),
+        }
+    }
 }
 
 impl InformationSet<ContractDP> for ContractInformationSet{

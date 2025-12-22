@@ -1,4 +1,4 @@
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 use karty::set::{HandSuitedTrait, CardSet, CardSetStd};
 use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::error::BridgeCoreError;
@@ -95,6 +95,10 @@ impl ContractAgentInfoSetSimple {
 
         }
         false
+    }
+
+    pub fn is_dummy(&self) -> bool {
+        self.side == self.contract.dummy()
     }
 
 
@@ -198,6 +202,10 @@ impl PresentPossibleActions<ContractDP> for ContractAgentInfoSetSimple{
     fn available_actions(&self) -> Self::ActionIteratorType {
         match self.contract.current_side(){
             dec if dec == self.side => {
+
+                if self.is_dummy() {
+                    return smallvec![ContractAction::ShowHand(self.hand)]
+                }
 
                 match self.contract.current_trick().called_suit(){
                     None => self.hand.into_iter()
