@@ -118,6 +118,19 @@ pub struct ModelConfig{
     pub force_declarer_when_rand: Option<Side>,
 }
 
+impl std::ops::Index<Side> for ModelConfig{
+    type Output = AgentConfig;
+    fn index(&self, side: Side) -> &<Self as std::ops::Index<Side>>::Output {
+        match side{
+            Side::East => &self.agents.east,
+            Side::West => &self.agents.west,
+            Side::South => &self.agents.south,
+            Side::North => &self.agents.north,
+
+        }
+    }
+}
+
 
 
 /*

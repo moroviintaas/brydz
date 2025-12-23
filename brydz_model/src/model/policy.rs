@@ -50,4 +50,13 @@ impl LearningNetworkPolicyGeneric<ContractDP> for ContractPolicy{
             ContractPolicy::MaskedA2C(policy) => policy.train_generic(trajectories, reward_f),
         }
     }
+
+    fn set_gradient_tracing(&mut self, enabled: bool) {
+        match self{
+            ContractPolicy::Ppo(policy) => policy.set_gradient_tracing(enabled),
+            ContractPolicy::MaskedPpo(policy) => policy.set_gradient_tracing(enabled),
+            ContractPolicy::A2C(policy) => policy.set_gradient_tracing(enabled),
+            ContractPolicy::MaskedA2C(policy) => policy.set_gradient_tracing(enabled),
+        }
+    }
 }

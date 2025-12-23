@@ -4,8 +4,8 @@ use nom::bytes::complete::tag;
 use nom::character::complete::digit1;
 use nom::error::ErrorKind;
 use nom::IResult;
-use nom::multi::{fold_many0};
-use nom::sequence::{delimited, pair};
+use nom::multi::{fold_many0, many, many0};
+use nom::sequence::{delimited, pair, tuple};
 use karty::cards::Card;
 use karty::figures::{Figure, parse_figure};
 use karty::suits::SuitMap;
@@ -48,8 +48,23 @@ pub fn parse_proba_prefix(s: &str) -> IResult<&str, FProbability>{
     })
 }
 
-pub fn parse_uncertain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
+pub fn parse_1_prefix(s: &str) -> IResult<&str, FProbability>{
+
+    (
+        tag("[1."),
+        many0(tag("0")),
+        tag("]")
+
+        ).parse(s).and_then(|(rem, _) | Ok((rem, FProbability::One)))
+
+}
+
+pub fn parse_uncertain_figure(s: &str) -> IResult<&str, (FProbability, Figure)> {
     pair(parse_proba_prefix, parse_figure).parse(s)//(s).map(|(rem, (proba, fig))|)
+}
+
+pub fn parse_verbose_certain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
+    pair(parse_1_prefix, parse_figure).parse(s)//(s).map(|(rem, (proba, fig))|)
 }
 
 pub fn parse_certain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
@@ -57,7 +72,7 @@ pub fn parse_certain_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
 }
 
 pub fn parse_probable_figure(s: &str) -> IResult<&str, (FProbability, Figure)>{
-    alt((parse_uncertain_figure, parse_certain_figure)).parse(s)
+    alt((parse_uncertain_figure, parse_certain_figure, parse_verbose_certain_figure)).parse(s)
 
 }
 

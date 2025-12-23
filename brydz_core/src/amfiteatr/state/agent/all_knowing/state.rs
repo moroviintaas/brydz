@@ -64,18 +64,25 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetAllKnowing{
             ContractAction::ShowHand(_h) => {
                 self.contract.dummy() == self.side
             }
-            ContractAction::PlaceCard(c) => match self.hand().contains(c){
-                true => match self.contract.current_trick().called_suit(){
-                    None => true,
-                    Some(s) => {
-                        if s == c.suit(){
-                            true
-                        } else {
-                            !self.hand().contains_in_suit(&s)
+            ContractAction::PlaceCard(c) => {
+                let hand = match self.side == self.contract.declarer() && self.contract.current_side() == self.side.partner(){
+                    true => self.deal[&self.contract.dummy()],
+                    false => *self.hand()
+                };
+
+                match hand.contains(c){
+                    true => match self.contract.current_trick().called_suit(){
+                        None => true,
+                        Some(s) => {
+                            if s == c.suit(){
+                                true
+                            } else {
+                                !hand.contains_in_suit(&s)
+                            }
                         }
                     }
+                    false => false
                 }
-                false => false
             }
         }
     }

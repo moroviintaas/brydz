@@ -57,8 +57,15 @@ impl<Card: Card2SymTrait> Display for BridgeCoreErrorGen<Card> {
             BridgeCoreErrorGen::Contract(deal_error)=> match f.alternate(){
                 true => write!(f, "BridgeError::DealError {{ {deal_error:#} }} " ),
                 false => write!(f, "BridgeError::DealError {{ {deal_error} }} " ),
-            }
-            _ => {write!(f, "error : {self:?}, //todo implement as thiserror")},
+            },
+
+            BridgeCoreErrorGen::Bidding(e) => write!(f, "BridgeError::Bidding {{ {e} }} " ),
+            BridgeCoreErrorGen::Score(e) => write!(f, "BridgeError::Score {{ {e} }} " ),
+            BridgeCoreErrorGen::Trick(e) => write!(f, "BridgeError::Trick {{ {e} }} " ),
+            BridgeCoreErrorGen::Distribution(e) => write!(f, "BridgeError::Distribution {{ {e:?} }} " ),
+            BridgeCoreErrorGen::Hand(e) => write!(f, "BridgeError::Hand {{ {e} }} " ),
+            BridgeCoreErrorGen::Format(e) => write!(f, "BridgeError::Format {{ {e:?} }} " ),
+            BridgeCoreErrorGen::Custom(e) => write!(f, "BridgeError::Custom {{ {e} }} " ),
         }
 
     }

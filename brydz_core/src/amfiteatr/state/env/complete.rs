@@ -139,7 +139,7 @@ impl SequentialGameState<ContractDP> for ContractEnvStateComplete{
     fn forward(&mut self, side: Side, action: ContractAction) -> Result<Self::Updates, BridgeCoreError> {
 
 
-        debug!("Translating environment state by agent {:} using action {}", &side, &action);
+        debug!("Forwarding environment state by agent {:} using action {}", &side, &action);
         match action{
             ShowHand(dhand) => match side{
                 s if s == self.contract.dummy() =>{

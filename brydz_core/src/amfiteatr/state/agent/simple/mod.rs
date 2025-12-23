@@ -136,19 +136,28 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetSimple {
             ContractAction::ShowHand(_h) => {
                 self.contract.dummy() == self.side
             }
-            ContractAction::PlaceCard(c) => match self.hand.contains(c){
-                true => match self.contract.current_trick().called_suit(){
-                    None => true,
-                    Some(s) => {
-                        if s == c.suit(){
-                            true
-                        } else {
-                            !self.hand.contains_in_suit(&s)
+            ContractAction::PlaceCard(c) => {
+                let hand = match self.side == self.contract.declarer() && self.contract.current_side() == self.side.partner(){
+                    true => self.dummy_hand.unwrap_or(CardSetStd::empty()),
+                    false => self.hand
+                };
+
+                match hand.contains(c){
+                    true => match self.contract.current_trick().called_suit(){
+                        None => true,
+                        Some(s) => {
+                            if s == c.suit(){
+                                true
+                            } else {
+                                !hand.contains_in_suit(&s)
+                            }
                         }
                     }
+                    false => false
                 }
-                false => false
             }
+
+
         }
     }
 
@@ -176,7 +185,7 @@ impl InformationSet<ContractDP> for ContractAgentInfoSetSimple {
                         false => side
                     }
                 };
-                debug!("Agent {:?}: actual_side: {:?}", &self.side, &actual_side);
+                debug!("Agent {:?}: actual_playing_side: {:?}", &self.side, &actual_side);
                 self.contract.insert_card(actual_side, card)?;
                 if actual_side == self.side{
                     self.hand.remove_card(&card)?

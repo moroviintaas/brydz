@@ -3,6 +3,7 @@ use clap::{Args, Subcommand};
 use log::LevelFilter;
 use brydz_model::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, ModelConfig, PolicyOuterConfig};
 use clap::Parser;
+use brydz_model::model::GameModel;
 
 
 #[derive(Debug, Args)]
@@ -95,10 +96,16 @@ fn main() -> anyhow::Result<()> {
                 },
                 Some(path) => {
                     //let file = std::fs::File::open(path)?;
-                    let s = std::fs::read_to_string(path)?;
+                    let s = std::fs::read_to_string(&path).map_err(|e|
+                    anyhow::format_err!("Can't open config file {:?}", &path)
+                    )?;
                     serde_yaml::from_str(&s)?
                 }
             };
+
+            let mut model = GameModel::try_from(model_config)?;
+
+            model.run_session_own_trajectories()?;
         }
     }
 
