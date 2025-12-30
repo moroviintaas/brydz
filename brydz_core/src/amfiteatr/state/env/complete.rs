@@ -6,7 +6,7 @@ use karty::set::{CardSetStd, HandSuitedTrait, CardSet};
 use amfiteatr_core::env::{SequentialGameState, GameStateWithPayoffs, GameSummaryGen};
 use amfiteatr_core::scheme::{Scheme, Renew};
 use amfiteatr_core::error::AmfiteatrError;
-use crate::contract::{Contract, ContractMechanics, ContractParameters, ContractParametersGen};
+use crate::contract::{Contract, ContractMechanics, ContractParameters};
 use crate::deal::{ContractGameDescription, DescriptionDeckDeal};
 use crate::error::{BridgeCoreError, ContractErrorGen};
 use crate::player::side::{Side, SIDES};

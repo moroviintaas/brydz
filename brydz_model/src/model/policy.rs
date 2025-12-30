@@ -2,10 +2,21 @@ use amfiteatr_core::agent::{AgentStepView, AgentTrajectory, Policy};
 use amfiteatr_core::error::AmfiteatrError;
 use amfiteatr_core::scheme::Scheme;
 use amfiteatr_rl::error::AmfiteatrRlError;
-use amfiteatr_rl::policy::{LearnSummary, LearningNetworkPolicy, LearningNetworkPolicyGeneric, PolicyDiscreteA2C, PolicyDiscretePPO, PolicyMaskingDiscreteA2C, PolicyMaskingDiscretePPO};
+use amfiteatr_rl::policy::{
+    LearnSummary,
+    LearningNetworkPolicyGeneric,
+    PolicyDiscreteA2C,
+    PolicyDiscretePPO,
+    PolicyMaskingDiscreteA2C,
+    PolicyMaskingDiscretePPO
+};
 use amfiteatr_rl::tch::Tensor;
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractInfoSetEncoding, ContractInformationSet};
+use brydz_core::amfiteatr::state::{
+    ActionPlaceCardConvertion1D,
+    ContractInfoSetEncoding,
+    ContractInformationSet
+};
 
 pub enum ContractPolicy{
     Ppo(PolicyDiscretePPO<ContractDP, ContractInformationSet, ContractInfoSetEncoding, ActionPlaceCardConvertion1D>),

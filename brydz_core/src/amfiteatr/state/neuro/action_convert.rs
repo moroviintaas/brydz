@@ -55,7 +55,7 @@ impl ContextDecodeIndexI64<ActionPlaceCardConvertion1D> for  ContractAction{
     fn try_from_index(index: i64, _encoding: &ActionPlaceCardConvertion1D) -> Result<Self, ConvertError> {
         let card = Card::from_usize_index(index as usize)
             .map_err(|e| ConvertError::ConvertFromTensor {
-                origin: format!("index: {index}"),
+                origin: format!("Error {e}, index: {index}"),
                 context: "Converting action index to card instance".to_string() })?;
 
         Ok(ContractAction::PlaceCard(card))

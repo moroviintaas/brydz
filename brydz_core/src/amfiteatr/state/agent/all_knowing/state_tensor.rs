@@ -8,7 +8,15 @@ use karty::symbol::CardSymbol;
 use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
 use crate::amfiteatr::spec::ContractDP;
 use crate::contract::ContractMechanics;
-use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAction, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractInfoSet, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
+use crate::amfiteatr::state::{
+    ActionPlaceCardConvertion1D,
+    ContractAction,
+    ContractAgentInfoSetAllKnowing,
+    ContractInfoSet,
+    ContractInfoSetConvertDense1,
+    ContractInfoSetConvertSparse,
+    ContractInfoSetConvertSparseHistoric
+};
 use crate::amfiteatr::state::contract_state_converter_common::{DECLARER_DIST_OFFSET, STATE_REPR_SIZE, write_contract_params, write_current_dummy, write_current_hand, write_tricks};
 
 impl SimpleConvertToTensor<ContractAgentInfoSetAllKnowing> for ContractInfoSetConvertDense1 {

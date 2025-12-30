@@ -3,7 +3,7 @@ use amfiteatr_core::error::{AmfiteatrError, ConvertError};
 use amfiteatr_rl::MaskingInformationSetAction;
 use amfiteatr_rl::tch::Tensor;
 use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
-use karty::cards::{STANDARD_DECK, STANDARD_DECK_CDHS};
+use karty::cards::STANDARD_DECK_CDHS;
 use crate::amfiteatr::spec::ContractDP;
 use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAction, ContractAgentInfoSetSimple, ContractInfoSetConvertDense1, ContractInfoSetConvertDense1Normalised, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
 

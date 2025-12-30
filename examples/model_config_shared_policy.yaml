@@ -1,0 +1,45 @@
+number_of_epochs: 100
+number_of_games_in_epoch: 100
+agents:
+  north:
+    limit_learn_epochs: null
+    policy: null
+    information_set_type: Simple
+  east:
+    limit_learn_epochs: null
+    policy: null
+    information_set_type: Simple
+  south:
+    limit_learn_epochs: null
+    policy: null
+    information_set_type: Simple
+  west:
+    limit_learn_epochs: null
+    policy: null
+    information_set_type: Simple
+test_set: !Saved ./run/brydz_model/test_contracts_100.yaml
+game_deal_biases: ./run/brydz_model/distributions_10k.yaml
+force_declarer_when_rand: North
+shared_policy:
+  internal: !MaskingPPO
+    gamma: 0.99
+    clip_vloss: true
+    clip_coef: 0.2
+    ent_coef: 0.01
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    gae_lambda_old: 0.95
+    gae_lambda: 0.95
+    mini_batch_size: 16
+    tensor_kind: f32
+    update_epochs: 4
+    target_kl: null
+  external:
+    var_store_load: null
+    var_store_save: null
+    device: Cpu
+    network_layers:
+      - !Linear 128
+      - Relu
+    adam_learning_rate: 0.0001
+    information_set_conversion: SparseHistoric

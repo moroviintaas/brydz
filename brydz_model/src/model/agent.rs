@@ -1,29 +1,40 @@
-use anyhow::anyhow;
-use log::info;
-use amfiteatr_core::agent::{InformationSet, TracingAgentGen};
+use amfiteatr_core::agent::TracingAgentGen;
 use amfiteatr_core::comm::StdAgentEndpoint;
-use amfiteatr_core::util::TensorboardSupport;
-use amfiteatr_rl::agent::RlSimpleLearningAgent;
-use amfiteatr_rl::policy::{LearnSummary, LearningNetworkPolicy, LearningNetworkPolicyDynamic, LearningNetworkPolicyGeneric, PolicyDiscreteA2C, PolicyDiscretePPO, PolicyMaskingDiscreteA2C, PolicyMaskingDiscretePPO};
-use amfiteatr_rl::tch::nn::{Adam, AdamW, VarStore};
-use amfiteatr_rl::tensor_data::{ContextEncodeTensor, TensorEncoding};
-use amfiteatr_rl::torch_net::{build_network_operator_ac, A2CNet, NeuralNetActorCritic};
+use amfiteatr_rl::policy::{PolicyDiscreteA2C,
+                           PolicyDiscretePPO,
+                           PolicyMaskingDiscreteA2C,
+                           PolicyMaskingDiscretePPO
+};
+use amfiteatr_rl::tch::nn::{AdamW, VarStore};
+use amfiteatr_rl::tensor_data::TensorEncoding;
+use amfiteatr_rl::torch_net::{build_network_operator_ac, NeuralNetActorCritic};
 use brydz_core::amfiteatr::spec::ContractDP;
-use brydz_core::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractEnvStateComplete, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding, ContractInformationSet};
-use brydz_core::deal::{ContractGameDescription, DealDistribution};
-use crate::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, InformationSetSelection, PolicyConfig};
+use brydz_core::amfiteatr::state::{
+    ActionPlaceCardConvertion1D,
+    ContractAgentInfoSetAllKnowing,
+    ContractAgentInfoSetAssuming,
+    ContractAgentInfoSetSimple,
+    ContractEnvStateComplete,
+    ContractInfoSetConvertDense1,
+    ContractInfoSetConvertSparse,
+    ContractInfoSetConvertSparseHistoric,
+    ContractInfoSetEncoding,
+    ContractInformationSet};
+use crate::options::contract::{
+    AgentConfig,
+    AgentPolicyInnerConfig,
+    InformationSetRepresentation,
+    InformationSetSelection,
+    PolicyConfig
+};
 use amfiteatr_rl::tch::nn::OptimizerConfig;
 use brydz_core::player::side::{Side, SideMap};
 use crate::model::policy::ContractPolicy;
 use brydz_core::amfiteatr::state::ContractState;
 
-pub trait SimpleContractAgentT:  RlSimpleLearningAgent<ContractDP, DealDistribution, LearnSummary>
-    + TensorboardSupport<ContractDP>
-{}
 
 #[allow(dead_code)]
 pub struct BAgent{
-    //agent: Box<dyn SimpleContractAgentT>,
     agent: TracingAgentGen<ContractDP, ContractPolicy, StdAgentEndpoint<ContractDP>>,
     config: AgentConfig,
     reference_policy: ContractPolicy,
@@ -50,7 +61,7 @@ impl BAgent{
         let vs =  policy_config.external.var_store_load.as_ref()
             .map_or_else(
                 || VarStore::new(policy_config.external.device),
-                |v| VarStore::new(policy_config.external.device));
+                |_| VarStore::new(policy_config.external.device));
 
         let optimizer = AdamW::default().build(&vs, policy_config.external.adam_learning_rate)?;
 

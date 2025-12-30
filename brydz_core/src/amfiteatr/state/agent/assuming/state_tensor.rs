@@ -8,7 +8,14 @@ use amfiteatr_rl::tensor_data::{ContextEncodeTensor, SimpleConvertToTensor};
 use crate::amfiteatr::spec::ContractDP;
 use crate::contract::ContractMechanics;
 use crate::amfiteatr::state::agent::assuming::ContractAgentInfoSetAssuming;
-use crate::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractAction, ContractAgentInfoSetSimple, ContractInfoSet, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric};
+use crate::amfiteatr::state::{
+    ActionPlaceCardConvertion1D,
+    ContractAction,
+    ContractInfoSet,
+    ContractInfoSetConvertDense1,
+    ContractInfoSetConvertSparse,
+    ContractInfoSetConvertSparseHistoric
+};
 use crate::amfiteatr::state::contract_state_converter_common::{DECLARER_DIST_OFFSET, STATE_REPR_SIZE, write_contract_params, write_current_dummy, write_current_hand, write_tricks};
 
 impl SimpleConvertToTensor<ContractAgentInfoSetAssuming> for ContractInfoSetConvertDense1 {

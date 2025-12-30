@@ -1,25 +1,21 @@
 use rand::prelude::IndexedRandom;
-use rand::seq::SliceRandom;
 use std::collections::HashMap;
-use std::path::PathBuf;
 use rand::seq::IteratorRandom;
-use amfiteatr_core::agent::{AutomaticAgent, MultiEpisodeAutoAgent, PolicyAgent, ReseedAgent, TracingAgent};
+use amfiteatr_core::agent::{AutomaticAgent, MultiEpisodeAutoAgent, PolicyAgent, ReseedAgent};
 use amfiteatr_core::comm::StdEnvironmentEndpoint;
 use amfiteatr_core::env::{EpochSummaryGen, GameSummaryGen, HashMapEnvironment, ReseedEnvironment, RoundRobinPenalisingUniversalEnvironment, StatefulEnvironment};
 use amfiteatr_core::error::{AmfiteatrError, CommunicationError};
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::ContractEnvStateComplete;
 use brydz_core::bidding::Bid;
-use brydz_core::cards::trump::{Trump, TRUMPS};
+use brydz_core::cards::trump::Trump;
 use brydz_core::contract::ContractParameters;
 use brydz_core::deal::{ContractGameDescription, DealDistribution};
-use brydz_core::error::ContractErrorGen;
-use brydz_core::player::side::{Side, SideMap, SIDES};
+use brydz_core::player::side::{Side, SIDES};
 use crate::generate::generate_contracts;
 use crate::model::agent::BAgent;
-use crate::options::contract::{AgentConfig, ModelConfig, TestSet};
-use crate::options::contract_generation::{ChoiceDoubling, ForceDeclarer, GenContractOptions, Subtrump};
-use crate::options::{DataFormat, DealMethod};
+use crate::options::contract::{ModelConfig, TestSet};
+use crate::options::contract_generation::GenContractOptions;
 use karty::random::RandomSymbol;
 use rand::distr::Distribution;
 use amfiteatr_rl::policy::LearningNetworkPolicyGeneric;
@@ -117,7 +113,7 @@ impl GameModel{
         }
         rx.recv().map_err(|e|{
             AmfiteatrError::Communication {
-                source: CommunicationError::RecvErrorUnspecified(format!("Environment export result."))
+                source: CommunicationError::RecvErrorUnspecified(format!("Environment export result. ({e})"))
             }
         })?
     }
@@ -129,7 +125,7 @@ impl GameModel{
         self.agent_west.agent_mut().reseed((&Side::West, seed))?;
         self.agent_south.agent_mut().reseed((&Side::South, seed))?;
 
-        let game_result = self.play_single_game()?;
+        let _game_result = self.play_single_game()?;
 
 
         let mut summary = GameSummaryGen::<ContractDP>::from(self.env.state());
@@ -193,7 +189,6 @@ impl GameModel{
         self.clean_trajectories()?;
         self.set_gradient_tracing(false);
 
-        let mut rng = rand::rng();
         let mut summaries = Vec::with_capacity(self.config.number_of_games_in_epoch);
         for i in 0..self.test_set_contracts.len() {
 
@@ -257,11 +252,11 @@ impl GameModel{
          };
 
         let trajectories: Vec<_> = agent_ref.take_episodes().into_iter().enumerate()
-            .filter(|(i, t)|{ ! t.view_step(0).expect("Trajectory {i} of {side} has no entry").information_set().is_dummy()
+            .filter(|(i, t)|{ ! t.view_step(0).expect(&format!("Trajectory {i} of {side} has no entry")).information_set().is_dummy()
 
         }).map(|(_,t)| t) .collect();
 
-        let mut policy = agent_ref.policy_mut();
+        let policy = agent_ref.policy_mut();
 
         policy.train(&trajectories[..])?;
 
@@ -330,12 +325,12 @@ impl TryFrom<ModelConfig> for GameModel{
         let env = HashMapEnvironment::new(ContractEnvStateComplete::default(), hm_comm);
 
 
-        let thread_pool = rayon::ThreadPoolBuilder::new().build().unwrap();
+        //let thread_pool = rayon::ThreadPoolBuilder::new().build().unwrap();
 
         let test_set_contracts = match config.test_set{
             TestSet::Saved(ref path) => {
                 let s = std::fs::read_to_string(&path)
-                    .map_err(|e| anyhow::format_err!("Can't open test contracts file {path:?}"))?;
+                    .map_err(|e| anyhow::format_err!("Can't open test contracts file {path:?} ({e})"))?;
                 let v: Vec<ContractGameDescription> = ron::from_str(&s)
                     .or_else(|_| serde_yaml::from_str(&s))?;
                 v
@@ -353,7 +348,7 @@ impl TryFrom<ModelConfig> for GameModel{
             None => None,
             Some(ref bias_path) => {
                 let s = std::fs::read_to_string(&bias_path)
-                    .map_err(|e| anyhow::format_err!("Can't open biased games distributions file: {bias_path:?}"))?;
+                    .map_err(|e| anyhow::format_err!("Can't open biased games distributions file: {bias_path:?} ({e})"))?;
                 let v: Vec<DealDistribution> = ron::from_str(&s)
                     .or_else(|_| serde_yaml::from_str(&s))?;
                 Some(v)

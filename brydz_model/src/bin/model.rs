@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use clap::{Args, Subcommand};
 use log::LevelFilter;
-use brydz_model::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, ModelConfig, PolicyOuterConfig};
+use brydz_model::options::contract::ModelConfig;
 use clap::Parser;
 use brydz_model::model::GameModel;
 
@@ -97,7 +97,7 @@ fn main() -> anyhow::Result<()> {
                 Some(path) => {
                     //let file = std::fs::File::open(path)?;
                     let s = std::fs::read_to_string(&path).map_err(|e|
-                    anyhow::format_err!("Can't open config file {:?}", &path)
+                    anyhow::format_err!("Can't open config file {:?} ({e})", &path)
                     )?;
                     serde_yaml::from_str(&s)?
                 }
