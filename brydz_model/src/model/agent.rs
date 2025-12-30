@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use log::info;
 use amfiteatr_core::agent::{InformationSet, TracingAgentGen};
 use amfiteatr_core::comm::StdAgentEndpoint;
@@ -10,7 +11,7 @@ use amfiteatr_rl::torch_net::{build_network_operator_ac, A2CNet, NeuralNetActorC
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{ActionPlaceCardConvertion1D, ContractActionWayToTensor, ContractAgentInfoSetAllKnowing, ContractAgentInfoSetAssuming, ContractAgentInfoSetSimple, ContractEnvStateComplete, ContractInfoSetConvertDense1, ContractInfoSetConvertSparse, ContractInfoSetConvertSparseHistoric, ContractInfoSetEncoding, ContractInformationSet};
 use brydz_core::deal::{ContractGameDescription, DealDistribution};
-use crate::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, InformationSetSelection};
+use crate::options::contract::{AgentConfig, AgentPolicyInnerConfig, InformationSetRepresentation, InformationSetSelection, PolicyConfig};
 use amfiteatr_rl::tch::nn::OptimizerConfig;
 use brydz_core::player::side::{Side, SideMap};
 use crate::model::policy::ContractPolicy;
@@ -35,31 +36,33 @@ impl BAgent{
 
 
 
-    fn create_policy(config: &AgentConfig) -> anyhow::Result<ContractPolicy>{
+    fn create_policy(policy_config: &PolicyConfig) -> anyhow::Result<ContractPolicy>{
 
-        let tensor_encoding = match config.information_set_conversion{
+        //let policy_config = config.policy.clone().ok_or_else(||anyhow!("Agent policy config missing"))?;
+
+        let tensor_encoding = match policy_config.external.information_set_conversion{
             InformationSetRepresentation::Dense => ContractInfoSetEncoding::Dense1(ContractInfoSetConvertDense1{}),
             InformationSetRepresentation::Sparse => ContractInfoSetEncoding::Sparse(ContractInfoSetConvertSparse{}),
             InformationSetRepresentation::SparseHistoric => ContractInfoSetEncoding::SparseHistoric(ContractInfoSetConvertSparseHistoric{}),
         };
         let network_input_shape = tensor_encoding.desired_shape();
 
-        let vs =  config.policy_data.var_store_load.as_ref()
+        let vs =  policy_config.external.var_store_load.as_ref()
             .map_or_else(
-                || VarStore::new(config.policy_data.device),
-                |v| VarStore::new(config.policy_data.device));
+                || VarStore::new(policy_config.external.device),
+                |v| VarStore::new(policy_config.external.device));
 
-        let optimizer = AdamW::default().build(&vs, config.policy_data.adam_learning_rate)?;
+        let optimizer = AdamW::default().build(&vs, policy_config.external.adam_learning_rate)?;
 
 
 
-        let operator = build_network_operator_ac(config.policy_data.network_layers.clone(),
+        let operator = build_network_operator_ac(policy_config.external.network_layers.clone(),
                                                  network_input_shape.to_vec(), 52);
         let network = NeuralNetActorCritic::new(vs, operator);
 
 
 
-        let policy = match config.policy{
+        let policy = match policy_config.internal{
             AgentPolicyInnerConfig::MaskingPPO(policy_config) => {
 
 
@@ -84,7 +87,8 @@ impl BAgent{
 
 
 
-    pub fn build(config: AgentConfig, side: Side, comm: StdAgentEndpoint<ContractDP>) -> anyhow::Result<Self>{
+    pub fn build(config: AgentConfig, side: Side, comm: StdAgentEndpoint<ContractDP>,
+                 shared_policy_config: &PolicyConfig) -> anyhow::Result<Self>{
 
         let default_contract = ContractEnvStateComplete::default();
 
@@ -107,8 +111,15 @@ impl BAgent{
             )
         };
 
-        let policy = Self::create_policy(&config)?;
-        let reference_policy = Self::create_policy(&config)?;
+        let policy = match &config.policy{
+            Some(policy_config) => Self::create_policy(&policy_config)?,
+            None => Self::create_policy(&shared_policy_config)?
+        };
+
+        let reference_policy = match &config.policy{
+            Some(policy_config) => Self::create_policy(&policy_config)?,
+            None => Self::create_policy(&shared_policy_config)?
+        };
 
         Ok(
             BAgent{

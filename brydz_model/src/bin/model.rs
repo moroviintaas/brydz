@@ -30,11 +30,11 @@ pub struct RunCli{
 
     #[arg(short = 'l', long = "log", default_value_t= LevelFilter::Info)]
     pub log_level: LevelFilter,
-    #[arg(short = 'c', long = "log_core", default_value_t= LevelFilter::Error)]
+    #[arg(short = 'c', long = "log-core", default_value_t= LevelFilter::Error)]
     pub brydz_core_log_level: LevelFilter,
-    #[arg(short = 'a', long = "log_amfi", default_value_t= LevelFilter::Error)]
+    #[arg(short = 'a', long = "log-amfiteatr", default_value_t= LevelFilter::Error)]
     pub amfi_log_level: LevelFilter,
-    #[arg(short = 'r', long = "log_amfi-rl", default_value_t= LevelFilter::Error)]
+    #[arg(short = 'r', long = "log-amfiteatr-rl", default_value_t= LevelFilter::Error)]
     pub amfiteatr_rl_log_level: LevelFilter,
 
     #[arg(long = "log_file")]
@@ -58,8 +58,8 @@ pub fn setup_logger(options: &RunCli) -> Result<(), fern::InitError> {
                 message
             ))
         })
-        //.level(log_level)
-        .level_for("brydz_model", options.log_level)
+        .level(options.log_level)
+        //.level_for("brydz_model", options.log_level)
         .level_for("brydz_core", options.brydz_core_log_level)
         .level_for("amfiteatr_rl", options.amfiteatr_rl_log_level)
         .level_for("amfiteatr_core", options.amfi_log_level);

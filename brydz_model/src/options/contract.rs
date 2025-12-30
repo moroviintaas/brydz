@@ -21,6 +21,12 @@ fn default_learning_rate() -> f64{
     0.0001
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+pub struct PolicyConfig{
+    pub internal: AgentPolicyInnerConfig,
+    pub external: PolicyOuterConfig,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PolicyOuterConfig{
     pub var_store_load: Option<PathBuf>,
@@ -30,6 +36,7 @@ pub struct PolicyOuterConfig{
     pub network_layers: Vec<Layer>,
     #[serde(default = "default_learning_rate")]
     pub adam_learning_rate: f64,
+    pub information_set_conversion: InformationSetRepresentation,
 
 
 
@@ -45,6 +52,7 @@ impl std::default::Default for PolicyOuterConfig {
             adam_learning_rate: 0.0001,
             var_store_load: None,
             var_store_save: None,
+            information_set_conversion: Default::default(),
         }
     }
 }
@@ -78,10 +86,11 @@ pub enum InformationSetSelection{
 pub struct AgentConfig{
     #[serde(default)]
     pub limit_learn_epochs: Option<usize>,
-    pub policy: AgentPolicyInnerConfig,
-    pub policy_data: PolicyOuterConfig,
+    //pub policy: AgentPolicyInnerConfig,
+    //pub policy_data: PolicyOuterConfig,
+    pub policy: Option<PolicyConfig>,
     pub information_set_type: InformationSetSelection,
-    pub information_set_conversion: InformationSetRepresentation,
+
 
 
 }
@@ -116,6 +125,8 @@ pub struct ModelConfig{
     pub test_set: TestSet,
     pub game_deal_biases: Option<PathBuf>,
     pub force_declarer_when_rand: Option<Side>,
+    /// Shared policy - shared by agents not set up with their own
+    pub shared_policy: PolicyConfig,
 }
 
 impl std::ops::Index<Side> for ModelConfig{

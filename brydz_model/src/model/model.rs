@@ -160,7 +160,7 @@ impl GameModel{
                 None => *SIDES.iter().choose(&mut rng).unwrap(),
                 Some(s) => s
             };
-            let bid_h = (0..3).choose(&mut rng).unwrap();
+            let bid_h = (1..3).choose(&mut rng).unwrap();
             let trump = Trump::random(&mut rng);
             let parameters = ContractParameters::new(declarer, Bid::init(trump, bid_h)?);
 
@@ -203,7 +203,7 @@ impl GameModel{
 
             let summary = self.play_one_game(&seed)?;
             summaries.push(summary);
-            log::trace!("Finishing game {i} in training epoch");
+            log::trace!("Finishing game {i} in test epoch");
 
 
         }
@@ -280,10 +280,11 @@ impl GameModel{
     }
 
     pub fn run_session_own_trajectories(&mut self) -> anyhow::Result<()>{
+        //println!("Hello");
         let summary = self.run_test_epoch_axis(Axis::EastWest)?;
-        log::info!("Test epoch for East-West: average score: {:.3}", summary.sum_score(&Side::East).unwrap() as f64 / self.test_set_contracts.len() as f64);
+        log::info!("Test epoch (before training) for East-West: average score: {:.3}", summary.sum_score(&Side::East).unwrap() as f64 / self.test_set_contracts.len() as f64);
         let summary = self.run_test_epoch_axis(Axis::NorthSouth)?;
-        log::info!("Test epoch for North-South: average score: {:.3}", summary.sum_score(&Side::North).unwrap() as f64 / self.test_set_contracts.len() as f64);
+        log::info!("Test epoch (before training) for North-South: average score: {:.3}", summary.sum_score(&Side::North).unwrap() as f64 / self.test_set_contracts.len() as f64);
 
         for epoch in 0..self.config.number_of_epochs{
             log::debug!("Unrolling learning epoch {epoch}");
@@ -292,9 +293,9 @@ impl GameModel{
             self.train_all_agents_if_applied(epoch)?;
             log::debug!("Beginning tests after epoch {epoch}");
 
-            log::info!("Test epoch for East-West: average score: {:.3}", summary.sum_score(&Side::East).unwrap() as f64 / self.test_set_contracts.len() as f64);
+            log::info!("Test epoch {epoch} for East-West: average score: {:.3}", summary.sum_score(&Side::East).unwrap() as f64 / self.test_set_contracts.len() as f64);
             let summary = self.run_test_epoch_axis(Axis::NorthSouth)?;
-            log::info!("Test epoch for North-South: average score: {:.3}", summary.sum_score(&Side::North).unwrap() as f64 / self.test_set_contracts.len() as f64);
+            log::info!("Test epoch {epoch} for North-South: average score: {:.3}", summary.sum_score(&Side::North).unwrap() as f64 / self.test_set_contracts.len() as f64);
 
         }
 
@@ -315,10 +316,10 @@ impl TryFrom<ModelConfig> for GameModel{
         let (comm_env_e, comm_east) = StdEnvironmentEndpoint::new_pair();
         let (comm_env_s, comm_south) = StdEnvironmentEndpoint::new_pair();
         let (comm_env_w, comm_west) = StdEnvironmentEndpoint::new_pair();
-        let agent_north = BAgent::build(config.agents.north.clone(), Side::North, comm_north)?;
-        let agent_east = BAgent::build(config.agents.east.clone(), Side::East, comm_east)?;
-        let agent_west = BAgent::build(config.agents.west.clone(), Side::West, comm_west)?;
-        let agent_south = BAgent::build(config.agents.south.clone(), Side::South, comm_south)?;
+        let agent_north = BAgent::build(config.agents.north.clone(), Side::North, comm_north, &config.shared_policy)?;
+        let agent_east = BAgent::build(config.agents.east.clone(), Side::East, comm_east, &config.shared_policy)?;
+        let agent_west = BAgent::build(config.agents.west.clone(), Side::West, comm_west, &config.shared_policy)?;
+        let agent_south = BAgent::build(config.agents.south.clone(), Side::South, comm_south, &config.shared_policy)?;
 
         let mut hm_comm = HashMap::new();
         hm_comm.insert(Side::North, comm_env_n);
