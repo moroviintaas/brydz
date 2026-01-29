@@ -7,7 +7,7 @@ use amfiteatr_rl::policy::{PolicyDiscreteA2C,
 };
 use amfiteatr_rl::tch::nn::{AdamW, VarStore};
 use amfiteatr_rl::tensor_data::TensorEncoding;
-use amfiteatr_rl::torch_net::{build_network_operator_ac, NeuralNetActorCritic};
+use amfiteatr_rl::torch_net::{build_network_model_ac_discrete, NeuralNetActorCritic, VariableStorage};
 use brydz_core::amfiteatr::spec::ContractDP;
 use brydz_core::amfiteatr::state::{
     ActionPlaceCardConvertion1D,
@@ -67,9 +67,9 @@ impl BAgent{
 
 
 
-        let operator = build_network_operator_ac(policy_config.external.network_layers.clone(),
-                                                 network_input_shape.to_vec(), 52);
-        let network = NeuralNetActorCritic::new(vs, operator);
+        let operator = build_network_model_ac_discrete(policy_config.external.network_layers.clone(),
+                                                       network_input_shape.to_vec(), 52, &vs.root());
+        let network = NeuralNetActorCritic::new(VariableStorage::Owned(vs), operator);
 
 
 
