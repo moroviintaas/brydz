@@ -37,9 +37,9 @@ serde_json = "1.0.139"
 smallvec = "1.13.2"
 enum-map = "2.7.3"
 
-amfiteatr_rl = { version = "0.13.0", features = ["log_trace"] }
+amfiteatr_rl = { version = "0.14.0", features = ["log_trace"] }
 karty = { version = "0.3.0", features = ["fuzzy"]}
 brydz_core = {version = "0.8.0", features = ["amfiteatr", "speedy", "serde_dedicate", "serde_ron", "torch"]}
-amfiteatr_core = {version = "0.13.0", features= ["speedy", "log_trace"]}
-amfiteatr_net_ext = {version = "0.13.0" }
+amfiteatr_core = {version = "0.14.0", features= ["speedy", "log_trace"]}
+amfiteatr_net_ext = {version = "0.14.0" }
 anyhow = "1.0.98"

@@ -5,7 +5,7 @@ use karty::symbol::CardSymbol;
 use amfiteatr_rl::tensor_data::{ContextDecodeIndexI64, ContextEncodeIndexI64, ContextEncodeTensor, TensorDecoding, TensorEncoding, TensorIndexI64Encoding};
 use crate::amfiteatr::state::ContractAction;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ContractActionWayToTensor{
 
 }
@@ -37,7 +37,7 @@ impl TensorEncoding for ActionPlaceCardConvertion1D{
 
 impl TensorDecoding for ActionPlaceCardConvertion1D{
     fn expected_input_shape(&self) -> &[i64] {
-        &[1]
+        &[52]
     }
 }
 

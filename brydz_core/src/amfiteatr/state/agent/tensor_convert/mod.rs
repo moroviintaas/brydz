@@ -10,6 +10,7 @@ pub use converter_sparse::*;
 pub use converter_sparse_historic::*;
 
 
+#[derive(Clone, Debug)]
 pub enum ContractInfoSetEncoding{
     Dense1(ContractInfoSetConvertDense1),
     Sparse(ContractInfoSetConvertSparse),

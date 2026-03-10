@@ -4,7 +4,7 @@ use crate::player::side::SIDES;
 
 use crate::amfiteatr::state::{ContractInfoSet};
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct ContractInfoSetConvertSparse{}
 
 impl TensorEncoding for ContractInfoSetConvertSparse{

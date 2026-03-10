@@ -56,7 +56,7 @@ use crate::amfiteatr::state::contract_state_converter_common::STATE_REPR_SIZE;
 ///     assert_eq!(v[i], -1.0);
 /// }
 /// ```
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct ContractInfoSetConvertDense1 {}
 
 impl TensorEncoding for ContractInfoSetConvertDense1 {
@@ -64,7 +64,7 @@ impl TensorEncoding for ContractInfoSetConvertDense1 {
         &[STATE_REPR_SIZE as i64]
     }
 }
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct ContractInfoSetConvertDense1Normalised {}
 impl TensorEncoding for ContractInfoSetConvertDense1Normalised {
     fn desired_shape(&self) -> &'static [i64] {

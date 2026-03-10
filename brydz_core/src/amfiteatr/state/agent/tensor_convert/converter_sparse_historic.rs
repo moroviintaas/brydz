@@ -3,7 +3,7 @@ use amfiteatr_rl::tensor_data::{TensorEncoding, SimpleConvertToTensor};
 use crate::amfiteatr::state::{ContractInfoSet};
 use crate::player::side::SIDES;
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct ContractInfoSetConvertSparseHistoric{}
 
 impl TensorEncoding for ContractInfoSetConvertSparseHistoric {
